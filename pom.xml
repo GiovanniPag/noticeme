@@ -82,6 +82,10 @@
         <spring.profiles.active>dev</spring.profiles.active>
         <springdoc-openapi-starter-webmvc-api.version>2.8.8</springdoc-openapi-starter-webmvc-api.version>
         <testng.version>7.11.0</testng.version>
+        <spotbugs.version>4.9.6</spotbugs.version>
+        <findsecbugs.version>1.12.0</findsecbugs.version>
+    	<maven-spotbugs-plugin.version>4.9.6.0</maven-spotbugs-plugin.version>
+		<pitest.version>1.20.6</pitest.version>
     </properties>
 
     <dependencyManagement>
@@ -303,7 +307,6 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>${liquibase.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -329,6 +332,11 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mysql</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -421,6 +429,14 @@
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+            	<groupId>com.github.spotbugs</groupId>
+            	<artifactId>spotbugs-maven-plugin</artifactId>
+        	</plugin>
+        	<plugin>
+			    <groupId>org.pitest</groupId>
+			    <artifactId>pitest-maven</artifactId>
+			</plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -887,6 +903,60 @@
                     <artifactId>sonar-maven-plugin</artifactId>
                     <version>${sonar-maven-plugin.version}</version>
                 </plugin>
+                <plugin>
+	                <groupId>com.github.spotbugs</groupId>
+	                <artifactId>spotbugs-maven-plugin</artifactId>
+	                <version>${maven-spotbugs-plugin.version}</version>
+	                <dependencies>
+	                    <dependency>
+	                        <groupId>com.github.spotbugs</groupId>
+	                        <artifactId>spotbugs</artifactId>
+	                        <version>${spotbugs.version}</version>
+	                    </dependency>
+	                </dependencies>
+	                <configuration>
+	                    <effort>Max</effort>
+	                    <threshold>Low</threshold>
+	                    <xmlOutput>true</xmlOutput>
+		                <plugins>
+		                    <plugin>
+		                        <groupId>com.h3xstream.findsecbugs</groupId>
+		                        <artifactId>findsecbugs-plugin</artifactId>
+		                        <version>${findsecbugs.version}</version>
+		                    </plugin>
+		                </plugins>
+	                </configuration>
+	                <executions>
+	                    <execution>
+	                        <phase>verify</phase>
+	                        <goals>
+	                            <goal>check</goal>
+	                        </goals>
+	                    </execution>
+	                </executions>
+	            </plugin>
+	            <plugin>
+		            <groupId>org.pitest</groupId>
+		            <artifactId>pitest-maven</artifactId>
+		            <version>${pitest.version}</version>
+		            <configuration>
+		                <targetClasses>
+		                    <param>com.giovannip.*</param>
+		                </targetClasses>
+		                <targetTests>
+		                    <param>com.giovannip.*Test</param>
+		                </targetTests>
+		                <mutationThreshold>80</mutationThreshold>
+		                <avoidCallsTo>
+					      <param>java.util.logging</param>
+					      <param>org.slf4j</param>
+					    </avoidCallsTo>
+		                <threads>4</threads>
+		                <outputFormats>
+		                    <param>HTML</param>
+		                </outputFormats>
+		            </configuration>
+		        </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -1066,11 +1136,6 @@
                 <dependency>
                     <groupId>com.mysql</groupId>
                     <artifactId>mysql-connector-j</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.testcontainers</groupId>
-                    <artifactId>mysql</artifactId>
-                    <scope>test</scope>
                 </dependency>
             </dependencies>
             <build>
