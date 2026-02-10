@@ -10,7 +10,7 @@ pipeline {
   }
   
   environment {
-    NODE_ENV = "production"
+    NODE_ENV = "development"
   }
 
   options {
@@ -212,6 +212,9 @@ pipeline {
        ========================================= */
     stage('release-build') {
       when { branch 'main' }
+      environment {
+        NODE_ENV = "production" // only for production artifact/image
+      }
       stages {
         stage('Build Backend & Frontend') {
 	      steps {
