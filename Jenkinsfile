@@ -34,7 +34,7 @@ pipeline {
             returnStdout: true
           ).trim()
         } // needed to check for [heavy] or [perf] descriptor
-        sh './mvnw -ntp dependency:go-offline'
+        sh './mvnw -ntp -DskipTests verify'
         sh './npmw ci'
       }
     }
@@ -130,7 +130,7 @@ pipeline {
 
         stage('Integration & E2E Tests') {
           steps {
-            sh './mvnw verify -Pintegration'
+            sh './mvnw verify -Pintegration -DskipUnitTests'
             sh './npmw run e2e'
           }
           post {
