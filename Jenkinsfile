@@ -59,7 +59,6 @@ pipeline {
        ======================================== */
     stage('feature-qa') {
       when { branch pattern: "feature/.*", comparator: "REGEXP" }
-	    stage('Backend/Fontend Unit & Coverage') {
 	      steps {
 			withSonarQubeEnv("${SONAR_ENV}") {
 	        	sh './mvnw -ntp -Pno-liquibase,frontend-test test sonar:sonar'
@@ -77,7 +76,6 @@ pipeline {
 	          ])
 	        }
 	      }
-	    }
     }
 
     /* =====================================
