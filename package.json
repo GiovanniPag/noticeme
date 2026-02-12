@@ -82,10 +82,7 @@
     "prewebapp:instrumenter": "npm run clean-www && npm run clean-coverage",
     "webapp:instrumenter": "ng build --configuration instrumenter",
     "webapp:prod": "npm run clean-www && npm run webapp:build:prod",
-    "webapp:test": "npm run test --",
-    "ci:feature": "npm run backend:unit:test && npm run lint && npm run prettier:check",
-  	"ci:dev": "npm run ci:backend:test && npm run ci:frontend:build && npm run e2e:headless && npm run lint && npm run prettier:check",
-  	"ci:main": "npm run java:jar:prod && npm run webapp:prod"
+    "webapp:test": "npm run test --"
   },
   "config": {
     "backend_port": 8080,

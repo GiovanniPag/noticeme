@@ -9,10 +9,6 @@ pipeline {
 		  )
   }
   
-  environment {
-    NODE_ENV = "development"
-  }
-
   options {
     timestamps()
     ansiColor('xterm')
@@ -20,12 +16,21 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '5'))
     timeout(time: 90, unit: 'MINUTES')
   }
+  
+  environment {
+	MAVEN_OPTS = "-Dmaven.repo.local=/root/.m2"
+    // Sonar
+    SONAR_ENV = "sonar-local"
+    // Docker registry (local)
+    DOCKER_REGISTRY = "localhost:15000"
+    IMAGE_NAME = "noticeme"
+  }
 
   stages {
     /* ===============================
        PREPARE: Checkout
        =============================== */
-    stage('Prepare') {
+    stage('prepare') {
       steps {
         checkout scm
         script {
@@ -34,66 +39,45 @@ pipeline {
             returnStdout: true
           ).trim()
         } // needed to check for [heavy] or [perf] descriptor
-        sh './mvnw -ntp -DskipTests verify'
-        sh './npmw ci'
       }
     }
+    
+    /* =========================================
+   PR BRANCH: fast unit checks on PR
+   ========================================= */
+	stage('pr-validation') {
+	  when {
+	    changeRequest()
+	  }
+	  steps {
+		sh './mvnw -ntp -Pno-liquibase,frontend-test clean test '
+      }
+	}
     
     /* ========================================
        FEATURE BRANCH: Rapido controllo qualità
        ======================================== */
     stage('feature-qa') {
       when { branch pattern: "feature/.*", comparator: "REGEXP" }
-      parallel {
-        stage('Frontend Lint & Unit') {
-          steps {
-            sh './npmw run lint'
-            sh './npmw run prettier:check || true'
-            sh './npmw test -- --watch=false'
-          }
-          post {
-            always {
-              junit '**/build/test-results/**/*.xml'
-            }
-          }
-        }
-
-        stage('Backend Unit & Coverage') {
-          steps {
-            sh './mvnw spotless:check'
-            sh './mvnw verify -Pdev -DskipIntegrationTests'
-            sh './mvnw jacoco:report'
-          }
-          post {
-            always {
-              junit '**/target/surefire-reports/*.xml'
-              publishHTML(target: [
-                reportDir: 'target/site/jacoco',
-                reportFiles: 'index.html',
-                reportName: 'Jacoco Coverage'
-              ])
-            }
-          }
-        }
-
-        stage('Static Analysis') {
-          steps {
-            sh './mvnw checkstyle:check spotbugs:check || true'
-          }
-          post {
-            always {
-              recordIssues(tools: [checkStyle(), spotBugs()])
-            }
-          }
-        }
-      }
-      post {
-        always {
-			withSonarQubeEnv('sonar-local') {
-            	sh './mvnw sonar:sonar'
-          	}
-        }
-      }
+	    stage('Backend/Fontend Unit & Coverage') {
+	      steps {
+			withSonarQubeEnv("${SONAR_ENV}") {
+	        	sh './mvnw -ntp -Pno-liquibase,frontend-test test sonar:sonar'
+	      	}
+	      }
+	      post {
+	        always {
+	          junit '**/target/surefire-reports/*.xml'
+	          junit '**/build/test-results/**/*.xml'
+	          recordIssues(tools: [checkStyle(), spotBugs()])
+	          publishHTML(target: [
+	            reportDir: 'target/site/jacoco',
+	            reportFiles: 'index.html',
+	            reportName: 'Jacoco Coverage'
+	          ])
+	        }
+	      }
+	    }
     }
 
     /* =====================================
@@ -102,40 +86,20 @@ pipeline {
     stage('dev-full-qa') {
       when { branch 'dev' }
       stages {
-        stage('Unit Tests') {
-	      parallel {
-	        stage('Frontend') {
-	          steps {
-	            sh './npmw run lint'
-	            sh './npmw test -- --watch=false'
-	          }
-	        }
-	        stage('Backend') {
-	          steps {
-	            sh './mvnw verify -Pdev'
-	          }
-	        }
-	      }
+        stage('build and full test suite') {
+	      steps {
+            sh './mvnw -ntp -Pfrontend-test verify'
+          }
           post {
             always {
+              recordIssues(tools: [checkStyle(), spotBugs()])
+			  cucumber fileIncludePattern: '**/cucumber-reports/*.json'
               junit '**/target/surefire-reports/*.xml'
               publishHTML(target: [
                 reportDir: 'target/site/jacoco',
                 reportFiles: 'index.html',
                 reportName: 'Jacoco Coverage'
               ])
-            }
-          }
-        }
-
-        stage('Integration & E2E Tests') {
-          steps {
-            sh './mvnw verify -Pintegration -DskipUnitTests'
-            sh './npmw run e2e'
-          }
-          post {
-            always {
-              cucumber fileIncludePattern: '**/cucumber-reports/*.json'
             }
           }
         }
@@ -158,21 +122,10 @@ pipeline {
             }
           }
         }
-
-        stage('Static Analysis') {
-          steps {
-            sh './mvnw checkstyle:check spotbugs:check || true'
-          }
-          post {
-            always {
-              recordIssues(tools: [checkStyle(), spotBugs()])
-            }
-          }
-        }
         
         stage('Sonar Analysis') {
           steps {
-            withSonarQubeEnv('sonar-local') {
+            withSonarQubeEnv("${SONAR_ENV}") {
               sh './mvnw sonar:sonar'
             }
           }
@@ -180,55 +133,31 @@ pipeline {
         
         stage('Quality Gate') {
           steps {
-            timeout(time: 5, unit: 'MINUTES') {
+            timeout(time: 10, unit: 'MINUTES') {
               waitForQualityGate abortPipeline: true
             }
           }
         }
       }
     }
-    /* =========================================
-       PR BRANCH: fast unit checks on PR
-       ========================================= */
-	stage('pr-validation') {
-	  when {
-	    changeRequest()
-	  }
-	  parallel {
-	    stage('Backend Unit') {
-	      steps {
-	        sh './mvnw -Pdev test -DskipIntegrationTests'
-	      }
-	    }
-	    stage('Frontend Unit') {
-	      steps {
-	        sh './npmw test -- --watch=false'
-	      }
-	    }
-	  }
-	}
+
     /* =========================================
        MAIN BRANCH: Build e packaging di produzione
        ========================================= */
     stage('release-build') {
       when { branch 'main' }
-      environment {
-        NODE_ENV = "production" // only for production artifact/image
-      }
       stages {
-        stage('Build Backend & Frontend') {
+        stage('Build Artifacts') {
 	      steps {
-	        sh './mvnw -Pprod clean package -DskipTests'
-	        sh './npmw ci'
-	        sh './npmw run build'
+			sh './mvnw -ntp -Pprod clean package -DskipTests'
 	      }
 	    }
 	
 	    stage('Build & Push Image (Jib)') {
 	      steps {
 	        sh """
-	          ./mvnw -Pprod -DskipTests jib:build \
-	            -Djib.to.image=localhost:15000/noticeme:${env.GIT_COMMIT}
+	          ./mvnw -Pprod jib:build \
+	            -Djib.to.image=${DOCKER_REGISTRY}/${IMAGE_NAME}:${env.GIT_COMMIT}
 	        """
 	      }
 	    }
