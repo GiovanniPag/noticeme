@@ -470,7 +470,7 @@
                     <executions>
                         <execution>
                             <id>checkstyle-verify</id>
-					        <phase>verify</phase>
+					        <phase>test</phase>
 					        <goals>
 					          <goal>check</goal>
 					        </goals>
@@ -932,7 +932,7 @@
                     <executions>
 				      <execution>
 				        <id>spotbugs-verify</id>
-	    			      <phase>verify</phase>
+	    			      <phase>test</phase>
 		    		      <goals>
 			    	        <goal>check</goal>
 				          </goals>
