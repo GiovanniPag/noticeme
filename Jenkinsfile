@@ -50,7 +50,7 @@ pipeline {
 	    changeRequest()
 	  }
 	  steps {
-		sh './mvnw -ntp -Pno-liquibase,frontend-test clean test '
+		sh './mvnw -ntp -Pdev,webapp,no-liquibase,frontend-test clean test '
       }
 	}
     
@@ -62,7 +62,7 @@ pipeline {
 	      steps {
 			echo "BRANCH_NAME=${env.BRANCH_NAME}"
 			withSonarQubeEnv("sonar") {
-	        	sh './mvnw -ntp -Pno-liquibase,frontend-test test sonar:sonar'
+	        	sh './mvnw -ntp -Pdev,webapp,no-liquibase,frontend-test test sonar:sonar'
 	      	}
 	      }
 	      post {
@@ -87,7 +87,7 @@ pipeline {
       stages {
         stage('build and full test suite') {
 	      steps {
-            sh './mvnw -ntp -Pfrontend-test verify'
+            sh './mvnw -ntp -Pdev,webapp,frontend-test verify'
           }
           post {
             always {
