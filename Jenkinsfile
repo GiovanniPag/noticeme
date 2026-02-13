@@ -60,6 +60,7 @@ pipeline {
     stage('feature-qa') {
       when { branch pattern: "feature/.*", comparator: "REGEXP" }
 	      steps {
+			echo "BRANCH_NAME=${env.BRANCH_NAME}"
 			withSonarQubeEnv("${SONAR_ENV}") {
 	        	sh './mvnw -ntp -Pno-liquibase,frontend-test test sonar:sonar'
 	      	}
