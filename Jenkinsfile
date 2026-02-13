@@ -60,16 +60,14 @@ pipeline {
     stage('feature-qa') {
       when { branch pattern: "feature/.*", comparator: "REGEXP" }
 	      steps {
-			echo "BRANCH_NAME=${env.BRANCH_NAME}"
-			withSonarQubeEnv("sonar") {
+			withSonarQubeEnv("${SONAR_ENV}") {
 	        	sh './mvnw -ntp -Pdev,webapp,no-liquibase,frontend-test test sonar:sonar'
 	      	}
 	      }
 	      post {
 	        always {
-	          junit '**/target/surefire-reports/*.xml'
-	          junit '**/build/test-results/**/*.xml'
-	          recordIssues(tools: [checkStyle(), spotBugs()])
+	          junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+			  recordIssues(tools: [checkStyle(), spotBugs()])
 	          publishHTML(target: [
 	            reportDir: 'target/site/jacoco',
 	            reportFiles: 'index.html',
@@ -93,7 +91,8 @@ pipeline {
             always {
               recordIssues(tools: [checkStyle(), spotBugs()])
 			  cucumber fileIncludePattern: '**/cucumber-reports/*.json'
-              junit '**/target/surefire-reports/*.xml'
+			  junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+			  junit allowEmptyResults: true, testResults: '**/target/failsafe-reports/*.xml'
               publishHTML(target: [
                 reportDir: 'target/site/jacoco',
                 reportFiles: 'index.html',
@@ -117,6 +116,7 @@ pipeline {
           }
           post {
             always {
+			  archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
               archiveArtifacts artifacts: 'target/gatling/**', fingerprint: true
             }
           }
@@ -125,7 +125,13 @@ pipeline {
         stage('Sonar Analysis') {
           steps {
             withSonarQubeEnv("${SONAR_ENV}") {
-              sh './mvnw sonar:sonar'
+              sh '''
+		          REPORTS="target/site/jacoco/jacoco.xml"
+		          if [ -f target/pit-reports/jacoco.xml ]; then
+		            REPORTS="$REPORTS,target/pit-reports/jacoco.xml"
+		          fi
+		          ./mvnw sonar:sonar -Dsonar.coverage.jacoco.xmlReportPaths=$REPORTS
+		          '''
             }
           }
         }
