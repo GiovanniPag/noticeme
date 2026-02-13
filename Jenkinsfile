@@ -67,10 +67,7 @@ pipeline {
 	      post {
 	        always {
 	          junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-			  recordIssues(tools: [
-	            checkStyle(pattern: '**/target/checkstyle/*.xml', allowMissing: true),
-	            spotBugs(pattern: '**/target/spotbugs/*.xml', allowMissing: true)
-	          ])
+			  recordIssues(tools: [checkStyle(), spotBugs()])
 	          publishHTML(target: [
 	            reportDir: 'target/site/jacoco',
 	            reportFiles: 'index.html',
@@ -92,10 +89,7 @@ pipeline {
           }
           post {
             always {
-              recordIssues(tools: [
-	            checkStyle(pattern: '**/target/checkstyle/*.xml', allowMissing: true),
-	            spotBugs(pattern: '**/target/spotbugs/*.xml', allowMissing: true)
-	          ])
+              recordIssues(tools: [checkStyle(), spotBugs()])
 			  cucumber fileIncludePattern: '**/cucumber-reports/*.json'
 			  junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
 			  junit allowEmptyResults: true, testResults: '**/target/failsafe-reports/*.xml'
