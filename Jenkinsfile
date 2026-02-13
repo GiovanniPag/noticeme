@@ -15,6 +15,7 @@ pipeline {
     skipDefaultCheckout(true)
     buildDiscarder(logRotator(numToKeepStr: '5'))
     timeout(time: 90, unit: 'MINUTES')
+    githubChecks()
   }
   
   environment {
@@ -49,8 +50,14 @@ pipeline {
 	  when {
 	    changeRequest()
 	  }
+	  options { githubCheckName('PR Unit Tests') }
 	  steps {
 		sh './mvnw -ntp -Pdev,webapp,no-liquibase,frontend-test clean test '
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+        }
       }
 	}
     
@@ -59,6 +66,7 @@ pipeline {
        ======================================== */
     stage('feature-qa') {
       when { branch pattern: "feature/.*", comparator: "REGEXP" }
+      options { githubCheckName('Feature QA') }
 	      steps {
 			withSonarQubeEnv("${SONAR_ENV}") {
 	        	sh './mvnw -ntp -Pdev,webapp,no-liquibase,frontend-test test sonar:sonar'
