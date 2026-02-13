@@ -20,7 +20,7 @@ pipeline {
   environment {
 	MAVEN_OPTS = "-Dmaven.repo.local=/root/.m2"
     // Sonar
-    SONAR_ENV = "sonar-local"
+    SONAR_ENV = "sonar"
     // Docker registry (local)
     DOCKER_REGISTRY = "localhost:15000"
     IMAGE_NAME = "noticeme"
@@ -61,7 +61,7 @@ pipeline {
       when { branch pattern: "feature/.*", comparator: "REGEXP" }
 	      steps {
 			echo "BRANCH_NAME=${env.BRANCH_NAME}"
-			withSonarQubeEnv("${SONAR_ENV}") {
+			withSonarQubeEnv("sonar") {
 	        	sh './mvnw -ntp -Pno-liquibase,frontend-test test sonar:sonar'
 	      	}
 	      }
