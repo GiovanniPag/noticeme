@@ -50,7 +50,14 @@ pipeline {
 	    changeRequest()
 	  }
 	  steps {
-		sh './mvnw -ntp -Pdev,webapp,no-liquibase,frontend-test clean test '
+		withChecks(name: 'PR - Unit Tests') {
+			sh './mvnw -ntp -Pdev,webapp,no-liquibase,frontend-test clean test '
+		}
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+        }
       }
 	}
     
@@ -60,8 +67,8 @@ pipeline {
     stage('feature-qa') {
       when { branch pattern: "feature/.*", comparator: "REGEXP" }
 	      steps {
-			withSonarQubeEnv("${SONAR_ENV}") {
-	        	sh './mvnw -ntp -Pdev,webapp,no-liquibase,frontend-test test sonar:sonar'
+			withChecks(name: 'feature - Build & unit Tests') {
+		        	sh './mvnw -ntp -Pdev,webapp,no-liquibase,frontend-test test'
 	      	}
 	      }
 	      post {
@@ -82,94 +89,99 @@ pipeline {
        ===================================== */
     stage('dev-full-qa') {
       when { branch 'dev' }
-      stages {
-        stage('build and full test suite') {
-	      steps {
-            sh './mvnw -ntp -Pdev,webapp,frontend-test verify'
-          }
-          post {
-            always {
-              recordIssues(tools: [checkStyle(), spotBugs()])
-			  cucumber fileIncludePattern: '**/cucumber-reports/*.json'
-			  junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-			  junit allowEmptyResults: true, testResults: '**/target/failsafe-reports/*.xml'
-              publishHTML(target: [
-                reportDir: 'target/site/jacoco',
-                reportFiles: 'index.html',
-                reportName: 'Jacoco Coverage'
-              ])
-            }
+	  steps {
+		withChecks(name: 'Dev - Build & Tests') {
+	       sh './mvnw -ntp -Pdev,webapp,frontend-test verify'
+	    }
+	  }
+	  post {
+	    always {
+	       recordIssues(tools: [checkStyle(), spotBugs()])
+		   cucumber fileIncludePattern: '**/cucumber-reports/*.json'
+		   junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+		   junit allowEmptyResults: true, testResults: '**/target/failsafe-reports/*.xml'
+	       publishHTML(target: [
+	         reportDir: 'target/site/jacoco',
+	         reportFiles: 'index.html',
+	         reportName: 'Jacoco Coverage'
+	       ])
+	    }
+	  }
+	}
+	
+	// ================= HEAVY TESTS =================
+    stage('Heavy Tests (optional)') {
+      when {
+        allOf {
+          branch 'dev'
+          anyOf {
+            expression { params.RUN_HEAVY }
+            expression { env.COMMIT_MSG.contains('[heavy]') }
+            expression { env.COMMIT_MSG.contains('[perf]') }
           }
         }
-
-        stage('Heavy Tests (optional)') {
-          when {
-            expression {
-              return params.RUN_HEAVY ||
-                     env.COMMIT_MSG.contains('[heavy]') ||
-                     env.COMMIT_MSG.contains('[perf]')
-            }
-          }
-          steps {
+      }
+      steps {
+        withChecks(name: 'Dev - Heavy Tests (PIT & Gatling)') {
             sh './mvnw org.pitest:pitest-maven:mutationCoverage'
             sh './mvnw gatling:test'
-          }
-          post {
-            always {
-			  archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
-              archiveArtifacts artifacts: 'target/gatling/**', fingerprint: true
-            }
-          }
         }
-        
-        stage('Sonar Analysis') {
-          steps {
-            withSonarQubeEnv("${SONAR_ENV}") {
-              sh '''
-		          REPORTS="target/site/jacoco/jacoco.xml"
-		          if [ -f target/pit-reports/jacoco.xml ]; then
-		            REPORTS="$REPORTS,target/pit-reports/jacoco.xml"
-		          fi
-		          ./mvnw sonar:sonar -Dsonar.coverage.jacoco.xmlReportPaths=$REPORTS
-		          '''
-            }
-          }
+      }
+      post {
+        always {
+		  archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
+          archiveArtifacts artifacts: 'target/gatling/**', fingerprint: true
         }
-        
-        stage('Quality Gate') {
-          steps {
+      }
+    }
+    
+     // ================= SONAR ANALYSIS =================
+	   stage('Sonar Analysis') {
+	  when { branch 'dev' }
+	  steps {
+	    withChecks(name: 'Sonar Analysis') {
+	      withSonarQubeEnv("${SONAR_ENV}") {
+	        script {
+	          def reports = "target/site/jacoco/jacoco.xml"
+	          if (fileExists('target/pit-reports/jacoco.xml')) {
+	              reports += ",target/pit-reports/jacoco.xml"
+	          }
+	
+	          sh """
+	            ./mvnw sonar:sonar \
+	              -Dsonar.coverage.jacoco.xmlReportPaths=${reports}
+	          """
+	        }
+	      }
+	    }
+	  }
+	}
+    
+    // ================= QUALITY GATE =================
+    stage('Quality Gate') {
+      when { branch 'dev' }
+      steps {
+          withChecks(name: 'Sonar Quality Gate') {
             timeout(time: 10, unit: 'MINUTES') {
               waitForQualityGate abortPipeline: true
             }
           }
-        }
       }
     }
 
     /* =========================================
        MAIN BRANCH: Build e packaging di produzione
        ========================================= */
-    stage('release-build') {
+    stage('Release Build') {
       when { branch 'main' }
-      stages {
-        stage('Build Artifacts') {
-	      steps {
-			sh './mvnw -ntp -Pprod clean package -DskipTests'
-	      }
-	    }
-	
-	    stage('Build & Push Image (Jib)') {
-	      steps {
-	        sh """
-	          ./mvnw -Pprod jib:build \
-	            -Djib.to.image=${DOCKER_REGISTRY}/${IMAGE_NAME}:${env.GIT_COMMIT}
-	        """
-	      }
-	    }
-
-        stage('Archive Artifacts') {
-          steps {
-            archiveArtifacts artifacts: 'target/*.jar, dist/**', fingerprint: true
+      steps {
+        script {
+          withChecks(name: 'Release Build') {
+            sh './mvnw -ntp -Pprod clean package -DskipTests'
+            sh """
+              ./mvnw -Pprod jib:build \
+                -Djib.to.image=${DOCKER_REGISTRY}/${IMAGE_NAME}:${env.GIT_COMMIT}
+            """
           }
         }
       }
