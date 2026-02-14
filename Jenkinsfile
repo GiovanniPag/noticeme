@@ -10,6 +10,8 @@ pipeline {
   }
   
   options {
+	// withChecks currently only affects Jenkins UI locally
+	// GitHub Checks UI requires Jenkins accessible from the internet
     timestamps()
     ansiColor('xterm')
     skipDefaultCheckout(true)
