@@ -136,32 +136,30 @@ pipeline {
     }
     
      // ================= SONAR ANALYSIS =================
-    stage('Sonar Analysis') {
-	  when { 
-		anyOf {
-			branch 'dev';
-			branch pattern: "feature/.*", comparator: "REGEXP";
-			changeRequest()
-			}
-		}
-      steps {
-		withChecks(name: 'Sonar Analysis') {
-        withSonarQubeEnv("${SONAR_ENV}") {
-          sh '''
-	          REPORTS="target/site/jacoco/jacoco.xml"
-	          if [ -f target/pit-reports/jacoco.xml ]; then
-	            REPORTS="$REPORTS,target/pit-reports/jacoco.xml"
-	          fi
-	          ./mvnw sonar:sonar -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.coverage.jacoco.xmlReportPaths=$REPORTS
-	          '''
-        }
-      }
-      }
-    }
+	   stage('Sonar Analysis') {
+	  when { branch 'dev' }
+	  steps {
+	    withChecks(name: 'Sonar Analysis') {
+	      withSonarQubeEnv("${SONAR_ENV}") {
+	        script {
+	          def reports = "target/site/jacoco/jacoco.xml"
+	          if (fileExists('target/pit-reports/jacoco.xml')) {
+	              reports += ",target/pit-reports/jacoco.xml"
+	          }
+	
+	          sh """
+	            ./mvnw sonar:sonar \
+	              -Dsonar.coverage.jacoco.xmlReportPaths=${reports}
+	          """
+	        }
+	      }
+	    }
+	  }
+	}
     
     // ================= QUALITY GATE =================
     stage('Quality Gate') {
-      when { anyOf { branch 'dev'; changeRequest() } }
+      when { branch 'dev' }
       steps {
           withChecks(name: 'Sonar Quality Gate') {
             timeout(time: 10, unit: 'MINUTES') {
