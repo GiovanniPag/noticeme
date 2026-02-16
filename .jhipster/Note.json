@@ -1,0 +1,64 @@
+{
+  "annotations": {
+    "changelogDate": "20260216160148"
+  },
+  "applications": "*",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "title",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "255"
+    },
+    {
+      "fieldName": "content",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "lastUpdateDate",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "alarmDate",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "NoteStatus",
+      "fieldTypeDocumentation": "ENUMS",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "NORMAL,PINNED,ARCHIVED,DELETED"
+    }
+  ],
+  "name": "Note",
+  "pagination": "infinite-scroll",
+  "relationships": [
+    {
+      "otherEntityName": "attachment",
+      "otherEntityRelationshipName": "note",
+      "relationshipName": "attachment",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "user",
+      "relationshipName": "owner",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required",
+      "relationshipWithBuiltInEntity": true
+    },
+    {
+      "otherEntityField": "tagName",
+      "otherEntityName": "tag",
+      "otherEntityRelationshipName": "notes",
+      "relationshipName": "tag",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-many"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

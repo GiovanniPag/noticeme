@@ -1,0 +1,92 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2 id="jhi-note-access-heading" data-cy="NoteAccessCreateUpdateHeading" jhiTranslate="noticeMeApp.noteAccess.home.createOrEditLabel">
+        Genera o modifica un Note Access
+      </h2>
+
+      <div>
+        <jhi-alert-error />
+
+        @if (editForm.controls.id.value !== null) {
+          <div class="mb-3">
+            <label class="form-label" for="field_id" jhiTranslate="noticeMeApp.noteAccess.id">ID</label>
+            <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+          </div>
+        }
+
+        @let roleRef = editForm.get('role')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_role" jhiTranslate="noticeMeApp.noteAccess.role">Role</label>
+          <select class="form-control" name="role" formControlName="role" id="field_role" data-cy="role">
+            <option [ngValue]="null">{{ 'noticeMeApp.AccessRole.null' | translate }}</option>
+            @for (accessRole of accessRoleValues; track $index) {
+              <option [value]="accessRole">{{ 'noticeMeApp.AccessRole.' + accessRole | translate }}</option>
+            }
+          </select>
+          @if (roleRef.invalid && (roleRef.dirty || roleRef.touched)) {
+            <div>
+              @if (editForm.get('role')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_note" jhiTranslate="noticeMeApp.noteAccess.note">Note</label>
+          <select class="form-control" id="field_note" data-cy="note" name="note" formControlName="note" [compareWith]="compareNote">
+            @if (!editForm.get('note')!.value) {
+              <option [ngValue]="null" selected></option>
+            }
+            @for (noteOption of notesSharedCollection; track $index) {
+              <option [ngValue]="noteOption">{{ noteOption.id }}</option>
+            }
+          </select>
+        </div>
+        @if (editForm.get(['note'])!.invalid && (editForm.get(['note'])!.dirty || editForm.get(['note'])!.touched)) {
+          <div>
+            @if (editForm.get(['note'])?.errors?.required) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
+            }
+          </div>
+        }
+
+        <div class="mb-3">
+          <label class="form-label" for="field_user" jhiTranslate="noticeMeApp.noteAccess.user">User</label>
+          <select class="form-control" id="field_user" data-cy="user" name="user" formControlName="user" [compareWith]="compareUser">
+            @if (!editForm.get('user')!.value) {
+              <option [ngValue]="null" selected></option>
+            }
+            @for (userOption of usersSharedCollection; track $index) {
+              <option [ngValue]="userOption">{{ userOption.id }}</option>
+            }
+          </select>
+        </div>
+        @if (editForm.get(['user'])!.invalid && (editForm.get(['user'])!.dirty || editForm.get(['user'])!.touched)) {
+          <div>
+            @if (editForm.get(['user'])?.errors?.required) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
+            }
+          </div>
+        }
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Annulla</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Salva</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

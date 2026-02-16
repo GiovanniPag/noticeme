@@ -24,7 +24,7 @@ entity Attachment {
   fileName String required
   data AnyBlob required
   dataContentType String required
-  size Long
+  fileSize Long
 }
 
 entity NoteAccess {
@@ -52,10 +52,10 @@ relationship OneToMany {
 }
 
 relationship ManyToOne {
-  Note{owner required} to User,
-  Tag{owner required} to User,
+  Note{owner required} to User with builtInEntity,
+  Tag{owner required} to User with builtInEntity,
   NoteAccess{note required} to Note,
-  NoteAccess{user required} to User
+  NoteAccess{user required} to User with builtInEntity
 }
 
 relationship ManyToMany {
@@ -67,9 +67,9 @@ relationship ManyToMany {
 // =======
 
 // Set pagination options
-paginate Note, Tag, Attachment, NoteAccess with infinite-scroll
+use infinite-scroll for Note, Tag, Attachment, NoteAccess 
 
-dto * with mapstruct
+dto Note, Tag, Attachment, NoteAccess  with mapstruct
 
 // Set service options to all 
-service * with serviceClass 
+service Note, Tag, Attachment, NoteAccess  with serviceClass 

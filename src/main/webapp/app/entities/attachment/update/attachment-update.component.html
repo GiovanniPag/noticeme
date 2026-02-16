@@ -1,0 +1,136 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2 id="jhi-attachment-heading" data-cy="AttachmentCreateUpdateHeading" jhiTranslate="noticeMeApp.attachment.home.createOrEditLabel">
+        Genera o modifica un Attachment
+      </h2>
+
+      <div>
+        <jhi-alert-error />
+
+        @if (editForm.controls.id.value !== null) {
+          <div class="mb-3">
+            <label class="form-label" for="field_id" jhiTranslate="noticeMeApp.attachment.id">ID</label>
+            <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+          </div>
+        }
+
+        @let fileNameRef = editForm.get('fileName')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_fileName" jhiTranslate="noticeMeApp.attachment.fileName">File Name</label>
+          <input type="text" class="form-control" name="fileName" id="field_fileName" data-cy="fileName" formControlName="fileName" />
+          @if (fileNameRef.invalid && (fileNameRef.dirty || fileNameRef.touched)) {
+            <div>
+              @if (editForm.get('fileName')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
+              }
+            </div>
+          }
+        </div>
+
+        @let dataRef = editForm.get('data')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_data" jhiTranslate="noticeMeApp.attachment.data">Data</label>
+          <div>
+            @if (dataRef.value) {
+              <div class="form-text text-danger clearfix">
+                <a
+                  class="pull-start"
+                  (click)="openFile(dataRef.value!, editForm.get('dataContentType')!.value!)"
+                  jhiTranslate="entity.action.open"
+                  >Open</a
+                ><br />
+                <span class="pull-start">{{ editForm.get('dataContentType')!.value }}, {{ byteSize(dataRef.value!) }}</span>
+                <button
+                  type="button"
+                  (click)="editForm.patchValue({ data: undefined, dataContentType: undefined })"
+                  class="btn btn-secondary btn-xs pull-end"
+                >
+                  <fa-icon icon="times"></fa-icon>
+                </button>
+              </div>
+            }
+            <input
+              type="file"
+              id="file_data"
+              data-cy="data"
+              (change)="setFileData($event, 'data', false)"
+              jhiTranslate="entity.action.addblob"
+            />
+          </div>
+          <input type="hidden" class="form-control" name="data" id="field_data" data-cy="data" formControlName="data" />
+          <input type="hidden" class="form-control" name="dataContentType" id="field_dataContentType" formControlName="dataContentType" />
+          @if (dataRef.invalid && (dataRef.dirty || dataRef.touched)) {
+            <div>
+              @if (editForm.get('data')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
+              }
+            </div>
+          }
+        </div>
+
+        @let dataContentTypeRef = editForm.get('dataContentType')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_dataContentType" jhiTranslate="noticeMeApp.attachment.dataContentType"
+            >Data Content Type</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            name="dataContentType"
+            id="field_dataContentType"
+            data-cy="dataContentType"
+            formControlName="dataContentType"
+          />
+          @if (dataContentTypeRef.invalid && (dataContentTypeRef.dirty || dataContentTypeRef.touched)) {
+            <div>
+              @if (editForm.get('dataContentType')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_fileSize" jhiTranslate="noticeMeApp.attachment.fileSize">File Size</label>
+          <input type="number" class="form-control" name="fileSize" id="field_fileSize" data-cy="fileSize" formControlName="fileSize" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_note" jhiTranslate="noticeMeApp.attachment.note">Note</label>
+          <select class="form-control" id="field_note" data-cy="note" name="note" formControlName="note" [compareWith]="compareNote">
+            @if (editForm.get(['note'])!.value === null) {
+              <option [ngValue]="null" selected></option>
+            }
+            @for (noteOption of notesSharedCollection; track $index) {
+              <option [ngValue]="noteOption">{{ noteOption.id }}</option>
+            }
+          </select>
+        </div>
+        @if (editForm.get(['note'])!.invalid && (editForm.get(['note'])!.dirty || editForm.get(['note'])!.touched)) {
+          <div>
+            @if (editForm.get(['note'])?.errors?.required) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
+            }
+          </div>
+        }
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Annulla</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Salva</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

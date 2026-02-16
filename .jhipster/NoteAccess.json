@@ -1,0 +1,36 @@
+{
+  "annotations": {
+    "changelogDate": "20260216160150"
+  },
+  "applications": "*",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "role",
+      "fieldType": "AccessRole",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "VIEWER,EDITOR"
+    }
+  ],
+  "name": "NoteAccess",
+  "pagination": "infinite-scroll",
+  "relationships": [
+    {
+      "otherEntityName": "note",
+      "relationshipName": "note",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    },
+    {
+      "otherEntityName": "user",
+      "relationshipName": "user",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required",
+      "relationshipWithBuiltInEntity": true
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

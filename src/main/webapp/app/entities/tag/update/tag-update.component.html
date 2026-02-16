@@ -1,0 +1,110 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2 id="jhi-tag-heading" data-cy="TagCreateUpdateHeading" jhiTranslate="noticeMeApp.tag.home.createOrEditLabel">
+        Genera o modifica un Tag
+      </h2>
+
+      <div>
+        <jhi-alert-error />
+
+        @if (editForm.controls.id.value !== null) {
+          <div class="mb-3">
+            <label class="form-label" for="field_id" jhiTranslate="noticeMeApp.tag.id">ID</label>
+            <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+          </div>
+        }
+
+        @let tagNameRef = editForm.get('tagName')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_tagName" jhiTranslate="noticeMeApp.tag.tagName">Tag Name</label>
+          <input type="text" class="form-control" name="tagName" id="field_tagName" data-cy="tagName" formControlName="tagName" />
+          @if (tagNameRef.invalid && (tagNameRef.dirty || tagNameRef.touched)) {
+            <div>
+              @if (editForm.get('tagName')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
+              }
+              @if (editForm.get('tagName')?.errors?.minlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.minlength" [translateValues]="{ min: '1' }"
+                  >Questo campo deve essere di almeno 1 caratteri.</small
+                >
+              }
+              @if (editForm.get('tagName')?.errors?.maxlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '255' }"
+                  >Questo campo non può essere più di 255 caratteri.</small
+                >
+              }
+            </div>
+          }
+        </div>
+
+        @let colorRef = editForm.get('color')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_color" jhiTranslate="noticeMeApp.tag.color">Color</label>
+          <input type="text" class="form-control" name="color" id="field_color" data-cy="color" formControlName="color" />
+          @if (colorRef.invalid && (colorRef.dirty || colorRef.touched)) {
+            <div>
+              @if (editForm.get('color')?.errors?.maxlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '20' }"
+                  >Questo campo non può essere più di 20 caratteri.</small
+                >
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_owner" jhiTranslate="noticeMeApp.tag.owner">Owner</label>
+          <select class="form-control" id="field_owner" data-cy="owner" name="owner" formControlName="owner" [compareWith]="compareUser">
+            @if (!editForm.get('owner')!.value) {
+              <option [ngValue]="null" selected></option>
+            }
+            @for (userOption of usersSharedCollection; track $index) {
+              <option [ngValue]="userOption">{{ userOption.id }}</option>
+            }
+          </select>
+        </div>
+        @if (editForm.get(['owner'])!.invalid && (editForm.get(['owner'])!.dirty || editForm.get(['owner'])!.touched)) {
+          <div>
+            @if (editForm.get(['owner'])?.errors?.required) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
+            }
+          </div>
+        }
+
+        <div class="mb-3">
+          <label for="field_notes" jhiTranslate="noticeMeApp.tag.notes">Notes</label>
+          <select
+            class="form-control"
+            id="field_notes"
+            data-cy="notes"
+            multiple
+            name="notes"
+            formControlName="notes"
+            [compareWith]="compareNote"
+          >
+            @for (noteOption of notesSharedCollection; track $index) {
+              <option [ngValue]="noteOption">{{ noteOption.id }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Annulla</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Salva</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
