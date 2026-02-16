@@ -1,0 +1,75 @@
+
+/**
+ * JHipster JDL model for myApp
+ */
+
+// ==============================
+// Entity definitions starts here
+// ==============================
+
+entity Tag {
+    tagName String required minlength(1) maxlength(255)
+	color String maxlength(20)
+}
+
+entity Note {
+  title String maxlength(255)
+  content TextBlob
+  lastUpdateDate Instant required
+  alarmDate Instant
+  status NoteStatus required
+}
+
+entity Attachment {
+  fileName String required
+  data AnyBlob required
+  dataContentType String required
+  size Long
+}
+
+entity NoteAccess {
+  role AccessRole required
+}
+
+/**
+ * ENUMS
+ */
+
+enum NoteStatus{
+    NORMAL,
+    PINNED,
+    ARCHIVED,
+    DELETED
+}
+
+enum AccessRole {
+  VIEWER,
+  EDITOR
+}
+
+relationship OneToMany {
+  Note{attachment} to Attachment{note required}
+}
+
+relationship ManyToOne {
+  Note{owner required} to User,
+  Tag{owner required} to User,
+  NoteAccess{note required} to Note,
+  NoteAccess{user required} to User
+}
+
+relationship ManyToMany {
+  Note{tag(tagName)} to Tag{notes}
+}
+
+// =======
+// Options
+// =======
+
+// Set pagination options
+paginate Note, Tag, Attachment, NoteAccess with infinite-scroll
+
+dto * with mapstruct
+
+// Set service options to all 
+service * with serviceClass 
