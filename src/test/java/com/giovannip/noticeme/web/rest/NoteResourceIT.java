@@ -260,6 +260,7 @@ class NoteResourceIT {
 
     @Test
     @Transactional
+    @WithMockUser(username = "user")
     void putExistingNote() throws Exception {
         // Initialize the database
         insertedNote = noteRepository.saveAndFlush(note);
@@ -342,6 +343,7 @@ class NoteResourceIT {
 
     @Test
     @Transactional
+    @WithMockUser(username = "user")
     void partialUpdateNoteWithPatch() throws Exception {
         // Initialize the database
         insertedNote = noteRepository.saveAndFlush(note);
@@ -374,6 +376,7 @@ class NoteResourceIT {
 
     @Test
     @Transactional
+    @WithMockUser(username = "user")
     void fullUpdateNoteWithPatch() throws Exception {
         // Initialize the database
         insertedNote = noteRepository.saveAndFlush(note);
