@@ -16,11 +16,6 @@
       "fieldValidateRules": ["required"]
     },
     {
-      "fieldName": "dataContentType",
-      "fieldType": "String",
-      "fieldValidateRules": ["required"]
-    },
-    {
       "fieldName": "fileSize",
       "fieldType": "Long"
     }

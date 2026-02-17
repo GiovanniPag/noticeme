@@ -44,9 +44,6 @@ class AttachmentResourceIT {
     private static final String DEFAULT_DATA_CONTENT_TYPE = "image/jpg";
     private static final String UPDATED_DATA_CONTENT_TYPE = "image/png";
 
-    private static final String DEFAULT_DATA_CONTENT_TYPE = "AAAAAAAAAA";
-    private static final String UPDATED_DATA_CONTENT_TYPE = "BBBBBBBBBB";
-
     private static final Long DEFAULT_FILE_SIZE = 1L;
     private static final Long UPDATED_FILE_SIZE = 2L;
 
@@ -86,7 +83,6 @@ class AttachmentResourceIT {
             .fileName(DEFAULT_FILE_NAME)
             .data(DEFAULT_DATA)
             .dataContentType(DEFAULT_DATA_CONTENT_TYPE)
-            .dataContentType(DEFAULT_DATA_CONTENT_TYPE)
             .fileSize(DEFAULT_FILE_SIZE);
         // Add required entity
         Note note;
@@ -111,7 +107,6 @@ class AttachmentResourceIT {
         Attachment updatedAttachment = new Attachment()
             .fileName(UPDATED_FILE_NAME)
             .data(UPDATED_DATA)
-            .dataContentType(UPDATED_DATA_CONTENT_TYPE)
             .dataContentType(UPDATED_DATA_CONTENT_TYPE)
             .fileSize(UPDATED_FILE_SIZE);
         // Add required entity
@@ -201,23 +196,6 @@ class AttachmentResourceIT {
 
     @Test
     @Transactional
-    void checkDataContentTypeIsRequired() throws Exception {
-        long databaseSizeBeforeTest = getRepositoryCount();
-        // set the field null
-        attachment.setDataContentType(null);
-
-        // Create the Attachment, which fails.
-        AttachmentDTO attachmentDTO = attachmentMapper.toDto(attachment);
-
-        restAttachmentMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(attachmentDTO)))
-            .andExpect(status().isBadRequest());
-
-        assertSameRepositoryCount(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
     void getAllAttachments() throws Exception {
         // Initialize the database
         insertedAttachment = attachmentRepository.saveAndFlush(attachment);
@@ -231,7 +209,6 @@ class AttachmentResourceIT {
             .andExpect(jsonPath("$.[*].fileName").value(hasItem(DEFAULT_FILE_NAME)))
             .andExpect(jsonPath("$.[*].dataContentType").value(hasItem(DEFAULT_DATA_CONTENT_TYPE)))
             .andExpect(jsonPath("$.[*].data").value(hasItem(Base64.getEncoder().encodeToString(DEFAULT_DATA))))
-            .andExpect(jsonPath("$.[*].dataContentType").value(hasItem(DEFAULT_DATA_CONTENT_TYPE)))
             .andExpect(jsonPath("$.[*].fileSize").value(hasItem(DEFAULT_FILE_SIZE.intValue())));
     }
 
@@ -250,7 +227,6 @@ class AttachmentResourceIT {
             .andExpect(jsonPath("$.fileName").value(DEFAULT_FILE_NAME))
             .andExpect(jsonPath("$.dataContentType").value(DEFAULT_DATA_CONTENT_TYPE))
             .andExpect(jsonPath("$.data").value(Base64.getEncoder().encodeToString(DEFAULT_DATA)))
-            .andExpect(jsonPath("$.dataContentType").value(DEFAULT_DATA_CONTENT_TYPE))
             .andExpect(jsonPath("$.fileSize").value(DEFAULT_FILE_SIZE.intValue()));
     }
 
@@ -276,7 +252,6 @@ class AttachmentResourceIT {
         updatedAttachment
             .fileName(UPDATED_FILE_NAME)
             .data(UPDATED_DATA)
-            .dataContentType(UPDATED_DATA_CONTENT_TYPE)
             .dataContentType(UPDATED_DATA_CONTENT_TYPE)
             .fileSize(UPDATED_FILE_SIZE);
         AttachmentDTO attachmentDTO = attachmentMapper.toDto(updatedAttachment);
@@ -368,7 +343,7 @@ class AttachmentResourceIT {
         Attachment partialUpdatedAttachment = new Attachment();
         partialUpdatedAttachment.setId(attachment.getId());
 
-        partialUpdatedAttachment.data(UPDATED_DATA).dataContentType(UPDATED_DATA_CONTENT_TYPE).dataContentType(UPDATED_DATA_CONTENT_TYPE);
+        partialUpdatedAttachment.data(UPDATED_DATA).dataContentType(UPDATED_DATA_CONTENT_TYPE).fileSize(UPDATED_FILE_SIZE);
 
         restAttachmentMockMvc
             .perform(
@@ -402,7 +377,6 @@ class AttachmentResourceIT {
         partialUpdatedAttachment
             .fileName(UPDATED_FILE_NAME)
             .data(UPDATED_DATA)
-            .dataContentType(UPDATED_DATA_CONTENT_TYPE)
             .dataContentType(UPDATED_DATA_CONTENT_TYPE)
             .fileSize(UPDATED_FILE_SIZE);
 

@@ -21,7 +21,6 @@ type AttachmentFormGroupContent = {
   fileName: FormControl<IAttachment['fileName']>;
   data: FormControl<IAttachment['data']>;
   dataContentType: FormControl<IAttachment['dataContentType']>;
-  dataContentType: FormControl<IAttachment['dataContentType']>;
   fileSize: FormControl<IAttachment['fileSize']>;
   note: FormControl<IAttachment['note']>;
 };
@@ -50,9 +49,6 @@ export class AttachmentFormService {
         validators: [Validators.required],
       }),
       dataContentType: new FormControl(attachmentRawValue.dataContentType),
-      dataContentType: new FormControl(attachmentRawValue.dataContentType, {
-        validators: [Validators.required],
-      }),
       fileSize: new FormControl(attachmentRawValue.fileSize),
       note: new FormControl(attachmentRawValue.note, {
         validators: [Validators.required],

@@ -54,13 +54,6 @@
                 <fa-icon class="p-1" icon="sort"></fa-icon>
               </div>
             </th>
-            <th scope="col" jhiSortBy="dataContentType">
-              <div class="d-flex">
-                <span jhiTranslate="noticeMeApp.attachment.dataContentType">Data Content Type</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
-            </th>
             <th scope="col" jhiSortBy="fileSize">
               <div class="d-flex">
                 <span jhiTranslate="noticeMeApp.attachment.fileSize">File Size</span>
@@ -90,7 +83,6 @@
                   <span>{{ attachment.dataContentType }}, {{ byteSize(attachment.data) }}</span>
                 }
               </td>
-              <td>{{ attachment.dataContentType }}</td>
               <td>{{ attachment.fileSize }}</td>
               <td>
                 @if (attachment.note) {

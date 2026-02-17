@@ -69,28 +69,6 @@
           }
         </div>
 
-        @let dataContentTypeRef = editForm.get('dataContentType')!;
-        <div class="mb-3">
-          <label class="form-label" for="field_dataContentType" jhiTranslate="noticeMeApp.attachment.dataContentType"
-            >Data Content Type</label
-          >
-          <input
-            type="text"
-            class="form-control"
-            name="dataContentType"
-            id="field_dataContentType"
-            data-cy="dataContentType"
-            formControlName="dataContentType"
-          />
-          @if (dataContentTypeRef.invalid && (dataContentTypeRef.dirty || dataContentTypeRef.touched)) {
-            <div>
-              @if (editForm.get('dataContentType')?.errors?.required) {
-                <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
-              }
-            </div>
-          }
-        </div>
-
         <div class="mb-3">
           <label class="form-label" for="field_fileSize" jhiTranslate="noticeMeApp.attachment.fileSize">File Size</label>
           <input type="number" class="form-control" name="fileSize" id="field_fileSize" data-cy="fileSize" formControlName="fileSize" />

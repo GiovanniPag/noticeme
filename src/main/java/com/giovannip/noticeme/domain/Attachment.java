@@ -32,14 +32,6 @@ public class Attachment implements Serializable {
     private byte[] data;
 
     @NotNull
-    @NotNull
-    @Column(name = "data_content_type", nullable = false)
-    @Column(name = "data_content_type", nullable = false)
-    private String dataContentType;
-
-    @NotNull
-    @NotNull
-    @Column(name = "data_content_type", nullable = false)
     @Column(name = "data_content_type", nullable = false)
     private String dataContentType;
 
@@ -105,19 +97,6 @@ public class Attachment implements Serializable {
         this.dataContentType = dataContentType;
     }
 
-    public String getDataContentType() {
-        return this.dataContentType;
-    }
-
-    public Attachment dataContentType(String dataContentType) {
-        this.setDataContentType(dataContentType);
-        return this;
-    }
-
-    public void setDataContentType(String dataContentType) {
-        this.dataContentType = dataContentType;
-    }
-
     public Long getFileSize() {
         return this.fileSize;
     }
@@ -170,7 +149,6 @@ public class Attachment implements Serializable {
             "id=" + getId() +
             ", fileName='" + getFileName() + "'" +
             ", data='" + getData() + "'" +
-            ", dataContentType='" + getDataContentType() + "'" +
             ", dataContentType='" + getDataContentType() + "'" +
             ", fileSize=" + getFileSize() +
             "}";

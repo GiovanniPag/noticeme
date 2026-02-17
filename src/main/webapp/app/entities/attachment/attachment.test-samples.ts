@@ -4,29 +4,29 @@ export const sampleWithRequiredData: IAttachment = {
   id: 15526,
   fileName: 'ouch',
   data: '../fake-data/blob/hipster.png',
-  dataContentType: 'until unruly',
+  dataContentType: 'unknown',
 };
 
 export const sampleWithPartialData: IAttachment = {
   id: 11307,
   fileName: 'covenant excited by',
   data: '../fake-data/blob/hipster.png',
-  dataContentType: 'triangular onto diversity',
-  fileSize: 4962,
+  dataContentType: 'unknown',
+  fileSize: 27491,
 };
 
 export const sampleWithFullData: IAttachment = {
   id: 21727,
   fileName: 'hierarchy ha editor',
   data: '../fake-data/blob/hipster.png',
-  dataContentType: 'unless',
-  fileSize: 18607,
+  dataContentType: 'unknown',
+  fileSize: 4238,
 };
 
 export const sampleWithNewData: NewAttachment = {
   fileName: 'fatally responsibility',
   data: '../fake-data/blob/hipster.png',
-  dataContentType: 'fully though deeply',
+  dataContentType: 'unknown',
   id: null,
 };
 

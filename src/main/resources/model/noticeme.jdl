@@ -23,7 +23,6 @@ entity Note {
 entity Attachment {
   fileName String required
   data AnyBlob required
-  dataContentType String required
   fileSize Long
 }
 

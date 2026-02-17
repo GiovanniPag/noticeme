@@ -15,7 +15,7 @@ describe('Attachment e2e test', () => {
   const attachmentPageUrlPattern = new RegExp('/attachment(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'user';
   const password = Cypress.env('E2E_PASSWORD') ?? 'user';
-  // const attachmentSample = {"fileName":"community trust","data":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci5wbmc=","dataContentType":"fictionalize hm"};
+  // const attachmentSample = {"fileName":"pliers yahoo profane","data":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci5wbmc=","dataContentType":"unknown"};
 
   let attachment;
   // let note;
@@ -215,16 +215,13 @@ describe('Attachment e2e test', () => {
 
     // Reason: cannot create a required entity with relationship with required relationships.
     it.skip('should create an instance of Attachment', () => {
-      cy.get(`[data-cy="fileName"]`).type('individual');
-      cy.get(`[data-cy="fileName"]`).should('have.value', 'individual');
+      cy.get(`[data-cy="fileName"]`).type('pro fatally');
+      cy.get(`[data-cy="fileName"]`).should('have.value', 'pro fatally');
 
       cy.setFieldImageAsBytesOfEntity('data', 'integration-test.png', 'image/png');
 
-      cy.get(`[data-cy="dataContentType"]`).type('ick pliers');
-      cy.get(`[data-cy="dataContentType"]`).should('have.value', 'ick pliers');
-
-      cy.get(`[data-cy="fileSize"]`).type('11495');
-      cy.get(`[data-cy="fileSize"]`).should('have.value', '11495');
+      cy.get(`[data-cy="fileSize"]`).type('12266');
+      cy.get(`[data-cy="fileSize"]`).should('have.value', '12266');
 
       cy.get(`[data-cy="note"]`).select(1);
 

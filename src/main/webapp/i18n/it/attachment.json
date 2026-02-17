@@ -20,7 +20,6 @@
       "id": "ID",
       "fileName": "File Name",
       "data": "Data",
-      "dataContentType": "Data Content Type",
       "fileSize": "File Size",
       "note": "Note"
     }

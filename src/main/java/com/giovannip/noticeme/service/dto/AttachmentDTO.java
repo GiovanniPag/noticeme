@@ -21,9 +21,6 @@ public class AttachmentDTO implements Serializable {
 
     private String dataContentType;
 
-    @NotNull
-    private String dataContentType;
-
     private Long fileSize;
 
     @NotNull
@@ -51,14 +48,6 @@ public class AttachmentDTO implements Serializable {
 
     public void setData(byte[] data) {
         this.data = data;
-    }
-
-    public String getDataContentType() {
-        return dataContentType;
-    }
-
-    public void setDataContentType(String dataContentType) {
-        this.dataContentType = dataContentType;
     }
 
     public String getDataContentType() {
@@ -113,7 +102,6 @@ public class AttachmentDTO implements Serializable {
             "id=" + getId() +
             ", fileName='" + getFileName() + "'" +
             ", data='" + getData() + "'" +
-            ", dataContentType='" + getDataContentType() + "'" +
             ", fileSize=" + getFileSize() +
             ", note=" + getNote() +
             "}";

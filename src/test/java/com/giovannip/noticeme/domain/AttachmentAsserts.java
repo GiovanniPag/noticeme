@@ -50,7 +50,6 @@ public class AttachmentAsserts {
             .satisfies(a -> assertThat(a.getFileName()).as("check fileName").isEqualTo(expected.getFileName()))
             .satisfies(a -> assertThat(a.getData()).as("check data").isEqualTo(expected.getData()))
             .satisfies(a -> assertThat(a.getDataContentType()).as("check data contenty type").isEqualTo(expected.getDataContentType()))
-            .satisfies(a -> assertThat(a.getDataContentType()).as("check dataContentType").isEqualTo(expected.getDataContentType()))
             .satisfies(a -> assertThat(a.getFileSize()).as("check fileSize").isEqualTo(expected.getFileSize()));
     }
 

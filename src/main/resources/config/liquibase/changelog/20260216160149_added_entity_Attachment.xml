@@ -23,9 +23,6 @@
             <column name="data_content_type" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="data_content_type" type="varchar(255)">
-                <constraints nullable="false" />
-            </column>
             <column name="file_size" type="bigint">
                 <constraints nullable="true" />
             </column>
@@ -55,7 +52,6 @@
             <column name="id" type="numeric"/>
             <column name="file_name" type="string"/>
             <column name="data" type="blob"/>
-            <column name="data_content_type" type="string"/>
             <column name="data_content_type" type="string"/>
             <column name="file_size" type="numeric"/>
             <column name="note_id" type="numeric"/>

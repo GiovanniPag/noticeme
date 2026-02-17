@@ -5,7 +5,6 @@ export interface IAttachment {
   fileName?: string | null;
   data?: string | null;
   dataContentType?: string | null;
-  dataContentType?: string | null;
   fileSize?: number | null;
   note?: Pick<INote, 'id'> | null;
 }
