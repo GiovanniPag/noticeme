@@ -23,6 +23,10 @@
       "alarmDate": "Alarm Date",
       "status": "Status",
       "attachment": "Attachment",
+      "createdBy": "Creato da",
+      "createdDate": "Creato il",
+      "lastModifiedBy": "Modificato da",
+      "lastModifiedDate": "Modificato il",
       "owner": "Owner",
       "tag": "Tag"
     }

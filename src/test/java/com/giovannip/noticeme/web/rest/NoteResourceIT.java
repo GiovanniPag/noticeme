@@ -351,6 +351,10 @@ class NoteResourceIT {
         // Update the note using partial update
         Note partialUpdatedNote = new Note();
         partialUpdatedNote.setId(note.getId());
+        partialUpdatedNote.setCreatedBy(note.getCreatedBy());
+        partialUpdatedNote.setCreatedDate(note.getCreatedDate());
+        partialUpdatedNote.setLastModifiedBy(note.getLastModifiedBy());
+        partialUpdatedNote.setLastModifiedDate(note.getLastModifiedDate());
 
         partialUpdatedNote.title(UPDATED_TITLE).content(UPDATED_CONTENT).alarmDate(UPDATED_ALARM_DATE).status(UPDATED_STATUS);
 
@@ -379,6 +383,10 @@ class NoteResourceIT {
         // Update the note using partial update
         Note partialUpdatedNote = new Note();
         partialUpdatedNote.setId(note.getId());
+        partialUpdatedNote.setCreatedBy(note.getCreatedBy());
+        partialUpdatedNote.setCreatedDate(note.getCreatedDate());
+        partialUpdatedNote.setLastModifiedBy(note.getLastModifiedBy());
+        partialUpdatedNote.setLastModifiedDate(note.getLastModifiedDate());
 
         partialUpdatedNote.title(UPDATED_TITLE).content(UPDATED_CONTENT).alarmDate(UPDATED_ALARM_DATE).status(UPDATED_STATUS);
 

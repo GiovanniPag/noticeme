@@ -24,7 +24,11 @@
       "status": "Status",
       "attachment": "Attachment",
       "owner": "Owner",
-      "tag": "Tag"
+      "tag": "Tag",
+      "createdBy": "Created by",
+      "createdDate": "Created date",
+      "lastModifiedBy": "Modified by",
+      "lastModifiedDate": "Modified date"
     }
   }
 }

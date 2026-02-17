@@ -11,6 +11,10 @@ export interface INote {
   status?: keyof typeof NoteStatus | null;
   owner?: Pick<IUser, 'id'> | null;
   tags?: Pick<ITag, 'id' | 'tagName'>[] | null;
+  createdBy?: string;
+  createdDate?: Date;
+  lastModifiedBy?: string;
+  lastModifiedDate?: Date;
 }
 
 export type NewNote = Omit<INote, 'id'> & { id: null };

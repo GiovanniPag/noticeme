@@ -29,6 +29,12 @@
             <column name="owner_id" type="bigint">
                 <constraints nullable="false" />
             </column>
+            <column name="created_by" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp"/>
+            <column name="last_modified_by" type="varchar(50)"/>
+            <column name="last_modified_date" type="timestamp"/>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
         <dropDefaultValue tableName="note" columnName="alarm_date" columnDataType="${datetimeType}"/>
@@ -70,7 +76,9 @@
             <column name="alarm_date" type="date"/>
             <column name="status" type="string"/>
             <column name="owner_id" type="numeric"/>
+            <column name="created_date" type="timestamp"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
         </loadData>
+        <dropDefaultValue tableName="note" columnName="created_date" columnDataType="${datetimeType}"/>
     </changeSet>
 </databaseChangeLog>

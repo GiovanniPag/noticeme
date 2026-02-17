@@ -24,6 +24,14 @@ public class NoteDTO implements Serializable {
     private String content;
 
     private Instant alarmDate;
+    
+    private String createdBy;
+
+    private Instant createdDate;
+
+    private String lastModifiedBy;
+
+    private Instant lastModifiedDate;
 
     @NotNull
     private NoteStatus status;
@@ -72,6 +80,38 @@ public class NoteDTO implements Serializable {
     public void setStatus(NoteStatus status) {
         this.status = status;
     }
+    
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Instant getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Instant createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public Instant getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(Instant lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
 
     public UserDTO getOwner() {
         return owner;
@@ -119,6 +159,10 @@ public class NoteDTO implements Serializable {
             ", content='" + getContent() + "'" +
             ", alarmDate='" + getAlarmDate() + "'" +
             ", status='" + getStatus() + "'" +
+            ", createdBy=" + createdBy +
+            ", createdDate=" + createdDate +
+            ", lastModifiedBy='" + lastModifiedBy + '\'' +
+            ", lastModifiedDate=" + lastModifiedDate +
             ", owner=" + getOwner() +
             ", tags=" + getTags() +
             "}";
