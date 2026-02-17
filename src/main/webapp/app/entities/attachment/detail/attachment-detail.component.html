@@ -1,0 +1,55 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (attachment(); as attachmentRef) {
+      <div>
+        <h2 data-cy="attachmentDetailsHeading"><span jhiTranslate="noticeMeApp.attachment.detail.title">Attachment</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ attachmentRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="noticeMeApp.attachment.fileName">File Name</span></dt>
+          <dd>
+            <span>{{ attachmentRef.fileName }}</span>
+          </dd>
+          <dt><span jhiTranslate="noticeMeApp.attachment.data">Data</span></dt>
+          <dd>
+            @if (attachmentRef.data) {
+              <div>
+                <a (click)="openFile(attachmentRef.data, attachmentRef.dataContentType)" jhiTranslate="entity.action.open">Open</a>
+                {{ attachmentRef.dataContentType }}, {{ byteSize(attachmentRef.data) }}
+              </div>
+            }
+          </dd>
+          <dt><span jhiTranslate="noticeMeApp.attachment.fileSize">File Size</span></dt>
+          <dd>
+            <span>{{ attachmentRef.fileSize }}</span>
+          </dd>
+          <dt><span jhiTranslate="noticeMeApp.attachment.note">Note</span></dt>
+          <dd>
+            @if (attachment()!.note) {
+              <div>
+                <a [routerLink]="['/note', attachment()!.note?.id, 'view']">{{ attachmentRef.note?.id }}</a>
+              </div>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Indietro</span>
+        </button>
+
+        <button type="button" [routerLink]="['/attachment', attachmentRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Modifica</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

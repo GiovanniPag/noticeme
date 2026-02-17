@@ -1,0 +1,34 @@
+{
+  "noticeMeApp": {
+    "note": {
+      "home": {
+        "title": "Notes",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Note",
+        "createOrEditLabel": "Create or edit a Note",
+        "notFound": "No Notes found"
+      },
+      "created": "A new Note is created with identifier {{ param }}",
+      "updated": "A Note is updated with identifier {{ param }}",
+      "deleted": "A Note is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Note {{ id }}?"
+      },
+      "detail": {
+        "title": "Note"
+      },
+      "id": "ID",
+      "title": "Title",
+      "content": "Content",
+      "alarmDate": "Alarm Date",
+      "status": "Status",
+      "attachment": "Attachment",
+      "owner": "Owner",
+      "tag": "Tag",
+      "createdBy": "Created by",
+      "createdDate": "Created date",
+      "lastModifiedBy": "Modified by",
+      "lastModifiedDate": "Modified date"
+    }
+  }
+}

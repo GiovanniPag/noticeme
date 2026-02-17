@@ -1,0 +1,37 @@
+{
+  "annotations": {
+    "changelogDate": "20260216160149"
+  },
+  "applications": "*",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "fileName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "data",
+      "fieldType": "AnyBlob",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "fileSize",
+      "fieldType": "Long"
+    }
+  ],
+  "name": "Attachment",
+  "pagination": "infinite-scroll",
+  "relationships": [
+    {
+      "otherEntityName": "note",
+      "otherEntityRelationshipName": "attachment",
+      "relationshipName": "note",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

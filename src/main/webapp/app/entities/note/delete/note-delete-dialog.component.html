@@ -1,0 +1,24 @@
+@if (note) {
+  <form name="deleteForm" (ngSubmit)="confirmDelete(note.id!)">
+    <div class="modal-header">
+      <h4 class="modal-title" data-cy="noteDeleteDialogHeading" jhiTranslate="entity.delete.title">Conferma operazione di cancellazione</h4>
+    </div>
+
+    <div class="modal-body">
+      <jhi-alert-error />
+      <p id="jhi-delete-note-heading" jhiTranslate="noticeMeApp.note.delete.question" [translateValues]="{ id: note.id }">
+        Sei sicuro di volere eliminare Note {{ note.id }}?
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="cancel()">
+        <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Annulla</span>
+      </button>
+
+      <button id="jhi-confirm-delete-note" data-cy="entityConfirmDeleteButton" type="submit" class="btn btn-danger">
+        <fa-icon icon="times"></fa-icon>&nbsp;<span jhiTranslate="entity.action.delete">Elimina</span>
+      </button>
+    </div>
+  </form>
+}

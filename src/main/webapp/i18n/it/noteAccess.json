@@ -1,0 +1,26 @@
+{
+  "noticeMeApp": {
+    "noteAccess": {
+      "home": {
+        "title": "NoteAccesses",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Genera un nuovo Note Access",
+        "createOrEditLabel": "Genera o modifica un Note Access",
+        "notFound": "No Note Accesses found"
+      },
+      "created": "&Egrave; stato generato un nuovo Note Access con identificatore {{ param }}",
+      "updated": "&Egrave; stato aggiornato Note Access identificato da {{ param }}",
+      "deleted": "&Egrave; stato eliminato Note Access con identificatore {{ param }}",
+      "delete": {
+        "question": "Sei sicuro di volere eliminare Note Access {{ id }}?"
+      },
+      "detail": {
+        "title": "Note Access"
+      },
+      "id": "ID",
+      "role": "Role",
+      "note": "Note",
+      "user": "User"
+    }
+  }
+}

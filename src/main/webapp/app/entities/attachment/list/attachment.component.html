@@ -1,0 +1,118 @@
+<div>
+  <h2 id="page-heading" data-cy="AttachmentHeading">
+    <span jhiTranslate="noticeMeApp.attachment.home.title">Attachments</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+        <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
+        <span jhiTranslate="noticeMeApp.attachment.home.refreshListLabel">Refresh list</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-attachment"
+        [routerLink]="['/attachment/new']"
+      >
+        <fa-icon icon="plus"></fa-icon>
+        <span jhiTranslate="noticeMeApp.attachment.home.createLabel">Genera un nuovo Attachment</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error />
+
+  <jhi-alert />
+
+  @if (attachments().length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="noticeMeApp.attachment.home.notFound">No Attachments found</span>
+    </div>
+  } @else {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="global.field.id">ID</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="fileName">
+              <div class="d-flex">
+                <span jhiTranslate="noticeMeApp.attachment.fileName">File Name</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="data">
+              <div class="d-flex">
+                <span jhiTranslate="noticeMeApp.attachment.data">Data</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="fileSize">
+              <div class="d-flex">
+                <span jhiTranslate="noticeMeApp.attachment.fileSize">File Size</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="note.id">
+              <div class="d-flex">
+                <span jhiTranslate="noticeMeApp.attachment.note">Note</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody infinite-scroll (scrolled)="loadNextPage()" [infiniteScrollDisabled]="!hasMorePage()" [infiniteScrollDistance]="0">
+          @for (attachment of attachments(); track trackId(attachment)) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/attachment', attachment.id, 'view']">{{ attachment.id }}</a>
+              </td>
+              <td>{{ attachment.fileName }}</td>
+              <td>
+                @if (attachment.data) {
+                  <a (click)="openFile(attachment.data, attachment.dataContentType)" jhiTranslate="entity.action.open">Open</a>
+                  <span>{{ attachment.dataContentType }}, {{ byteSize(attachment.data) }}</span>
+                }
+              </td>
+              <td>{{ attachment.fileSize }}</td>
+              <td>
+                @if (attachment.note) {
+                  <div>
+                    <a [routerLink]="['/note', attachment.note.id, 'view']">{{ attachment.note.id }}</a>
+                  </div>
+                }
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <a [routerLink]="['/attachment', attachment.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                    <fa-icon icon="eye"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">Visualizza</span>
+                  </a>
+
+                  <a [routerLink]="['/attachment', attachment.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                    <fa-icon icon="pencil-alt"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Modifica</span>
+                  </a>
+
+                  <button type="submit" (click)="delete(attachment)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                    <fa-icon icon="times"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Elimina</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
