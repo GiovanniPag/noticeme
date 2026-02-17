@@ -16,11 +16,6 @@
       "fieldType": "TextBlob"
     },
     {
-      "fieldName": "lastUpdateDate",
-      "fieldType": "Instant",
-      "fieldValidateRules": ["required"]
-    },
-    {
       "fieldName": "alarmDate",
       "fieldType": "Instant"
     },

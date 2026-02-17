@@ -30,7 +30,7 @@ describe('Attachment e2e test', () => {
     cy.authenticatedRequest({
       method: 'POST',
       url: '/api/notes',
-      body: {"title":"concerned by antagonize","content":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci50eHQ=","lastUpdateDate":"2026-02-15T18:29:27.809Z","alarmDate":"2026-02-16T02:51:36.163Z","status":"ARCHIVED"},
+      body: {"title":"primary","content":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci50eHQ=","alarmDate":"2026-02-16T06:32:28.052Z","status":"ARCHIVED"},
     }).then(({ body }) => {
       note = body;
     });

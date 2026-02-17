@@ -11,8 +11,7 @@ import { INote, NewNote } from '../note.model';
 
 export type PartialUpdateNote = Partial<INote> & Pick<INote, 'id'>;
 
-type RestOf<T extends INote | NewNote> = Omit<T, 'lastUpdateDate' | 'alarmDate'> & {
-  lastUpdateDate?: string | null;
+type RestOf<T extends INote | NewNote> = Omit<T, 'alarmDate'> & {
   alarmDate?: string | null;
 };
 
@@ -99,7 +98,6 @@ export class NoteService {
   protected convertDateFromClient<T extends INote | NewNote | PartialUpdateNote>(note: T): RestOf<T> {
     return {
       ...note,
-      lastUpdateDate: note.lastUpdateDate?.toJSON() ?? null,
       alarmDate: note.alarmDate?.toJSON() ?? null,
     };
   }
@@ -107,7 +105,6 @@ export class NoteService {
   protected convertDateFromServer(restNote: RestNote): INote {
     return {
       ...restNote,
-      lastUpdateDate: restNote.lastUpdateDate ? dayjs(restNote.lastUpdateDate) : undefined,
       alarmDate: restNote.alarmDate ? dayjs(restNote.alarmDate) : undefined,
     };
   }

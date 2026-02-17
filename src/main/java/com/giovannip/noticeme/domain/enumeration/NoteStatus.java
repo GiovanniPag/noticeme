@@ -1,7 +1,7 @@
 package com.giovannip.noticeme.domain.enumeration;
 
 /**
- * ENUMS
+ * Current Status of the Note
  */
 public enum NoteStatus {
     NORMAL,

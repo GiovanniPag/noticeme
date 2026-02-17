@@ -70,7 +70,6 @@ public class NoteGatlingTest extends Simulation {
                                 "{" +
                                 "\"title\": \"SAMPLE_TEXT\"" +
                                 ", \"content\": null" +
-                                ", \"lastUpdateDate\": \"2020-01-01T00:00:00.000Z\"" +
                                 ", \"alarmDate\": \"2020-01-01T00:00:00.000Z\"" +
                                 ", \"status\": \"NORMAL\"" +
                                 "}"

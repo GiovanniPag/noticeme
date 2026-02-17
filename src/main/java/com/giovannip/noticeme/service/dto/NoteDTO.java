@@ -23,9 +23,6 @@ public class NoteDTO implements Serializable {
     @Lob
     private String content;
 
-    @NotNull
-    private Instant lastUpdateDate;
-
     private Instant alarmDate;
 
     @NotNull
@@ -58,14 +55,6 @@ public class NoteDTO implements Serializable {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public Instant getLastUpdateDate() {
-        return lastUpdateDate;
-    }
-
-    public void setLastUpdateDate(Instant lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
     }
 
     public Instant getAlarmDate() {
@@ -128,7 +117,6 @@ public class NoteDTO implements Serializable {
             "id=" + getId() +
             ", title='" + getTitle() + "'" +
             ", content='" + getContent() + "'" +
-            ", lastUpdateDate='" + getLastUpdateDate() + "'" +
             ", alarmDate='" + getAlarmDate() + "'" +
             ", status='" + getStatus() + "'" +
             ", owner=" + getOwner() +

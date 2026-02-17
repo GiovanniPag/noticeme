@@ -7,7 +7,6 @@ export interface INote {
   id: number;
   title?: string | null;
   content?: string | null;
-  lastUpdateDate?: dayjs.Dayjs | null;
   alarmDate?: dayjs.Dayjs | null;
   status?: keyof typeof NoteStatus | null;
   owner?: Pick<IUser, 'id'> | null;

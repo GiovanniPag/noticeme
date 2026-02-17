@@ -49,7 +49,6 @@ public class NoteAsserts {
             .as("Verify Note relevant properties")
             .satisfies(a -> assertThat(a.getTitle()).as("check title").isEqualTo(expected.getTitle()))
             .satisfies(a -> assertThat(a.getContent()).as("check content").isEqualTo(expected.getContent()))
-            .satisfies(a -> assertThat(a.getLastUpdateDate()).as("check lastUpdateDate").isEqualTo(expected.getLastUpdateDate()))
             .satisfies(a -> assertThat(a.getAlarmDate()).as("check alarmDate").isEqualTo(expected.getAlarmDate()))
             .satisfies(a -> assertThat(a.getStatus()).as("check status").isEqualTo(expected.getStatus()));
     }

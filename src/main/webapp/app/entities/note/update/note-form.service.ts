@@ -19,8 +19,7 @@ type NoteFormGroupInput = INote | PartialWithRequiredKeyOf<NewNote>;
 /**
  * Type that converts some properties for forms.
  */
-type FormValueOf<T extends INote | NewNote> = Omit<T, 'lastUpdateDate' | 'alarmDate'> & {
-  lastUpdateDate?: string | null;
+type FormValueOf<T extends INote | NewNote> = Omit<T, 'alarmDate'> & {
   alarmDate?: string | null;
 };
 
@@ -28,13 +27,12 @@ type NoteFormRawValue = FormValueOf<INote>;
 
 type NewNoteFormRawValue = FormValueOf<NewNote>;
 
-type NoteFormDefaults = Pick<NewNote, 'id' | 'lastUpdateDate' | 'alarmDate' | 'tags'>;
+type NoteFormDefaults = Pick<NewNote, 'id' | 'alarmDate' | 'tags'>;
 
 type NoteFormGroupContent = {
   id: FormControl<NoteFormRawValue['id'] | NewNote['id']>;
   title: FormControl<NoteFormRawValue['title']>;
   content: FormControl<NoteFormRawValue['content']>;
-  lastUpdateDate: FormControl<NoteFormRawValue['lastUpdateDate']>;
   alarmDate: FormControl<NoteFormRawValue['alarmDate']>;
   status: FormControl<NoteFormRawValue['status']>;
   owner: FormControl<NoteFormRawValue['owner']>;
@@ -62,9 +60,6 @@ export class NoteFormService {
         validators: [Validators.maxLength(255)],
       }),
       content: new FormControl(noteRawValue.content),
-      lastUpdateDate: new FormControl(noteRawValue.lastUpdateDate, {
-        validators: [Validators.required],
-      }),
       alarmDate: new FormControl(noteRawValue.alarmDate),
       status: new FormControl(noteRawValue.status, {
         validators: [Validators.required],
@@ -95,7 +90,6 @@ export class NoteFormService {
 
     return {
       id: null,
-      lastUpdateDate: currentTime,
       alarmDate: currentTime,
       tags: [],
     };
@@ -104,7 +98,6 @@ export class NoteFormService {
   private convertNoteRawValueToNote(rawNote: NoteFormRawValue | NewNoteFormRawValue): INote | NewNote {
     return {
       ...rawNote,
-      lastUpdateDate: dayjs(rawNote.lastUpdateDate, DATE_TIME_FORMAT),
       alarmDate: dayjs(rawNote.alarmDate, DATE_TIME_FORMAT),
     };
   }
@@ -114,7 +107,6 @@ export class NoteFormService {
   ): NoteFormRawValue | PartialWithRequiredKeyOf<NewNoteFormRawValue> {
     return {
       ...note,
-      lastUpdateDate: note.lastUpdateDate ? note.lastUpdateDate.format(DATE_TIME_FORMAT) : undefined,
       alarmDate: note.alarmDate ? note.alarmDate.format(DATE_TIME_FORMAT) : undefined,
       tags: note.tags ?? [],
     };

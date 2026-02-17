@@ -9,7 +9,6 @@ import { NoteService, RestNote } from './note.service';
 
 const requireRestSample: RestNote = {
   ...sampleWithRequiredData,
-  lastUpdateDate: sampleWithRequiredData.lastUpdateDate?.toJSON(),
   alarmDate: sampleWithRequiredData.alarmDate?.toJSON(),
 };
 

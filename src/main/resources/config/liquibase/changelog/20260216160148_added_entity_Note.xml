@@ -20,9 +20,6 @@
             <column name="content" type="${clobType}">
                 <constraints nullable="true" />
             </column>
-            <column name="last_update_date" type="${datetimeType}">
-                <constraints nullable="false" />
-            </column>
             <column name="alarm_date" type="${datetimeType}">
                 <constraints nullable="true" />
             </column>
@@ -34,7 +31,6 @@
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
-        <dropDefaultValue tableName="note" columnName="last_update_date" columnDataType="${datetimeType}"/>
         <dropDefaultValue tableName="note" columnName="alarm_date" columnDataType="${datetimeType}"/>
     </changeSet>
 
@@ -71,7 +67,6 @@
             <column name="id" type="numeric"/>
             <column name="title" type="string"/>
             <column name="content" type="clob"/>
-            <column name="last_update_date" type="date"/>
             <column name="alarm_date" type="date"/>
             <column name="status" type="string"/>
             <column name="owner_id" type="numeric"/>

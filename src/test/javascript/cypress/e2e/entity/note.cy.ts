@@ -15,7 +15,7 @@ describe('Note e2e test', () => {
   const notePageUrlPattern = new RegExp('/note(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'user';
   const password = Cypress.env('E2E_PASSWORD') ?? 'user';
-  // const noteSample = {"lastUpdateDate":"2026-02-16T05:23:09.334Z","status":"ARCHIVED"};
+  // const noteSample = {"status":"NORMAL"};
 
   let note;
   // let user;
@@ -225,19 +225,15 @@ describe('Note e2e test', () => {
 
     // Reason: cannot create a required entity with relationship with required relationships.
     it.skip('should create an instance of Note', () => {
-      cy.get(`[data-cy="title"]`).type('delirious');
-      cy.get(`[data-cy="title"]`).should('have.value', 'delirious');
+      cy.get(`[data-cy="title"]`).type('wry');
+      cy.get(`[data-cy="title"]`).should('have.value', 'wry');
 
       cy.get(`[data-cy="content"]`).type('../fake-data/blob/hipster.txt');
       cy.get(`[data-cy="content"]`).invoke('val').should('match', new RegExp('../fake-data/blob/hipster.txt'));
 
-      cy.get(`[data-cy="lastUpdateDate"]`).type('2026-02-16T02:09');
-      cy.get(`[data-cy="lastUpdateDate"]`).blur();
-      cy.get(`[data-cy="lastUpdateDate"]`).should('have.value', '2026-02-16T02:09');
-
-      cy.get(`[data-cy="alarmDate"]`).type('2026-02-15T18:02');
+      cy.get(`[data-cy="alarmDate"]`).type('2026-02-15T20:23');
       cy.get(`[data-cy="alarmDate"]`).blur();
-      cy.get(`[data-cy="alarmDate"]`).should('have.value', '2026-02-15T18:02');
+      cy.get(`[data-cy="alarmDate"]`).should('have.value', '2026-02-15T20:23');
 
       cy.get(`[data-cy="status"]`).select('PINNED');
 

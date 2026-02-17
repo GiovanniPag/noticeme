@@ -35,10 +35,6 @@ public class Note implements Serializable {
     @Column(name = "content")
     private String content;
 
-    @NotNull
-    @Column(name = "last_update_date", nullable = false)
-    private Instant lastUpdateDate;
-
     @Column(name = "alarm_date")
     private Instant alarmDate;
 
@@ -101,19 +97,6 @@ public class Note implements Serializable {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public Instant getLastUpdateDate() {
-        return this.lastUpdateDate;
-    }
-
-    public Note lastUpdateDate(Instant lastUpdateDate) {
-        this.setLastUpdateDate(lastUpdateDate);
-        return this;
-    }
-
-    public void setLastUpdateDate(Instant lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
     }
 
     public Instant getAlarmDate() {
@@ -235,7 +218,6 @@ public class Note implements Serializable {
             "id=" + getId() +
             ", title='" + getTitle() + "'" +
             ", content='" + getContent() + "'" +
-            ", lastUpdateDate='" + getLastUpdateDate() + "'" +
             ", alarmDate='" + getAlarmDate() + "'" +
             ", status='" + getStatus() + "'" +
             "}";

@@ -15,7 +15,6 @@ entity Tag {
 entity Note {
   title String maxlength(255)
   content TextBlob
-  lastUpdateDate Instant required
   alarmDate Instant
   status NoteStatus required
 }

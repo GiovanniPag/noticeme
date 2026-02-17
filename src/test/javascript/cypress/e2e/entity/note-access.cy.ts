@@ -31,7 +31,7 @@ describe('NoteAccess e2e test', () => {
     cy.authenticatedRequest({
       method: 'POST',
       url: '/api/notes',
-      body: {"title":"jaunty everlasting","content":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci50eHQ=","lastUpdateDate":"2026-02-15T21:19:04.375Z","alarmDate":"2026-02-16T08:35:45.951Z","status":"NORMAL"},
+      body: {"title":"by","content":"Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci50eHQ=","alarmDate":"2026-02-16T10:11:41.838Z","status":"PINNED"},
     }).then(({ body }) => {
       note = body;
     });
