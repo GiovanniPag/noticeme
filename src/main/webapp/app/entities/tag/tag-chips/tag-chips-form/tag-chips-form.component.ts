@@ -49,6 +49,7 @@ export class TagChipsFormComponent {
   readonly tagNameControl = this.form.controls.tagName;
   readonly tagColorControl = this.form.controls.color;
   private readonly tagService = inject(TagService);
+  private _focused = signal(false);
 
   constructor() {
     // react to disabled signal
@@ -66,10 +67,12 @@ export class TagChipsFormComponent {
    * ========================================================== */
 
   focus(): void {
+    this._focused.set(true);
     this.inputRef.nativeElement.focus();
   }
 
   blur(): void {
+    this._focused.set(false);
     this.inputRef.nativeElement.blur();
   }
 
@@ -79,6 +82,10 @@ export class TagChipsFormComponent {
 
   get inputText(): string {
     return this.tagNameControl.value.trim();
+  }
+
+  public isInputFocused(): boolean {
+    return this._focused();
   }
 
   /* ==========================================================

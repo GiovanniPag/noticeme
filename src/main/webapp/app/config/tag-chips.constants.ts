@@ -51,7 +51,7 @@ export const DEFAULT_ERROR_MESSAGES = {
  * Defaults
  * ========================================================= */
 
-export const DEFAULT_TAG_INPUT_OPTIONS = {
+export const default_tag_input = {
   separatorKeyCodes: [],
   placeholder: PLACEHOLDER,
   secondaryPlaceholder: SECONDARY_PLACEHOLDER,

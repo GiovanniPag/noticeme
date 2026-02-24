@@ -1,40 +1,43 @@
 <div [ngClass]="theme" class="ng2-tag-input" (click)="focus(true)">
   <!-- TAGS -->
   <div class="ng2-tags-container">
-    @for (tag of tags(); let i = index; track tag.id) {
+    @for (tag of tags(); track tag.id; let i = $index) {
     <jhi-tag-chip
       [model]="tag"
-      (removeTag)="removeTag(tag)"
-      [disabled]="disabled()"
-      (selectTag)="selectItem(tag)"
-      (keyDownTag)="handleKeydown($event)"
-      (blurTag)="onTagBlurred($event, i)"
       [index]="i"
+      [disabled]="disabled()"
+      (removeTag)="removeTag(tag)"
+      (selectTag)="selectTag(i)"
+      (keyDownTag)="onTagKeydown($event, i)"
+      (blurTag)="onTagBlurred($event, i)"
     >
     </jhi-tag-chip>
     }
 
     <jhi-tag-chips-form
       #TagChipsFormComponent
-      (submitTag)="addTagByName($event)"
-      (blurEvent)="blur()"
       [disabled]="disabled()"
-      [placeholder]="(tags().length ? placeholder : secondaryPlaceholder) | translate"
+      [placeholder]="(tags().length ? placeholder() : secondaryPlaceholder()) | translate"
       [noteid]="noteid()"
       [existingTags]="tags()"
-      (keyDownEvent)="fireEvents('keydown', $event)"
-      (keyUpEvent)="fireEvents('keyup', $event)"
-      [inputClass]="inputClass"
-      [inputId]="inputId"
+      [inputClass]="inputClass()"
+      [inputId]="inputId()"
+      (submitTag)="addTagByName($event)"
+      (blurEvent)="blur()"
+      (keyDownEvent)="onInputKeydown($event)"
     >
     </jhi-tag-chips-form>
   </div>
 </div>
 
 <!-- ERRORS -->
-<div *ngIf="hasErrors()" [ngClass]="theme" class="error-messages">
-  <p *ngFor="let error of errors" class="error-message" jhitranslate="error">
-    <span [jhiTranslate]="error.msg" [translateValues]="error.translateValues"></span>
-  </p>
+@if (hasErrors()) {
+<div [ngClass]="theme" class="error-messages">
+  @for (error of errors(); track error.msg) {
+    <p class="error-message" jhitranslate="error">
+      <span [jhiTranslate]="error.msg" [translateValues]="error.translateValues"></span>
+    </p>
+  }
 </div>
+}
 <ng-content></ng-content>

@@ -7,7 +7,7 @@ import { ITag } from 'app/entities/tag/tag.model';
 import { TagService } from 'app/entities/tag/service/tag.service';
 import { TagChipsFormComponent } from '../tag-chips-form/tag-chips-form.component';
 
-import { defaults } from 'app/config/tag-chips.constants';
+import { default_tag_input } from 'app/config/tag-chips.constants';
 import { TagComponent } from '../tag/tag.component';
 
 @Component({
@@ -33,16 +33,16 @@ import { TagComponent } from '../tag/tag.component';
 })
 export class TagInputComponent implements ControlValueAccessor {
   /* ------------------ Inputs ------------------ */
-  placeholder = input<string>(defaults.tagInput.placeholder);
-  secondaryPlaceholder = input<string>(defaults.tagInput.secondaryPlaceholder);
-  disabled = input<boolean>(defaults.tagInput.disable);
+  placeholder = input<string>(default_tag_input.placeholder);
+  secondaryPlaceholder = input<string>(default_tag_input.secondaryPlaceholder);
+  disabled = input<boolean>(default_tag_input.disable);
   noteid = input<number | undefined>();
-  separatorKeys: string[] = defaults.tagInput.separatorKeyCodes;
-  hideForm = defaults.tagInput.hideForm;
-  errorMessages = defaults.tagInput.errorMessages;
-  theme = defaults.tagInput.theme;
-  inputId = defaults.tagInput.inputId;
-  inputClass = defaults.tagInput.inputClass;
+  separatorKeys: string[] = default_tag_input.separatorKeyCodes;
+  hideForm = default_tag_input.hideForm;
+  errorMessages = default_tag_input.errorMessages;
+  theme = default_tag_input.theme;
+  inputId = default_tag_input.inputId;
+  inputClass = default_tag_input.inputClass;
   /* ------------------ Outputs ------------------ */
   tagAdded = output<ITag>();
   tagRemoved = output<ITag>();
@@ -51,6 +51,7 @@ export class TagInputComponent implements ControlValueAccessor {
   @ViewChildren(TagComponent) tagComponents!: QueryList<TagComponent>;
   /* ------------------ State ------------------ */
   readonly tags = computed(() => this._tags());
+  // TODO: is selected index even needed?
   readonly selectedIndex = signal<number | null>(null);
   isLoading = signal(false);
   isSaving = signal(false);
@@ -90,12 +91,23 @@ export class TagInputComponent implements ControlValueAccessor {
 
   blur(): void {
     this.onTouched();
-    // TODO: on blur clear the text's form after a bit i guess
+    // clear input after a short delay to allow event propagation
+    setTimeout(() => {
+      if (this.inputForm) {
+        this.inputForm.inputText = '';
+      }
+    }, 50);
   }
 
   removeTag(tag: ITag): void {
+    const index = this.tags().indexOf(tag);
     this._tags.update(tags => tags.filter(t => t !== tag));
-    // TODO: remove selected index if removed
+    if (this.selectedIndex() === index) {
+      this.selectedIndex.set(null);
+    } else if (this.selectedIndex() !== null && this.selectedIndex() > index) {
+      // Adjust selectedIndex if a tag above was removed
+      this.selectedIndex.set(this.selectedIndex() - 1);
+    }
     this.focus(true);
     this.tagRemoved.emit(tag);
   }
@@ -117,6 +129,21 @@ export class TagInputComponent implements ControlValueAccessor {
     });
   }
 
+  public onTagBlurred(changedElement: ITag, index: number): void {
+    this._tags.update(tags => {
+      const copy = [...tags];
+      copy[index] = changedElement;
+      return copy;
+    });
+    this.blur();
+  }
+
+  public selectItem(index: number): void {
+    if (this.selectedIndex() === index) {
+      return;
+    }
+    this.selectedIndex.set(index);
+  }
   /* ------------------------------------------------------------------
    * Keyboard Handling
    * ------------------------------------------------------------------ */
@@ -133,7 +160,11 @@ export class TagInputComponent implements ControlValueAccessor {
         this.focusNext(index);
         break;
       case 'Tab':
-        event.shiftKey ? this.focusPrevious(index) : this.focusNext(index);
+        if (event.shiftKey) {
+          this.focusPrevious(index);
+        } else {
+          this.focusNext(index);
+        }
         break;
       default:
         return;
@@ -162,11 +193,11 @@ export class TagInputComponent implements ControlValueAccessor {
    * ------------------------------------------------------------------ */
 
   hasErrors(): boolean {
-    return this.errors().length > 0;
+    const currentErrors = this.errors();
+    return Array.isArray(currentErrors) && currentErrors.length > 0;
   }
 
   isInputFocused(): boolean {
-    // TODO: implement in input form
     return this.inputForm?.isInputFocused() ?? false;
   }
 
@@ -197,8 +228,13 @@ export class TagInputComponent implements ControlValueAccessor {
   }
 
   private isDuplicate(name: string): boolean {
-    return this._tags().some(t => t.tagName === name);
-    // todo: make duplicate tag blink
+    const dupe = this._tags().find(t => t.tagName === name);
+    if (dupe) {
+      const index = this._tags().indexOf(dupe);
+      const tagComponent = this.tagComponents.get(index);
+      tagComponent?.blink();
+    }
+    return !!dupe;
   }
 
   private focusPrevious(index: number): void {
