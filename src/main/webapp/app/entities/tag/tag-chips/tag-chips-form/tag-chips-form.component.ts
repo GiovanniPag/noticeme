@@ -42,7 +42,7 @@ export class TagChipsFormComponent {
   readonly fb = inject(NonNullableFormBuilder);
   readonly form = this.fb.group({
     tagName: this.fb.control('', {
-      validators: [minTrimmedLength(1), Validators.maxLength(50)],
+      validators: [minTrimmedLength(1), Validators.maxLength(255)],
     }),
     color: this.fb.control('#3b82f6'), // default color (blue)
   });
