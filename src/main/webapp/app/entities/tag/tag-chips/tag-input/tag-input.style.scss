@@ -1,0 +1,9 @@
+@use '../../tag.scss';
+
+:host {
+  display: block;
+}
+
+jhi-tag-chip {
+  @include tag-theme($noticeme-tag-theme);
+}

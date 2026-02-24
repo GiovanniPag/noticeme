@@ -1,0 +1,118 @@
+@use '~bootstrap/scss/functions';
+@use '~bootstrap/scss/variables';
+@use '../../../content/scss/bootstrap-variables';
+
+/* ==========================================================================
+Sidebar
+========================================================================== */
+#sidebarResponsive {
+  z-index: 100;
+  padding: unset;
+  height: 100%;
+  align-items: flex-start;
+}
+
+.sidebar-list {
+  padding-top: 48px;
+  width: 100%;
+
+  .side-link:hover {
+    background: $gray-200;
+  }
+
+  li.active {
+    background: $primary;
+    fa-icon,
+    .side-link {
+      color: $white;
+    }
+    .side-link:hover {
+      background: darken($primary, 20%);
+    }
+  }
+}
+
+.side-link {
+  padding-left: 0.75rem;
+  text-decoration: none;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  transition:
+    color 500ms,
+    background 500ms;
+
+  fa-icon {
+    padding: 0rem 0.75rem 0rem 0rem;
+    font-size: 1.5rem;
+    line-height: 2;
+    background-color: transparent;
+    color: $primary;
+    transition: color 500ms;
+  }
+
+  span {
+    font-size: small;
+    font-weight: 500;
+    vertical-align: middle;
+  }
+}
+
+/* Shrinking the sidebar from 200px to auto*/
+:host.is-active {
+  .side-link span {
+    animation: fadein 0.5s;
+    display: flex;
+  }
+
+  #sidebarResponsive {
+    min-width: 200px;
+    max-width: 200px;
+  }
+}
+
+:host {
+  #sidebarResponsive {
+    transition:
+      min-width 0.5s,
+      max-width 0.5s;
+    min-width: 45px;
+    max-width: 45px;
+  }
+  .side-link span {
+    display: none;
+  }
+}
+
+/*smaller screens*/
+@media (max-width: 768px) {
+  :host #sidebarResponsive {
+    min-width: 127px;
+    max-width: 127px;
+    white-space: nowrap;
+    margin-left: -127px;
+    transition: margin-left 0.5s;
+  }
+  :host.is-active #sidebarResponsive {
+    min-width: 127px;
+    max-width: 127px;
+    margin-left: 0px;
+  }
+  :host .side-link span,
+  :host.is-active .side-link span {
+    animation: fadein 0s;
+    display: inline;
+  }
+  #sidebarResponsive .side-link {
+    padding-right: 10px;
+  }
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

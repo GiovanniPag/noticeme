@@ -1,0 +1,65 @@
+@use '../../tag.scss';
+
+:host {
+  outline: 0;
+  overflow: visible;
+  transition: opacity 1s;
+  z-index: 1;
+}
+
+:host(.blink) {
+  animation: blink 0.3s normal forwards ease-in-out;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.3;
+  }
+}
+
+:host(.disabled) {
+  cursor: not-allowed;
+}
+
+.tag-wrapper {
+  flex-direction: row;
+  display: flex;
+}
+
+.tag__text {
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove-icon {
+  overflow: visible !important;
+  width: 20px;
+  height: 16px;
+  transition: all 0.15s;
+  display: inline-block;
+  text-align: right;
+
+  path {
+    fill: $color-arrow-noticeme;
+  }
+
+  svg {
+    vertical-align: bottom;
+    height: 34px;
+  }
+}
+
+.remove-icon:hover {
+  transform: scale(1.5) translateY(-3px);
+}
+
+:host:focus,
+:host:active {
+  .remove-icon {
+    path {
+      fill: $color-arrow-noticeme-focused;
+    }
+  }
+}

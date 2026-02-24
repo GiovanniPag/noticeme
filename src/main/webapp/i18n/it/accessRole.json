@@ -2,8 +2,8 @@
   "noticeMeApp": {
     "AccessRole": {
       "null": "",
-      "VIEWER": "VIEWER",
-      "EDITOR": "EDITOR"
+      "VIEWER": "Visualizzatore",
+      "EDITOR": "Editor"
     }
   }
 }

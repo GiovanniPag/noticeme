@@ -5,6 +5,16 @@
  * Make sure not to add !default to values here
  */
 
+// Colors:
+// Grayscale and brand colors for use across Bootstrap.
+
+$primary: #5ec6f2;
+$secondary: #c6c6c6;
+$success: #28a745;
+$info: #17a2b8;
+$warning: #ffc107;
+$danger: #dc3545;
+
 // Options:
 // Quickly modify global styling by enabling or disabling optional features.
 $enable-rounded: true;
@@ -25,7 +35,7 @@ $border-radius-sm: 0.1rem;
 // Body:
 // Settings for the `<body>` element.
 
-$body-bg: #ffffff;
+$body-bg: #e4e5e6;
 
 // Typography:
 // Font, line-height, and color for body text, headings, and more.
@@ -34,3 +44,166 @@ $font-size-base: 1rem;
 
 $dropdown-link-hover-color: white;
 $dropdown-link-hover-bg: #343a40;
+
+// tag chips
+// Colors
+$color-primary-noticeme: #f9f9f9 !default;
+$color-focused-noticeme: #d0d0d0 !default;
+$color-error-noticeme: #f44336 !default;
+$color-arrow-noticeme: #444 !default;
+$color-arrow-noticeme-focused: #000 !default;
+
+// variables
+$font-family: 'Roboto', 'Helvetica Neue', sans-serif !default;
+$tag-color: #444 !default;
+$tag-border-radius: 16px !default;
+$tag-font-size: 1em !default;
+$tag-font-weight: 400 !default;
+$tag-letter-spacing: 0.05rem !default;
+$tag-margin: 0.1rem 0.3rem 0.1rem 0 !default;
+$tag-padding: 0.08rem 0.45rem !default;
+$tag-height: 32px !default;
+$tag-line-height: 34px !default;
+$input-font-size: 1em;
+$input-padding: 0 0.5rem;
+$input-border: none;
+$input-height: 38px;
+$container-padding: 0.25rem 0 !default;
+$container-height: 32px !default;
+$container-margin: 0.1em 0 !default;
+$error-message-font-size: 0.8em !default;
+$error-message-margin: 0.5em 0 0 0 !default;
+$error-message-color: $color-error-noticeme !default;
+
+//mixins
+@mixin tag-input-theme($theme) {
+  display: block;
+  flex-direction: row;
+  flex-wrap: wrap;
+  position: relative;
+
+  transition: map-get($theme, transition);
+
+  padding: map-get($theme, 'container-padding');
+  min-height: map-get($theme, 'container-height');
+
+  cursor: text;
+
+  border-bottom: map-get($theme, 'container-border-bottom');
+  box-shadow: map-get($theme, 'box-shadow');
+  border-radius: map-get($theme, 'border-radius');
+
+  &:focus {
+    outline: 0;
+  }
+
+  &.ng2-tag-input--dropping {
+    opacity: 0.7;
+  }
+
+  &.ng2-tag-input--focused {
+    border-bottom: map-get($theme, 'container-border-bottom-focused');
+  }
+
+  &.ng2-tag-input--invalid {
+    border-bottom: map-get($theme, 'container-border-bottom-invalid');
+  }
+
+  &.ng2-tag-input--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  form {
+    margin: map-get($theme, 'container-margin');
+  }
+
+  .ng2-tags-container {
+    flex-wrap: wrap;
+    display: flex;
+  }
+}
+
+@mixin error-message($theme) {
+  font-size: map-get($theme, 'error-message-font-size');
+  color: map-get($theme, 'error-message-color');
+  margin: map-get($theme, 'error-message-margin');
+}
+
+@mixin tag-theme($theme) {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  font-family: map-get($theme, 'font-family');
+  font-weight: map-get($theme, 'font-weight');
+  font-size: map-get($theme, 'font-size');
+  letter-spacing: map-get($theme, 'letter-spacing');
+
+  color: map-get($theme, 'color');
+  border-radius: map-get($theme, 'border-radius');
+
+  transition: map-get($theme, 'transition');
+
+  margin: map-get($theme, 'margin');
+  padding: map-get($theme, 'padding');
+
+  height: map-get($theme, 'height');
+  line-height: map-get($theme, 'line-height');
+
+  background: map-get($theme, 'background');
+
+  user-select: none;
+  overflow: hidden;
+  outline: 0;
+  cursor: pointer;
+  position: relative;
+
+  &:not(.readonly):focus {
+    background: map-get($theme, 'background-focused');
+    color: map-get($theme, 'color-focused');
+    box-shadow: map-get($theme, 'box-shadow');
+  }
+
+  &:not(.readonly):active {
+    background: map-get($theme, 'background-active');
+    color: map-get($theme, 'color-active');
+    box-shadow: map-get($theme, 'box-shadow');
+  }
+
+  &:not(:focus):not(:active):not(.readonly):hover {
+    background: map-get($theme, 'background-hover');
+    color: map-get($theme, 'color-hover');
+    box-shadow: map-get($theme, 'box-shadow');
+  }
+
+  &.readonly {
+    cursor: default;
+  }
+
+  &.readonly:focus,
+  &:focus {
+    outline: 0;
+  }
+}
+
+@mixin tag-input-form-theme($theme) {
+  display: inline;
+  vertical-align: middle;
+
+  border: map-get($theme, 'input-border');
+  padding: map-get($theme, 'input-padding');
+  height: map-get($theme, 'input-height');
+
+  font-size: map-get($theme, 'input-font-size');
+  font-family: map-get($theme, 'font-family');
+
+  &:focus {
+    outline: 0;
+  }
+
+  &[disabled='true'] {
+    opacity: 0.5;
+    background: #fff;
+  }
+}

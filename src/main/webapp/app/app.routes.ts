@@ -8,13 +8,18 @@ import { errorRoute } from './layouts/error/error.route';
 const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./home/home.component'),
-    title: 'home.title',
+    pathMatch: 'full',
+    redirectTo: 'note',
   },
   {
     path: '',
     loadComponent: () => import('./layouts/navbar/navbar.component'),
     outlet: 'navbar',
+  },
+  {
+    path: '',
+    loadComponent: () => import('./layouts/sidebar/sidebar.component'),
+    outlet: 'sidebar',
   },
   {
     path: 'admin',

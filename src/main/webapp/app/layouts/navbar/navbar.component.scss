@@ -1,13 +1,28 @@
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
+@import '../../../content/scss/bootstrap-variables';
 
 /* ==========================================================================
 Navbar
 ========================================================================== */
 
+.navbar-title {
+  white-space: unset;
+}
+
+.navbar-title-notice {
+  color: $secondary;
+  font-weight: bold;
+}
+
+.navbar-title-me {
+  color: $primary;
+  font-weight: bold;
+}
+
 .navbar-version {
   font-size: 0.65em;
-  color: $navbar-dark-color;
+  color: $navbar-light-color;
 }
 
 .profile-image {
@@ -15,8 +30,29 @@ Navbar
   width: 1.75em;
 }
 
+.navbar-toggler-sidebar {
+  padding: 0.25rem 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.15rem;
+  color: $primary;
+  transition: color 500ms;
+}
+
+.navbar-toggler-sidebar:hover {
+  color: darken($primary, 20%);
+}
+
 .navbar {
-  padding: 0.2rem 1rem;
+  padding: 0.2rem 0.25rem;
+  white-space: nowrap;
+  ul.navbar-nav {
+    .nav-item {
+      margin-left: 0.5em;
+    }
+  }
 
   a.nav-link {
     font-weight: 400;
@@ -27,10 +63,17 @@ Navbar
 Logo styles
 ========================================================================== */
 .logo-img {
-  height: 45px;
-  width: 45px;
+  height: 30px;
+  width: 30px;
   display: inline-block;
   vertical-align: middle;
-  background: url('/content/images/logo-jhipster.png') no-repeat center center;
+  background: url('../../../content/images/logo-noticeme.png') no-repeat center center;
   background-size: contain;
+}
+
+/*smaller screens*/
+@media (max-width: 768px) {
+  .nav-link span span {
+    display: none;
+  }
 }
