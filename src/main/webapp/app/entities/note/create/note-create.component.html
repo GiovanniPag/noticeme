@@ -1,0 +1,214 @@
+<div class="createform">
+  <form
+    #notecreateform
+    autocomplete="off"
+    name="createForm"
+    role="form"
+    novalidate
+    (ngSubmit)="closeAndSaveNote()"
+    [formGroup]="createForm"
+    (clickOutside)="closeAndSaveNote()"
+    [exclude]="'.click-outside-exclude'"
+    [excludeBeforeClick]="true"
+    [delayClickOutsideInit]="true"
+  >
+    <div class="modal-header d-flex">
+      <div class="form-group" [hidden]="true">
+        <input class="form-control" name="status" id="field_status" data-cy="status" formControlName="status" [readonly]="true" />
+      </div>
+
+      <div class="form-group mb-0 w-100">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="{{ 'noticeMeApp.note.placeholder.title' | translate }}"
+          name="title"
+          id="field_title"
+          #field_title
+          data-cy="title"
+          formControlName="title"
+          autocomplete="off"
+          maxlength="{{ maxTitleLength }}"
+        />
+      </div>
+      <div *ngIf="createForm.get('title')!.invalid && (createForm.get('title')!.dirty || createForm.get('title')!.touched)">
+        <small
+          class="form-text text-danger pl-3"
+          *ngIf="createForm.get('title')?.errors?.maxlength"
+          jhiTranslate="entity.validation.maxlength"
+          [translateValues]="{ max: 255 }"
+        >
+          This field cannot be longer than 255 characters.
+        </small>
+      </div>
+
+      <div class="btn-group" role="group" aria-label="pin group">
+        <button
+          [hidden]="this.status === allNoteStatus.PINNED"
+          type="button"
+          class="btn btn-light"
+          ngbTooltip="{{ 'noticeMeApp.note.toolbar.pin' | translate }}"
+          placement="top"
+          container="body"
+          (click)="pinNote()"
+        >
+          <fa-icon [icon]="['far', 'check-circle']"></fa-icon>
+        </button>
+        <button
+          [hidden]="this.status !== allNoteStatus.PINNED"
+          type="button"
+          class="btn btn-light"
+          ngbTooltip="{{ 'noticeMeApp.note.toolbar.unpin' | translate }}"
+          placement="top"
+          container="body"
+          (click)="unPinNote()"
+        >
+          <fa-icon icon="check-circle"></fa-icon>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group mb-0">
+        <textarea
+          jhiInputTextarea
+          class="form-control pb-0"
+          placeholder="{{ 'noticeMeApp.note.placeholder.content' | translate }}"
+          name="content"
+          id="field_content"
+          #field_content
+          data-cy="content"
+          formControlName="content"
+          maxlength="{{ maxContentLength }}"
+        ></textarea>
+      </div>
+
+      <div class="form-group mb-0 w-100">
+        <div class="form-group" [hidden]="true">
+          <input class="form-control" name="tags" id="field_tags" data-cy="tags" formControlName="tags" [readonly]="true" />
+        </div>
+        <jhi-tag-input
+          #tagInput
+          class="form-group mb-0 w-100"
+          [(ngModel)]="this.tags"
+          [ngModelOptions]="{ standalone: true }"
+          inputClass="w-100"
+          (ngModelChange)="modelChangeFn($event)"
+        >
+        </jhi-tag-input>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="btn-toolbar w-100 justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+        <div class="btn-group" role="group" aria-label="action group">
+          <button
+            type="button"
+            class="btn btn-light"
+            [ngClass]="{ 'invalid-red': createForm.get('alarmDate')?.errors }"
+            ngbTooltip="{{ 'noticeMeApp.note.toolbar.alarm' | translate }}"
+            container="body"
+            [ngbPopover]="popAlarmDate"
+            placement="top auto"
+            [autoClose]="'outside'"
+            #popoverAlarm="ngbPopover"
+            [popoverTitle]="popAlarmDateTitle"
+            popoverClass="click-outside-exclude"
+          >
+            <fa-icon [icon]="['far', 'bell']"></fa-icon>
+          </button>
+          <button
+            type="button"
+            class="btn btn-light"
+            [ngbPopover]="popCollaborator"
+            [autoClose]="'outside'"
+            #popoverAlarm="ngbPopover"
+            [popoverTitle]="popCollaboratorTitle"
+            popoverClass="click-outside-exclude"
+            ngbTooltip="{{ 'noticeMeApp.note.toolbar.collaborator' | translate }}"
+            placement="top auto"
+            container="body"
+          >
+            <fa-icon icon="user-plus"></fa-icon>
+          </button>
+          <button
+            type="button"
+            class="btn btn-light"
+            ngbTooltip="{{ 'noticeMeApp.note.toolbar.attachment' | translate }}"
+            placement="top"
+            container="body"
+          >
+            <fa-icon icon="link"></fa-icon>
+          </button>
+        </div>
+      </div>
+      <div class="btn-group" role="group" aria-label="save group">
+        <button type="submit" id="save-entity" data-cy="entitySaveButton" [disabled]="!canSubmit()" class="btn btn-primary">
+          <span jhiTranslate="entity.action.save">Save</span>
+        </button>
+      </div>
+    </div>
+    <ng-template #popAlarmDate>
+      <div>
+        <input
+          id="field_alarmDate"
+          data-cy="alarmDate"
+          type="datetime-local"
+          class="form-control"
+          name="alarmDate"
+          formControlName="alarmDate"
+          placeholder="YYYY-MM-DD HH:mm"
+          min="{{ minDate }}"
+        />
+        <div *ngIf="createForm.get('alarmDate')!.invalid && (createForm.get('alarmDate')!.dirty || createForm.get('alarmDate')!.touched)">
+          <small
+            class="form-text text-danger"
+            [hidden]="!createForm.get('alarmDate')?.errors?.invalidDate"
+            jhiTranslate="entity.validation.MinimumDate"
+          >
+            Alarm date is in the past
+          </small>
+          <small
+            class="form-text text-danger"
+            [hidden]="!createForm.get('alarmDate')?.errors?.ZonedDateTimelocal"
+            jhiTranslate="entity.validation.ZonedDateTimelocal"
+          >
+            This field should be a date and time.
+          </small>
+        </div>
+      </div>
+    </ng-template>
+    <ng-template #popAlarmDateTitle>
+      <div class="d-flex w-100 align-items-center justify-content-between">
+        <label class="h6 mb-0" jhiTranslate="noticeMeApp.note.toolbar.alarmdate" for="field_alarmDate">Alarm Date</label>
+        <button type="button" class="btn btn-light btn-sm" (click)="resetDate()">
+          <fa-icon icon="times"></fa-icon>
+        </button>
+      </div>
+    </ng-template>
+
+    <ng-template #popCollaborator>
+      <div>
+        <select
+          class="form-control"
+          id="field_collaborators"
+          data-cy="collaborator"
+          multiple
+          name="collaborators"
+          formControlName="collaborators"
+        >
+          <option
+            [ngValue]="getSelectedUser(userOption, createForm.get('collaborators')!.value)"
+            *ngFor="let userOption of usersSharedCollection; trackBy: trackUserById"
+          >
+            {{ userOption.login }}
+          </option>
+        </select>
+      </div>
+    </ng-template>
+    <ng-template #popCollaboratorTitle>
+      <div class="d-flex w-100 text-center">
+        <label class="h6 mb-0" jhiTranslate="noticeMeApp.note.collaborator" for="field_collaborators">Collaborator</label>
+      </div>
+    </ng-template>
+  </form>
+</div>

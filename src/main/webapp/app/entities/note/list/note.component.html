@@ -1,119 +1,153 @@
 <div>
+  <!-- Page Heading -->
   <h2 id="page-heading" data-cy="NoteHeading">
     <span jhiTranslate="noticeMeApp.note.home.title">Notes</span>
 
     <div class="d-flex justify-content-end">
-      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+      <button class="btn btn-info me-2" (click)="reset()" [disabled]="isLoading">
         <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
         <span jhiTranslate="noticeMeApp.note.home.refreshListLabel">Refresh list</span>
-      </button>
-
-      <button
-        id="jh-create-entity"
-        data-cy="entityCreateButton"
-        class="btn btn-primary jh-create-entity create-note"
-        [routerLink]="['/note/new']"
-      >
-        <fa-icon icon="plus"></fa-icon>
-        <span jhiTranslate="noticeMeApp.note.home.createLabel">Genera un nuovo Note</span>
       </button>
     </div>
   </h2>
 
-  <jhi-alert-error />
-
-  <jhi-alert />
-
-  @if (notes().length === 0) {
+<!-- Add Form -->
+@if(canShowCreate()){
+    <jhi-note-create (oncreate)="addNote($event)"></jhi-note-create>
+}
+<!-- No Result Warning -->
+  @if (pinnedNotes().length === 0 && otherNotes().length === 0) {
     <div class="alert alert-warning" id="no-result">
       <span jhiTranslate="noticeMeApp.note.home.notFound">No Notes found</span>
     </div>
   } @else {
-    <div class="table-responsive table-entities" id="entities">
-      <table class="table table-striped" aria-describedby="page-heading">
-        <thead>
-          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
-            <th scope="col" jhiSortBy="id">
-              <div class="d-flex">
-                <span jhiTranslate="global.field.id">ID</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
-            </th>
-            <th scope="col" jhiSortBy="title">
-              <div class="d-flex">
-                <span jhiTranslate="noticeMeApp.note.title">Title</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
-            </th>
-            <th scope="col" jhiSortBy="content">
-              <div class="d-flex">
-                <span jhiTranslate="noticeMeApp.note.content">Content</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
-            </th>
-            <th scope="col" jhiSortBy="alarmDate">
-              <div class="d-flex">
-                <span jhiTranslate="noticeMeApp.note.alarmDate">Alarm Date</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
-            </th>
-            <th scope="col" jhiSortBy="status">
-              <div class="d-flex">
-                <span jhiTranslate="noticeMeApp.note.status">Status</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
-            </th>
-            <th scope="col" jhiSortBy="owner.id">
-              <div class="d-flex">
-                <span jhiTranslate="noticeMeApp.note.owner">Owner</span>
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
-            </th>
-            <th scope="col"></th>
-          </tr>
-        </thead>
-        <tbody infinite-scroll (scrolled)="loadNextPage()" [infiniteScrollDisabled]="!hasMorePage()" [infiniteScrollDistance]="0">
-          @for (note of notes(); track trackId(note)) {
-            <tr data-cy="entityTable">
-              <td>
-                <a [routerLink]="['/note', note.id, 'view']">{{ note.id }}</a>
-              </td>
-              <td>{{ note.title }}</td>
-              <td>{{ note.content }}</td>
-              <td>{{ note.alarmDate | formatMediumDatetime }}</td>
-              <td [jhiTranslate]="'noticeMeApp.NoteStatus.' + (note.status ?? 'null')">
-                {{ { null: '', NORMAL: 'NORMAL', PINNED: 'PINNED', ARCHIVED: 'ARCHIVED', DELETED: 'DELETED' }[note.status ?? 'null'] }}
-              </td>
-              <td>
-                {{ note.owner?.id }}
-              </td>
-              <td class="text-end">
-                <div class="btn-group">
-                  <a [routerLink]="['/note', note.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
-                    <fa-icon icon="eye"></fa-icon>
-                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">Visualizza</span>
-                  </a>
-
-                  <a [routerLink]="['/note', note.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
-                    <fa-icon icon="pencil-alt"></fa-icon>
-                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Modifica</span>
-                  </a>
-
-                  <button type="submit" (click)="delete(note)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
-                    <fa-icon icon="times"></fa-icon>
-                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Elimina</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+    <!-- Notes Grid with Infinite Scroll -->
+    <div
+    id="entities"
+    infinite-scroll
+    (scrolled)="loadNextPage()"
+    [infiniteScrollDisabled]="!hasMorePage()"
+    [infiniteScrollDistance]="0"
+  >
+  <!-- Pinned Notes -->
+  @if(pinnedNotes().length > 0){
+  	<div class="grid-wrapper">
+        <label>
+          <span jhiTranslate="noticeMeApp.note.home.titlepinned">Pinned Notes</span>
+        </label>
+              <div
+        #gridPinned
+        id="gridPinned"
+        class="muuri-grid"
+        muuriGrid
+        [config]="layoutConfig"
+        (gridCreated)="onPinnedGridCreated($event)"
+        (resized)="onResized()"
+      >
+       @for(note of pinnedNotes();  track trackId(note)){
+       
+        <div
+          (mousedown)="onMouseDown($event)"
+          (click)="onClick($event, note)"
+          class="muuri-grid-item"
+          muuriGridItem
+        >
+          <div class="muuri-grid-item-content" (resized)="onResized()">
+            <div class="card-img-top">
+              <jhi-carousel-attach
+                [attachments]="note.attachments!"
+                [disableRemove]="true"
+                [showNavigationIndicators]="false"
+                [showNavigationArrows]="false"
+              ></jhi-carousel-attach>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">{{ note.title }}</h5>
+              <p class="card-text summary-text" ellipsis [ellipsis-content]="note.content ?? ''"></p>
+              <jhi-tag-input
+                #tagInput
+                class="form-group mb-0 w-100"
+                [(ngModel)]="note.tags"
+                [hideForm]="true"
+                [noteid]="note.id"
+                [disable]="note.status === allNoteStatus.DELETED"
+                (ngModelChange)="modelChangeFn($event, note)"
+              >
+              </jhi-tag-input>
+            </div>
+            <div class="card-footer">
+              <p class="card-text">
+                <small class="text-muted m-0" jhiTranslate="noticeMeApp.note.lastUpdateDate">lastUpdateDate</small>
+                <small class="text-muted m-0" [innerHTML]="getFormattedLastUpdateDate(note)"></small>
+              </p>
+            </div>
+          </div>
+        </div>
+       }
+      </div>
+ 	</div>
+    }
+     <!-- Other Notes -->
+      @if(otherNotes().length > 0){
+  	<div class="grid-wrapper">
+  	   @if(pinnedNotes().length > 0){
+        <label>
+          <span jhiTranslate="noticeMeApp.note.home.titleother">Other Notes</span>
+        </label>
+        }
+              <div
+        #gridOther
+        id="gridOther"
+        class="muuri-grid"
+        muuriGrid
+        [config]="layoutConfig"
+        (gridCreated)="onOtherGridCreated($event)"
+        (resized)="onResized()"
+      >
+       @for(note of otherNotes();  track trackId(note)){
+       
+        <div
+          (mousedown)="onMouseDown($event)"
+          (click)="onClick($event, note)"
+          class="muuri-grid-item"
+          muuriGridItem
+        >
+          <div class="muuri-grid-item-content" (resized)="onResized()">
+            <div class="card-img-top">
+              <jhi-carousel-attach
+                [attachments]="note.attachments!"
+                [disableRemove]="true"
+                [showNavigationIndicators]="false"
+                [showNavigationArrows]="false"
+              ></jhi-carousel-attach>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">{{ note.title }}</h5>
+              <p class="card-text summary-text" ellipsis [ellipsis-content]="note.content ?? ''"></p>
+              <jhi-tag-input
+                #tagInput
+                class="form-group mb-0 w-100"
+                [(ngModel)]="note.tags"
+                [hideForm]="true"
+                [noteid]="note.id"
+                [disable]="note.status === allNoteStatus.DELETED"
+                (ngModelChange)="modelChangeFn($event, note)"
+              >
+              </jhi-tag-input>
+            </div>
+            <div class="card-footer">
+              <p class="card-text">
+                <small class="text-muted m-0" jhiTranslate="noticeMeApp.note.lastUpdateDate">lastUpdateDate</small>
+                <small class="text-muted m-0" [innerHTML]="getFormattedLastUpdateDate(note)"></small>
+              </p>
+            </div>
+          </div>
+        </div>
+       }
+      </div>
+ 	</div>
+    }
   }
+  <jhi-alert-error />
+  <jhi-alert />
 </div>

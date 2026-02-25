@@ -15,7 +15,6 @@ export class jhiCarouselComponent {
   // signal inputs
   attachments = input.required<IAttachment[]>();
   disableRemove = input(false);
-  showControls = input(true);
   showNavigationArrows = input<boolean | undefined>(undefined);
   showNavigationIndicators = input<boolean | undefined>(undefined);
   // Modern signal outputs
