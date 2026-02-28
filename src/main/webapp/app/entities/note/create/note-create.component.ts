@@ -69,7 +69,7 @@ export class NoteCreateComponent implements OnInit, AfterViewInit {
     protected noteService: NoteService,
     protected userService: UserService,
     protected fb: FormBuilder,
-    protected alertService: AlertService
+    protected alertService: AlertService,
   ) {
     this.userService.getCurrent().subscribe((data: HttpResponse<IUser>) => (data.body ? (this.owner = data.body) : null));
   }
@@ -92,14 +92,14 @@ export class NoteCreateComponent implements OnInit, AfterViewInit {
       'warning.titlelength',
       this.createForm.get(['title'])!.value.length ?? 0,
       this.maxTitleLength,
-      this.alertMaxTitle
+      this.alertMaxTitle,
     );
     this.alertMaxContent = this.checkInputLenght(
       500,
       'warning.contentlength',
       this.createForm.get(['content'])!.value.length ?? 0,
       this.maxContentLength,
-      this.alertMaxContent
+      this.alertMaxContent,
     );
 
     this.loadRelationshipsOptions();
@@ -120,7 +120,7 @@ export class NoteCreateComponent implements OnInit, AfterViewInit {
     translationKey: string,
     currentLenght: number,
     maxLenght: number,
-    alertToDisplay: Alert | undefined
+    alertToDisplay: Alert | undefined,
   ): Alert | undefined {
     const remainingChar = maxLenght - currentLenght >= 0 ? maxLenght - currentLenght : 0;
     if (remainingChar <= limit) {
@@ -148,7 +148,7 @@ export class NoteCreateComponent implements OnInit, AfterViewInit {
         'warning.contentlength',
         elem.value.length,
         this.maxContentLength,
-        this.alertMaxContent
+        this.alertMaxContent,
       );
     }
   }
@@ -197,9 +197,7 @@ export class NoteCreateComponent implements OnInit, AfterViewInit {
   setFileData(event: Event, field: string, isImage: boolean): void {
     this.dataUtils.loadFileToForm(event, this.createForm, field, isImage).subscribe({
       error: (err: FileLoadError) =>
-        this.eventManager.broadcast(
-          new EventWithContent<AlertError>('noticeMeApp.error', { ...err, key: 'error.file.' + err.key })
-        ),
+        this.eventManager.broadcast(new EventWithContent<AlertError>('noticeMeApp.error', { ...err, key: 'error.file.' + err.key })),
     });
   }
 
@@ -261,7 +259,7 @@ export class NoteCreateComponent implements OnInit, AfterViewInit {
   protected subscribeToSaveResponse(result: Observable<HttpResponse<INote>>): void {
     result.pipe(finalize(() => this.onSaveFinalize())).subscribe(
       data => (data.body ? this.onSaveSuccess(data.body) : this.onSaveError()),
-      () => this.onSaveError()
+      () => this.onSaveError(),
     );
   }
 
@@ -284,8 +282,8 @@ export class NoteCreateComponent implements OnInit, AfterViewInit {
       .pipe(map((res: HttpResponse<IUser[]>) => res.body ?? []))
       .pipe(
         map((users: IUser[]) =>
-          this.userService.addUserToCollectionIfMissing(users, ...(this.createForm.get('collaborators')!.value ?? []))
-        )
+          this.userService.addUserToCollectionIfMissing(users, ...(this.createForm.get('collaborators')!.value ?? [])),
+        ),
       )
       .subscribe((users: IUser[]) => (this.usersSharedCollection = users));
   }

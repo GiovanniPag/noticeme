@@ -1,4 +1,15 @@
-import { Component, DestroyRef, takeUntilDestroyed, ChangeDetectionStrategy, NgZone, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  takeUntilDestroyed,
+  ChangeDetectionStrategy,
+  NgZone,
+  OnInit,
+  WritableSignal,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute, Data, ParamMap, Router, RouterModule } from '@angular/router';
 import { Observable, Subscription, combineLatest, filter, tap } from 'rxjs';
@@ -38,7 +49,17 @@ import Grid from 'muuri';
   styleUrls: ['../note.scss'],
   animations,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterModule, FormsModule, SharedModule, SortDirective, SortByDirective, FormatMediumDatetimePipe, InfiniteScrollDirective, jhiCarouselComponent, TagInputComponent,],
+  imports: [
+    RouterModule,
+    FormsModule,
+    SharedModule,
+    SortDirective,
+    SortByDirective,
+    FormatMediumDatetimePipe,
+    InfiniteScrollDirective,
+    jhiCarouselComponent,
+    TagInputComponent,
+  ],
 })
 export class NoteComponent implements OnInit {
   // ========================

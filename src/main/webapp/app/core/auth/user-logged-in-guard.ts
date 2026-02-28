@@ -8,7 +8,10 @@ import { Authority } from 'app/config/authority.constants';
 
 @Injectable({ providedIn: 'root' })
 export class LoggedInGuard implements CanActivate {
-  constructor(private router: Router, private accountService: AccountService) {}
+  constructor(
+    private router: Router,
+    private accountService: AccountService,
+  ) {}
 
   canActivate(): Observable<boolean> {
     return this.checkLogin();
@@ -28,7 +31,7 @@ export class LoggedInGuard implements CanActivate {
           }
         }
         return true;
-      })
+      }),
     );
   }
 }

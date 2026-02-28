@@ -34,9 +34,9 @@
 @if (hasErrors()) {
 <div [ngClass]="theme" class="error-messages">
   @for (error of errors(); track error.msg) {
-    <p class="error-message" jhitranslate="error">
-      <span [jhiTranslate]="error.msg" [translateValues]="error.translateValues"></span>
-    </p>
+  <p class="error-message" jhitranslate="error">
+    <span [jhiTranslate]="error.msg" [translateValues]="error.translateValues"></span>
+  </p>
   }
 </div>
 }
