@@ -15,7 +15,7 @@ const noteRoute: Routes = [
   },
   {
     path: ':id/view',
-    loadComponent: () => import('./detail/note-detail.component').then(m => m.NoteDetailComponent),
+    loadComponent: () => import('./list/note.component').then(m => m.NoteComponent),
     resolve: {
       note: NoteResolve,
     },
@@ -23,7 +23,7 @@ const noteRoute: Routes = [
   },
   {
     path: 'new',
-    loadComponent: () => import('./update/note-update.component').then(m => m.NoteUpdateComponent),
+    loadComponent: () => import('./list/note.component').then(m => m.NoteComponent),
     resolve: {
       note: NoteResolve,
     },
@@ -31,7 +31,7 @@ const noteRoute: Routes = [
   },
   {
     path: ':id/edit',
-    loadComponent: () => import('./update/note-update.component').then(m => m.NoteUpdateComponent),
+    loadComponent: () => import('./list/note.component').then(m => m.NoteComponent),
     resolve: {
       note: NoteResolve,
     },

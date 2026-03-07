@@ -16,7 +16,7 @@ h4 {
 
 /* Increase contrast of links to get 100% on Lighthouse Accessibility Audit. Override this color if you want to change the link color, or use a Bootswatch theme */
 a {
-  color: #533f03;
+  color: $gray-700;
   font-weight: bold;
 }
 
@@ -31,7 +31,7 @@ a:not([href]):not([tabindex]):hover.dropdown-item {
 }
 
 a:hover {
-  color: #533f03;
+  color: $gray-700;
   /* make sure browsers use the pointer cursor for anchors, even with no href */
   cursor: pointer;
 }
@@ -40,6 +40,9 @@ a:hover {
   color: $dropdown-link-hover-color;
 }
 
+.zindex-popover {
+  z-index: $zindex-popover;
+}
 /* ==========================================================================
 Browser Upgrade Prompt
 ========================================================================== */
@@ -68,7 +71,8 @@ Generic styles
 
 .jh-card {
   padding: 1.5%;
-  margin-top: 20px;
+  padding-top: 48px;
+  width: 100%;
   border: none;
 }
 
@@ -191,6 +195,32 @@ entity detail page css
   }
 }
 
+.border-top {
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.carousel .item {
+  overflow: hidden;
+}
+
+.item img {
+  max-height: 40vh !important;
+  min-width: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  object-position: center; // You can change this to bottom, right or left depending
+  // on the position you want.
+}
+
+.floating-tr {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 20;
+}
+
 /* ==========================================================================
 ui bootstrap tweaks
 ========================================================================== */
@@ -225,12 +255,10 @@ angular-cli removes postcss-rtl processed inline css, processed rules must be ad
   transform: rotate(-45deg);
 }
 
-/* navbar.component.scss */
-.navbar {
-  ul.navbar-nav {
-    .nav-item {
-      margin-left: 0.5em;
-    }
-  }
+.wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 100vh;
 }
 /* jhipster-needle-scss-add-main JHipster will add new css style */

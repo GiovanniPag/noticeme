@@ -12,6 +12,7 @@ import { AlertError } from './alert-error.model';
 @Component({
   selector: 'jhi-alert-error',
   templateUrl: './alert-error.component.html',
+  standalone: true,
   imports: [CommonModule, NgbModule],
 })
 export class AlertErrorComponent implements OnDestroy {

@@ -21,7 +21,10 @@
       "fileName": "File Name",
       "data": "Data",
       "fileSize": "File Size",
-      "note": "Note"
+      "note": "Note",
+      "tooltip": {
+        "delete": "Delete Attachment"
+      }
     }
   }
 }

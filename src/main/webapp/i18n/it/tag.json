@@ -19,9 +19,9 @@
       },
       "id": "ID",
       "tagName": "Tag Name",
-      "color": "Color",
-      "owner": "Owner",
-      "notes": "Notes"
+      "color": "Colore",
+      "owner": "Proprietario",
+      "notes": "Note"
     }
   }
 }

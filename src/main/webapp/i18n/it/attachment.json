@@ -2,26 +2,29 @@
   "noticeMeApp": {
     "attachment": {
       "home": {
-        "title": "Attachments",
-        "refreshListLabel": "Refresh list",
-        "createLabel": "Genera un nuovo Attachment",
-        "createOrEditLabel": "Genera o modifica un Attachment",
-        "notFound": "No Attachments found"
+        "title": "Allegati",
+        "refreshListLabel": "Ricarica lista",
+        "createLabel": "Genera un nuovo Allegato",
+        "createOrEditLabel": "Genera o modifica un Allegato",
+        "notFound": "Nessun Allegato trovato"
       },
-      "created": "&Egrave; stato generato un nuovo Attachment con identificatore {{ param }}",
-      "updated": "&Egrave; stato aggiornato Attachment identificato da {{ param }}",
-      "deleted": "&Egrave; stato eliminato Attachment con identificatore {{ param }}",
+      "created": "&Egrave; stato generato un nuovo Allegato con identificatore {{ param }}",
+      "updated": "&Egrave; stato aggiornato Allegato identificato da {{ param }}",
+      "deleted": "&Egrave; stato eliminato Allegato con identificatore {{ param }}",
       "delete": {
-        "question": "Sei sicuro di volere eliminare Attachment {{ id }}?"
+        "question": "Sei sicuro di volere eliminare Allegato {{ id }}?"
       },
       "detail": {
-        "title": "Attachment"
+        "title": "Allegato"
       },
       "id": "ID",
-      "fileName": "File Name",
+      "fileName": "Nome del file",
       "data": "Data",
-      "fileSize": "File Size",
+      "fileSize": "Dimesione del File",
       "note": "Note"
+	   "tooltip": {
+        	"delete": "Elimina Allegato"
+       }
     }
   }
 }

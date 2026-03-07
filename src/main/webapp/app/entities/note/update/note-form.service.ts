@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import dayjs from 'dayjs/esm';
-import { DATE_TIME_FORMAT } from 'app/config/input.constants';
+import { NoteStatus } from 'app/entities/enumerations/note-status.model';
+import { DATE_TIME_FORMAT, DATE_TIME_INPUT_FORMAT } from 'app/config/input.constants';
+import MinDateValidator from 'app/shared/date/min-date-validator.directive';
 import { INote, NewNote } from '../note.model';
 
 /**
@@ -27,7 +29,7 @@ type NoteFormRawValue = FormValueOf<INote>;
 
 type NewNoteFormRawValue = FormValueOf<NewNote>;
 
-type NoteFormDefaults = Pick<NewNote, 'id' | 'alarmDate' | 'tags'>;
+type NoteFormDefaults = Pick<NewNote, 'id' | 'title' | 'content' | 'alarmDate' | 'status' | 'tags'>;
 
 type NoteFormGroupContent = {
   id: FormControl<NoteFormRawValue['id'] | NewNote['id']>;
@@ -59,14 +61,16 @@ export class NoteFormService {
       title: new FormControl(noteRawValue.title, {
         validators: [Validators.maxLength(255)],
       }),
-      content: new FormControl(noteRawValue.content),
-      alarmDate: new FormControl(noteRawValue.alarmDate),
+      content: new FormControl(noteRawValue.content, {
+        validators: [Validators.maxLength(20000)],
+      }),
+      alarmDate: new FormControl(noteRawValue.alarmDate, {
+        validators: [MinDateValidator(dayjs().format(DATE_TIME_INPUT_FORMAT))],
+      }),
       status: new FormControl(noteRawValue.status, {
         validators: [Validators.required],
       }),
-      owner: new FormControl(noteRawValue.owner, {
-        validators: [Validators.required],
-      }),
+      owner: new FormControl(noteRawValue.owner),
       tags: new FormControl(noteRawValue.tags ?? []),
     });
   }
@@ -86,11 +90,12 @@ export class NoteFormService {
   }
 
   private getFormDefaults(): NoteFormDefaults {
-    const currentTime = dayjs();
-
     return {
       id: null,
-      alarmDate: currentTime,
+      title: '',
+      content: '',
+      alarmDate: null,
+      status: NoteStatus.NORMAL,
       tags: [],
     };
   }

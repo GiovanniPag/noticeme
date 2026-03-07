@@ -2,10 +2,10 @@
   "noticeMeApp": {
     "NoteStatus": {
       "null": "",
-      "NORMAL": "NORMAL",
-      "PINNED": "PINNED",
-      "ARCHIVED": "ARCHIVED",
-      "DELETED": "DELETED"
+      "NORMAL": "Normale",
+      "DELETED": "Eliminata",
+      "ARCHIVED": "Archiviata",
+      "PINNED": "Fissata"
     }
   }
 }

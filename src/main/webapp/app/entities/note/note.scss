@@ -1,0 +1,145 @@
+@use 'sass:color';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import '../../../content/scss/bootstrap-variables';
+
+/* ==========================================================================
+Note
+========================================================================== */
+
+.createform {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-width: 600px;
+  margin: 1.75rem auto;
+  position: relative;
+  width: 100%;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.75rem;
+}
+
+.grid-wrapper {
+  display: block;
+}
+
+.summary-text {
+  max-height: 33vh;
+  white-space: pre-wrap;
+}
+
+.muuri-grid {
+  position: relative;
+}
+
+.muuri-grid-item {
+  display: block;
+  position: absolute;
+  flex-direction: column;
+  word-wrap: break-word;
+  background-color: $white;
+  min-width: 18rem;
+  max-width: 18rem;
+  margin: 5px;
+  z-index: 1;
+  transition: box-shadow 0.3s;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.75rem;
+  &:hover {
+    box-shadow: 0 0 10px 0 $primary;
+  }
+}
+
+.muuri-grid-item.muuri-item-dragging {
+  z-index: 3;
+  box-shadow: 0 0 10px 5px $primary;
+}
+
+.muuri-grid-item.muuri-item-releasing {
+  z-index: 2;
+}
+
+.muuri-grid-item.muuri-item-hidden {
+  z-index: 0;
+}
+
+.muuri-grid-item-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.scrollable-modal {
+  all: inherit;
+  .form-control:focus {
+    border-color: none;
+    box-shadow: none;
+  }
+}
+
+.modal.modal-static .modal-dialog {
+  -webkit-transform: none !important;
+  transform: none !important;
+}
+
+.invalid-red {
+  color: color.adjust($red, $saturation: 30%);
+
+  &:hover,
+  &:focus {
+    color: color.adjust(color.adjust($red, $saturation: 30%), $lightness: -10%);
+  }
+}
+
+.note-detail-dialog,
+.createform {
+  .modal-content {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.75rem;
+  }
+  .modal-header {
+    all: unset;
+  }
+
+  #field_content {
+    overflow: hidden;
+    resize: none;
+  }
+
+  .modal-body {
+    all: unset;
+    overflow-y: auto;
+  }
+
+  .modal-footer {
+    all: unset;
+    display: flex;
+  }
+  #field_title {
+    font-size: 1.5rem;
+    font-weight: 400;
+    &.ng-invalid {
+      border-bottom-color: $red;
+    }
+  }
+
+  #upload_attach {
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+  }
+}
+
+.small-text {
+  color: color.adjust($secondary, $lightness: -20%);
+  font-weight: 300;
+  font-size: 0.8rem;
+}
+
+@media (min-width: 576px) {
+  .note-detail-dialog .modal-dialog {
+    max-width: 600px;
+  }
+}

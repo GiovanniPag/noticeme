@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 /**
  * Spring Data JPA repository for the NoteAccess entity.
  */
-@SuppressWarnings("unused")
 @Repository
 public interface NoteAccessRepository extends JpaRepository<NoteAccess, Long> {
     @Query("select noteAccess from NoteAccess noteAccess where noteAccess.user.login = ?#{authentication.name}")

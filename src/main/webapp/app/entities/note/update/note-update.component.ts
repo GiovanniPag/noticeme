@@ -22,6 +22,7 @@ import { NoteFormGroup, NoteFormService } from './note-form.service';
 @Component({
   selector: 'jhi-note-update',
   templateUrl: './note-update.component.html',
+  standalone: true,
   imports: [SharedModule, FormsModule, ReactiveFormsModule],
 })
 export class NoteUpdateComponent implements OnInit {

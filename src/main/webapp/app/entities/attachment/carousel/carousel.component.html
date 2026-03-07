@@ -1,0 +1,44 @@
+<ngb-carousel
+  #carousel
+  [interval]="5000"
+  [pauseOnHover]="pauseOnHover()"
+  [pauseOnFocus]="pauseOnFocus()"
+  class="carousel"
+  [showNavigationIndicators]="shouldShowIndicators()"
+  [showNavigationArrows]="shouldShowArrows()"
+>
+  @for (file of attachments(); track file.id) {
+    <ng-template ngbSlide>
+      <div class="attachment-wrapper text-center p-3 border-top">
+        @if (isImage(file)) {
+          <div class="img-wrapper item border-top">
+            <img [src]="fileUrl(file)" [alt]="file.fileName" class="img-fluid rounded" />
+          </div>
+        } @else {
+          <div class="file-preview">
+            <div class="fs-1"><fa-icon icon="file"></fa-icon></div>
+            <div>{{ file.fileName }}</div>
+          </div>
+        }
+      </div>
+      <!-- Floating actions -->
+      <div class="position-absolute top-0 end-0 m-2 d-flex gap-2">
+        <button type="button" class="btn btn-light btn-sm" (click)="downloadFile(file)">
+          <fa-icon icon="download"></fa-icon>
+        </button>
+        @if (!disableRemove()) {
+          <button
+            type="button"
+            class="btn btn-light"
+            ngbTooltip="{{ 'noticeMeApp.attachment.tooltip.delete' | translate }}"
+            placement="top auto"
+            container="body"
+            (click)="removeItem(file)"
+          >
+            <fa-icon icon="times"></fa-icon>
+          </button>
+        }
+      </div>
+    </ng-template>
+  }
+</ngb-carousel>

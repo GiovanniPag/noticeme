@@ -1,0 +1,25 @@
+<!-- form -->
+<form (ngSubmit)="submit()" [formGroup]="form">
+  <input
+    #tagInput
+    type="text"
+    class="ng2-tag-input__text-input"
+    autocomplete="off"
+    formControlName="tagName"
+    [ngClass]="inputClass()"
+    [attr.id]="inputId()"
+    [attr.placeholder]="placeholder()"
+    [attr.aria-label]="placeholder()"
+    [disabled]="disabled()"
+    (blur)="blurEvent.emit($event)"
+    (keydown)="onKeyDown($event)"
+    (keyup)="onKeyUp($event)"
+    #typeahead="ngbTypeahead"
+    [ngbTypeahead]="search"
+    container="body"
+    placement="auto"
+    popupClass="zindex-popover click-outside-exclude"
+  />
+  <!-- Color Picker -->
+  <input type="color" formControlName="color" [disabled]="disabled()" class="color-picker" />
+</form>

@@ -2,25 +2,25 @@
   "noticeMeApp": {
     "noteAccess": {
       "home": {
-        "title": "NoteAccesses",
-        "refreshListLabel": "Refresh list",
-        "createLabel": "Genera un nuovo Note Access",
-        "createOrEditLabel": "Genera o modifica un Note Access",
-        "notFound": "No Note Accesses found"
+        "title": "Accesso Note",
+        "refreshListLabel": "Ricarica lista",
+        "createLabel": "Genera un nuovo Accesso per la nota",
+        "createOrEditLabel": "Genera o modifica un Accesso per la nota",
+        "notFound": "Nessun Accesso per la nota trovato"
       },
-      "created": "&Egrave; stato generato un nuovo Note Access con identificatore {{ param }}",
-      "updated": "&Egrave; stato aggiornato Note Access identificato da {{ param }}",
-      "deleted": "&Egrave; stato eliminato Note Access con identificatore {{ param }}",
+      "created": "&Egrave; stato generato un nuovo Accesso per la nota con identificatore {{ param }}",
+      "updated": "&Egrave; stato aggiornato Accesso per la nota identificato da {{ param }}",
+      "deleted": "&Egrave; stato eliminato Accesso per la nota con identificatore {{ param }}",
       "delete": {
-        "question": "Sei sicuro di volere eliminare Note Access {{ id }}?"
+        "question": "Sei sicuro di volere eliminare Accesso per la nota {{ id }}?"
       },
       "detail": {
-        "title": "Note Access"
+        "title": "Accesso per la nota"
       },
       "id": "ID",
-      "role": "Role",
-      "note": "Note",
-      "user": "User"
+      "role": "Ruolo",
+      "note": "Nota",
+      "user": "Utente"
     }
   }
 }

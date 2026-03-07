@@ -24,7 +24,7 @@ public class NoteDTO implements Serializable {
     private String content;
 
     private Instant alarmDate;
-    
+
     private String createdBy;
 
     private Instant createdDate;
@@ -80,7 +80,7 @@ public class NoteDTO implements Serializable {
     public void setStatus(NoteStatus status) {
         this.status = status;
     }
-    
+
     public String getCreatedBy() {
         return createdBy;
     }
