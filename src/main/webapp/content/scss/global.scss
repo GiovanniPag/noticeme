@@ -255,12 +255,10 @@ angular-cli removes postcss-rtl processed inline css, processed rules must be ad
   transform: rotate(-45deg);
 }
 
-/* navbar.component.scss */
-.navbar {
-  ul.navbar-nav {
-    .nav-item {
-      margin-left: 0.5em;
-    }
-  }
+.wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 100vh;
 }
 /* jhipster-needle-scss-add-main JHipster will add new css style */

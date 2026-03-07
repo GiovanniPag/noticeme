@@ -3,37 +3,37 @@
     <ul class="sticky-top components navbar-nav mr-auto sidebar-list">
       <!-- jhipster-needle-add-element-to-menu - JHipster will add new menu items here -->
       <li class="nav-item pointer" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <a class="side-link" routerLink="note">
+        <a class="side-link" routerLink="/note">
           <fa-icon class="fa-fw" [icon]="['far', 'sticky-note']"></fa-icon>
           <span jhiTranslate="global.menu.sidebar.note">Note</span>
         </a>
       </li>
       <li class="nav-item pointer" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <a class="side-link" routerLink="note" [queryParams]="{ hasAlarm: 'true' }">
+        <a class="side-link" routerLink="/note" [queryParams]="{ hasAlarm: 'true' }">
           <fa-icon class="fa-fw" [icon]="['far', 'bell']"></fa-icon>
           <span jhiTranslate="global.menu.sidebar.alarm">Alarm</span>
         </a>
       </li>
       <li class="nav-item pointer" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <a class="side-link" routerLink="tag">
+        <a class="side-link" routerLink="/tag">
           <fa-icon class="fa-fw" [icon]="['far', 'bookmark']"></fa-icon>
           <span jhiTranslate="global.menu.sidebar.tags">Tags</span>
         </a>
       </li>
       <li class="nav-item pointer" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <a class="side-link" routerLink="note" [queryParams]="{ isCollaborator: 'true' }">
+        <a class="side-link" routerLink="/note" [queryParams]="{ isCollaborator: 'true' }">
           <fa-icon class="fa-fw" [icon]="['far', 'share-square']"></fa-icon>
           <span jhiTranslate="global.menu.sidebar.shared">Shared</span>
         </a>
       </li>
       <li class="nav-item pointer" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <a class="side-link" routerLink="note" [queryParams]="{ status: 'archived' }">
+        <a class="side-link" routerLink="/note" [queryParams]="{ status: 'archived' }">
           <fa-icon class="fa-fw" [icon]="['far', 'file-archive']"></fa-icon>
           <span jhiTranslate="global.menu.sidebar.archive">Archive</span>
         </a>
       </li>
       <li class="nav-item pointer" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <a class="side-link" routerLink="note" [queryParams]="{ status: 'deleted' }">
+        <a class="side-link" routerLink="/note" [queryParams]="{ status: 'deleted' }">
           <fa-icon class="fa-fw" [icon]="['far', 'trash-alt']"></fa-icon>
           <span jhiTranslate="global.menu.sidebar.trash">Trash</span>
         </a>
