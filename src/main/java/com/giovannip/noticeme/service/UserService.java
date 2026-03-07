@@ -180,6 +180,10 @@ public class UserService {
         return user;
     }
 
+    public Optional<User> getCurrentUser() {
+        return SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneByLogin);
+    }
+
     /**
      * Update all information for a specific user, and return the modified user.
      *

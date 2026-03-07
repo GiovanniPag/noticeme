@@ -11,144 +11,126 @@
     </div>
   </h2>
 
-<!-- Add Form -->
-@if (canShowCreate()) {
+  <!-- Add Form -->
+  @if (canShowCreate()) {
     <jhi-note-create (oncreate)="addNote($event)"></jhi-note-create>
-}
-<!-- No Result Warning -->
+  }
+  <!-- No Result Warning -->
   @if (pinnedNotes().length === 0 && otherNotes().length === 0) {
     <div class="alert alert-warning" id="no-result">
       <span jhiTranslate="noticeMeApp.note.home.notFound">No Notes found</span>
     </div>
   } @else {
     <!-- Notes Grid with Infinite Scroll -->
-    <div
-    id="entities"
-    infinite-scroll
-    (scrolled)="loadNextPage()"
-    [infiniteScrollDisabled]="!hasMorePage()"
-    [infiniteScrollDistance]="0"
-  >
-  <!-- Pinned Notes -->
-  @if (pinnedNotes().length > 0) {
-  	<div class="grid-wrapper">
-        <label>
-          <span jhiTranslate="noticeMeApp.note.home.titlepinned">Pinned Notes</span>
-        </label>
-              <div
-        #gridPinned
-        id="gridPinned"
-        class="muuri-grid"
-        jhiGrid
-        [config]="layoutConfig"
-        (gridCreated)="onPinnedGridCreated($event)"
-        (resized)="onResized()"
-      >
-       @for (note of pinnedNotes();  track trackId(note)) {
-       
-        <div
-          (mousedown)="onMouseDown($event)"
-          (click)="onClick($event, note)"
-          class="muuri-grid-item"
-          jhiGridItem
-        >
-          <div class="muuri-grid-item-content" (resized)="onResized()">
-            <div class="card-img-top">
-              <jhi-carousel-attachment
-                [attachments]="note.attachments!"
-                [disableRemove]="true"
-                [showNavigationIndicators]="false"
-                [showNavigationArrows]="false"
-              ></jhi-carousel-attachment>
-            </div>
-            <div class="card-body">
-              <h5 class="card-title">{{ note.title }}</h5>
-              <p class="card-text summary-text" jhiEllipsis [ellipsisContent]="note.content ?? ''"></p>
-              <jhi-tag-input
-                #tagInput
-                class="form-group mb-0 w-100"
-                [(ngModel)]="note.tags"
-                [hideForm]="true"
-                [noteid]="note.id"
-                [disabledInput]="note.status === allNoteStatus.DELETED"
-                (ngModelChange)="modelChangeFn($event, note)"
-              >
-              </jhi-tag-input>
-            </div>
-            <div class="card-footer">
-              <p class="card-text">
-                <small class="text-muted m-0" jhiTranslate="noticeMeApp.note.lastUpdateDate">lastUpdateDate</small>
-                <small class="text-muted m-0" [innerHTML]="getFormattedLastUpdateDate(note)"></small>
-              </p>
-            </div>
+    <div id="entities" infinite-scroll (scrolled)="loadNextPage()" [infiniteScrollDisabled]="!hasMorePage()" [infiniteScrollDistance]="0">
+      <!-- Pinned Notes -->
+      @if (pinnedNotes().length > 0) {
+        <div class="grid-wrapper">
+          <label>
+            <span jhiTranslate="noticeMeApp.note.home.titlepinned">Pinned Notes</span>
+          </label>
+          <div
+            #gridPinned
+            id="gridPinned"
+            class="muuri-grid"
+            jhiGrid
+            [config]="layoutConfig"
+            (gridCreated)="onPinnedGridCreated($event)"
+            (resized)="onResized()"
+          >
+            @for (note of pinnedNotes(); track trackId(note)) {
+              <div (mousedown)="onMouseDown($event)" (click)="onClick($event, note)" class="muuri-grid-item" jhiGridItem>
+                <div class="muuri-grid-item-content" (resized)="onResized()">
+                  <div class="card-img-top">
+                    <jhi-carousel-attachment
+                      [attachments]="note.attachments!"
+                      [disableRemove]="true"
+                      [showNavigationIndicators]="false"
+                      [showNavigationArrows]="false"
+                    ></jhi-carousel-attachment>
+                  </div>
+                  <div class="card-body">
+                    <h5 class="card-title">{{ note.title }}</h5>
+                    <p class="card-text summary-text" jhiEllipsis [ellipsisContent]="note.content ?? ''"></p>
+                    <jhi-tag-input
+                      #tagInput
+                      class="form-group mb-0 w-100"
+                      [(ngModel)]="note.tags"
+                      [hideForm]="true"
+                      [noteid]="note.id"
+                      [disabledInput]="note.status === allNoteStatus.DELETED"
+                      (ngModelChange)="modelChangeFn($event, note)"
+                    >
+                    </jhi-tag-input>
+                  </div>
+                  <div class="card-footer">
+                    <p class="card-text">
+                      <small class="text-muted m-0" jhiTranslate="noticeMeApp.note.lastModifiedDate">lastModifiedDate</small>
+                      <small class="text-muted m-0" [innerHTML]="getFormattedLastUpdateDate(note)"></small>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
-       }
-      </div>
- 	</div>
-    }
-     <!-- Other Notes -->
+      }
+      <!-- Other Notes -->
       @if (otherNotes().length > 0) {
-  	<div class="grid-wrapper">
-  	   @if (pinnedNotes().length > 0) {
-        <label>
-          <span jhiTranslate="noticeMeApp.note.home.titleother">Other Notes</span>
-        </label>
-        }
-              <div
-        #gridOther
-        id="gridOther"
-        class="muuri-grid"
-        jhiGrid
-        [config]="layoutConfig"
-        (gridCreated)="onOtherGridCreated($event)"
-        (resized)="onResized()"
-      >
-       @for (note of otherNotes();  track trackId(note)) {
-       
-        <div
-          (mousedown)="onMouseDown($event)"
-          (click)="onClick($event, note)"
-          class="muuri-grid-item"
-          jhiGridItem
-        >
-          <div class="muuri-grid-item-content" (resized)="onResized()">
-            <div class="card-img-top">
-              <jhi-carousel-attachment
-                [attachments]="note.attachments!"
-                [disableRemove]="true"
-                [showNavigationIndicators]="false"
-                [showNavigationArrows]="false"
-              ></jhi-carousel-attachment>
-            </div>
-            <div class="card-body">
-              <h5 class="card-title">{{ note.title }}</h5>
-              <p class="card-text summary-text" jhiEllipsis [ellipsisContent]="note.content ?? ''"></p>
-              <jhi-tag-input
-                #tagInput
-                class="form-group mb-0 w-100"
-                [(ngModel)]="note.tags"
-                [hideForm]="true"
-                [noteid]="note.id"
-                [disabledInput]="note.status === allNoteStatus.DELETED"
-                (ngModelChange)="modelChangeFn($event, note)"
-              >
-              </jhi-tag-input>
-            </div>
-            <div class="card-footer">
-              <p class="card-text">
-                <small class="text-muted m-0" jhiTranslate="noticeMeApp.note.lastUpdateDate">lastUpdateDate</small>
-                <small class="text-muted m-0" [innerHTML]="getFormattedLastUpdateDate(note)"></small>
-              </p>
-            </div>
+        <div class="grid-wrapper">
+          @if (pinnedNotes().length > 0) {
+            <label>
+              <span jhiTranslate="noticeMeApp.note.home.titleother">Other Notes</span>
+            </label>
+          }
+          <div
+            #gridOther
+            id="gridOther"
+            class="muuri-grid"
+            jhiGrid
+            [config]="layoutConfig"
+            (gridCreated)="onOtherGridCreated($event)"
+            (resized)="onResized()"
+          >
+            @for (note of otherNotes(); track trackId(note)) {
+              <div (mousedown)="onMouseDown($event)" (click)="onClick($event, note)" class="muuri-grid-item" jhiGridItem>
+                <div class="muuri-grid-item-content" (resized)="onResized()">
+                  <div class="card-img-top">
+                    <jhi-carousel-attachment
+                      [attachments]="note.attachments!"
+                      [disableRemove]="true"
+                      [showNavigationIndicators]="false"
+                      [showNavigationArrows]="false"
+                    ></jhi-carousel-attachment>
+                  </div>
+                  <div class="card-body">
+                    <h5 class="card-title">{{ note.title }}</h5>
+                    <p class="card-text summary-text" jhiEllipsis [ellipsisContent]="note.content ?? ''"></p>
+                    <jhi-tag-input
+                      #tagInput
+                      class="form-group mb-0 w-100"
+                      [(ngModel)]="note.tags"
+                      [hideForm]="true"
+                      [noteid]="note.id"
+                      [disabledInput]="note.status === allNoteStatus.DELETED"
+                      (ngModelChange)="modelChangeFn($event, note)"
+                    >
+                    </jhi-tag-input>
+                  </div>
+                  <div class="card-footer">
+                    <p class="card-text">
+                      <small class="text-muted m-0" jhiTranslate="noticeMeApp.note.lastModifiedDate">lastModifiedDate</small>
+                      <small class="text-muted m-0" [innerHTML]="getFormattedLastUpdateDate(note)"></small>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
-       }
-      </div>
- 	</div>
-    }
+      }
     </div>
   }
-  <jhi-alert-error/>
-  <jhi-alert/>
+  <jhi-alert-error />
+  <jhi-alert />
 </div>

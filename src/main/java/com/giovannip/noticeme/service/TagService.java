@@ -2,8 +2,14 @@ package com.giovannip.noticeme.service;
 
 import com.giovannip.noticeme.domain.Tag;
 import com.giovannip.noticeme.repository.TagRepository;
+import com.giovannip.noticeme.security.AuthoritiesConstants;
+import com.giovannip.noticeme.security.SecurityUtils;
 import com.giovannip.noticeme.service.dto.TagDTO;
 import com.giovannip.noticeme.service.mapper.TagMapper;
+import com.giovannip.noticeme.web.rest.errors.BadRequestAlertException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +28,13 @@ public class TagService {
     private static final Logger LOG = LoggerFactory.getLogger(TagService.class);
 
     private final TagRepository tagRepository;
-
+    private final UserService userService;
+    private static final String ENTITY_NAME = "tag";
     private final TagMapper tagMapper;
 
-    public TagService(TagRepository tagRepository, TagMapper tagMapper) {
+    public TagService(TagRepository tagRepository, TagMapper tagMapper, UserService userService) {
         this.tagRepository = tagRepository;
+        this.userService = userService;
         this.tagMapper = tagMapper;
     }
 
@@ -39,6 +47,12 @@ public class TagService {
     public TagDTO save(TagDTO tagDTO) {
         LOG.debug("Request to save Tag : {}", tagDTO);
         Tag tag = tagMapper.toEntity(tagDTO);
+        if (tag.getOwner() == null) {
+            userService.getCurrentUser().ifPresent(tag::setOwner);
+        }
+        if (tagRepository.existsByTagNameAndOwnerLogin(tag.getTagName(), tag.getOwner().getLogin())) {
+            throw new BadRequestAlertException("A new tag cannot have the same name of an existing one", ENTITY_NAME, "tagnameesxists");
+        }
         tag = tagRepository.save(tag);
         return tagMapper.toDto(tag);
     }
@@ -85,7 +99,11 @@ public class TagService {
     @Transactional(readOnly = true)
     public Page<TagDTO> findAll(Pageable pageable) {
         LOG.debug("Request to get all Tags");
-        return tagRepository.findAll(pageable).map(tagMapper::toDto);
+        if (SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN)) {
+            return tagRepository.findAll(pageable).map(tagMapper::toDto);
+        }
+        String login = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return tagRepository.findAllByOwnerLogin(login, pageable).map(tagMapper::toDto);
     }
 
     /**
@@ -97,7 +115,24 @@ public class TagService {
     @Transactional(readOnly = true)
     public Optional<TagDTO> findOne(Long id) {
         LOG.debug("Request to get Tag : {}", id);
-        return tagRepository.findById(id).map(tagMapper::toDto);
+        if (SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN)) {
+            return tagRepository.findById(id).map(tagMapper::toDto);
+        }
+        String login = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return tagRepository.findOneByIdAndOwnerLogin(id, login).map(tagMapper::toDto);
+    }
+
+    /**
+     * Get one tag by tagname.
+     *
+     * @param tagname the tagname of the entity.
+     * @return the entity.
+     */
+    @Transactional(readOnly = true)
+    public Optional<TagDTO> findOne(String tagname) {
+        LOG.debug("Request to get Tag : {}", tagname);
+        String login = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return tagRepository.findOneByTagNameAndOwnerLogin(tagname, login).map(tagMapper::toDto);
     }
 
     /**
@@ -108,5 +143,56 @@ public class TagService {
     public void delete(Long id) {
         LOG.debug("Request to delete Tag : {}", id);
         tagRepository.deleteById(id);
+    }
+
+    /**
+     * Get all the tags filtered.
+     *
+     * @param pageable the pagination information.
+     * @param
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<TagDTO> findFilterAll(Pageable pageable, String initial, String[] filterBy) {
+        LOG.debug("Request to get filtered Tags");
+
+        Collection<String> noteTags = filterBy == null ? Collections.emptyList() : Arrays.asList(filterBy);
+        Long ownerId = userService.getUserWithAuthorities().orElseThrow().getId();
+
+        if (noteTags.isEmpty()) {
+            return tagRepository
+                .findDistinctAllByOwnerIdAndTagNameStartingWithOrderByTagNameAsc(ownerId, initial, pageable)
+                .map(tagMapper::toDto);
+        }
+
+        return tagRepository
+            .findDistinctAllByOwnerIdAndTagNameNotInAndTagNameStartingWithOrderByTagNameAsc(ownerId, noteTags, initial, pageable)
+            .map(tagMapper::toDto);
+    }
+
+    /**
+     * Get all the tags filtered.
+     *
+     * @param pageable the pagination information.
+     * @param
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<TagDTO> findFilterAll(Pageable pageable, String initial, Long noteid) {
+        LOG.debug("Request to get filtered Tags");
+
+        Long ownerId = userService.getUserWithAuthorities().orElseThrow().getId();
+
+        Collection<String> noteTags = tagRepository.findDistinctAllByNotesId(noteid).stream().map(Tag::getTagName).toList();
+
+        if (noteTags.isEmpty()) {
+            return tagRepository
+                .findDistinctAllByOwnerIdAndTagNameStartingWithOrderByTagNameAsc(ownerId, initial, pageable)
+                .map(tagMapper::toDto);
+        }
+
+        return tagRepository
+            .findDistinctAllByOwnerIdAndTagNameNotInAndTagNameStartingWithOrderByTagNameAsc(ownerId, noteTags, initial, pageable)
+            .map(tagMapper::toDto);
     }
 }

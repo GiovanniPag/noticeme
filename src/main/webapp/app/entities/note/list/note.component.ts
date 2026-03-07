@@ -147,11 +147,13 @@ export class NoteComponent implements OnInit {
   onPinnedGridCreated(grid: Grid): void {
     this.gridPinned = grid;
     this.registerGridEvents(grid);
+    this.scheduleGridLayout(grid);
   }
 
   onOtherGridCreated(grid: Grid): void {
     this.gridOther = grid;
     this.registerGridEvents(grid);
+    this.scheduleGridLayout(grid);
   }
 
   registerGridEvents(grid: Grid): void {
@@ -247,6 +249,7 @@ export class NoteComponent implements OnInit {
   removeOne(id: number): void {
     this.pinnedNotes.update(list => list.filter(n => n.id !== id));
     this.otherNotes.update(list => list.filter(n => n.id !== id));
+    this.relayoutAll();
   }
 
   reset(): void {
@@ -265,6 +268,7 @@ export class NoteComponent implements OnInit {
     } else {
       this.otherNotes.update(notes => [...notes, note]);
     }
+    this.relayoutAll();
   }
   // ========================
   // Utilities
@@ -381,6 +385,7 @@ export class NoteComponent implements OnInit {
   protected onResponseSuccess(response: EntityArrayResponseType): void {
     this.fillComponentAttributesFromResponseHeader(response.headers);
     this.fillComponentAttributesFromResponseBody(response.body);
+    this.relayoutAll();
   }
 
   protected updateNote(data: INote | null): void {
@@ -409,6 +414,7 @@ export class NoteComponent implements OnInit {
         this.pinnedNotes.update(notes => [...notes, data]);
       }
     }
+    this.relayoutAll();
   }
 
   protected fillComponentAttributesFromResponseBody(data: INote[] | null): void {
@@ -442,5 +448,21 @@ export class NoteComponent implements OnInit {
     } else {
       this.links.set({});
     }
+  }
+
+  private scheduleGridLayout(grid?: Grid): void {
+    if (!grid) return;
+
+    // Aspetta che Angular abbia finito il render visivo.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        grid.refreshItems().layout();
+      });
+    });
+  }
+
+  private relayoutAll(): void {
+    this.scheduleGridLayout(this.gridPinned);
+    this.scheduleGridLayout(this.gridOther);
   }
 }
