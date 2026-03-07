@@ -12,20 +12,13 @@ export class MuuriGridDirective {
   private readonly elRef = inject(ElementRef<HTMLElement>);
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
-  private initialized = false;
 
   constructor() {
     // React to config changes (signal-based)
     effect(() => {
       const cfg = this.config();
-
-      if (!this.initialized) {
-        this.initialized = true;
-        this.createGrid(cfg);
-        return;
-      }
-      this.createGrid(cfg);
       this.destroyGrid();
+      this.createGrid(cfg);
     });
     // Cleanup
     this.destroyRef.onDestroy(() => {
@@ -38,8 +31,10 @@ export class MuuriGridDirective {
     const grid = this.grid();
     if (!grid) return [];
     const el = itemElRef.nativeElement;
-    const items = grid.add(el);
-    return items;
+    if (grid.getItem(el)) {
+      return [];
+    }
+    return grid.add(el);
   }
 
   removeItem(itemElRef: ElementRef): void {

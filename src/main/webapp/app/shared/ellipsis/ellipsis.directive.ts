@@ -4,7 +4,6 @@ import {
   DestroyRef,
   ElementRef,
   NgZone,
-  PLATFORM_ID,
   Renderer2,
   computed,
   effect,
@@ -13,7 +12,6 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 
 type ResizeStrategy = '' | 'manual' | 'resize-observer' | 'window';
 
@@ -49,10 +47,10 @@ export class EllipsisDirective implements AfterViewInit {
   private readonly renderer = inject(Renderer2);
   private readonly ngZone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly platformId = inject(PLATFORM_ID);
   // -----------------------
   // Internal state
   // -----------------------
+  private readonly domReady = signal(false);
   private elem!: HTMLElement;
   private innerElem!: HTMLDivElement;
   private moreAnchor!: HTMLAnchorElement;
@@ -62,7 +60,6 @@ export class EllipsisDirective implements AfterViewInit {
 
   private previousDimensions = { width: 0, height: 0 };
   private readonly initialDomText = signal<string>('');
-  private readonly viewReady = signal(false);
   // guard to prevent resize loops while measuring/applying
   private suppressResize = false;
 
@@ -79,8 +76,39 @@ export class EllipsisDirective implements AfterViewInit {
     return this.initialDomText();
   });
 
+  constructor() {
+    effect(() => {
+      if (!this.domReady()) return;
+      this.moreAnchor.textContent = this.normalizeEllipsis(this.ellipsis());
+    });
+
+    effect(() => {
+      if (!this.domReady()) return;
+
+      const strategy = this.resizeDetection();
+      this.detachResizeListener();
+      this.attachResizeListener(strategy);
+
+      if (strategy !== 'manual') {
+        this.applyEllipsis();
+      }
+    });
+
+    effect(() => {
+      if (!this.domReady()) return;
+
+      void this.originalText();
+      void this.boundaryRegexClass();
+      void this.ellipsisSubstrFn();
+      void this.ellipsis();
+
+      if (this.resizeDetection() !== 'manual') {
+        this.applyEllipsis();
+      }
+    });
+  }
+
   ngAfterViewInit(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
     this.elem = this.elementRef.nativeElement;
     this.initialDomText.set((this.elem.textContent ?? '').trim());
     // Setup wrapper + anchor
@@ -90,31 +118,9 @@ export class EllipsisDirective implements AfterViewInit {
       width: this.elem.clientWidth,
       height: this.elem.clientHeight,
     };
-    this.viewReady.set(true);
-    effect(() => {
-      if (!this.viewReady()) return;
-      this.moreAnchor.textContent = this.normalizeEllipsis(this.ellipsis());
-    });
-    effect(() => {
-      if (!this.viewReady()) return;
-      const strategy = this.resizeDetection();
-      this.detachResizeListener();
-      this.attachResizeListener(strategy);
-      if (strategy !== 'manual') this.applyEllipsis();
-    });
-    effect(() => {
-      if (!this.viewReady()) return;
-      // read dependencies
-      void this.originalText();
-      void this.boundaryRegexClass();
-      void this.ellipsisSubstrFn();
-      void this.ellipsis();
-      if (this.resizeDetection() !== 'manual') {
-        this.applyEllipsis();
-      }
-    });
     // Cleanup
     this.destroyRef.onDestroy(() => this.cleanupAll());
+    this.domReady.set(true);
     // Initial apply (if not manual)
     if (this.resizeDetection() !== 'manual') {
       this.applyEllipsis();
@@ -125,7 +131,7 @@ export class EllipsisDirective implements AfterViewInit {
   // Public API
   // -----------------------
   public applyEllipsis(): void {
-    if (!this.viewReady()) return;
+    if (!this.domReady()) return;
     this.suppressResize = true;
     const text = this.originalText();
     const maxLength = this.numericBinarySearch(text.length, curLength => {
@@ -226,34 +232,34 @@ export class EllipsisDirective implements AfterViewInit {
     const textTruncated = truncatedLength !== original.length;
     this.renderer.setProperty(this.innerElem, 'textContent', '');
 
-    if (textTruncated && !this.showMore()) {
-      text += this.normalizeEllipsis(this.ellipsis());
-    }
-    this.renderer.setProperty(this.innerElem, 'textContent', text);
+	// Remove any existing more click listener:
+	if (this.destroyMoreClickListener) {
+	  this.destroyMoreClickListener();
+	  this.destroyMoreClickListener = undefined;
+	}
 
-    if (textTruncated && this.showMore()) {
-      this.renderer.appendChild(this.innerElem, this.moreAnchor);
-    }
-    this.renderer.appendChild(this.innerElem, this.renderer.createText(text));
-    if (textTruncated && this.showMore()) {
-      this.moreAnchor.textContent = this.normalizeEllipsis(this.ellipsis());
-      this.renderer.appendChild(this.innerElem, this.moreAnchor);
-    }
-    // Remove any existing more click listener:
-    if (this.destroyMoreClickListener) {
-      this.destroyMoreClickListener();
-      this.destroyMoreClickListener = undefined;
-    }
-    // If the text has been truncated, add a more click listener:
-    if (addMoreListener && textTruncated && this.showMore()) {
-      this.destroyMoreClickListener = this.renderer.listen(this.moreAnchor, 'click', (e: MouseEvent) => {
-        e.preventDefault();
-        const target = e.target as HTMLElement | null;
-        if (!target?.classList.contains('ellipsis-more')) return;
-        this.moreClickEmitter.emit(e);
-      });
-    }
-    return truncatedLength;
+	if (!textTruncated) {
+	  this.renderer.appendChild(this.innerElem, this.renderer.createText(text));
+	  return truncatedLength;
+	}
+
+	if (this.showMore()) {
+	  this.renderer.appendChild(this.innerElem, this.renderer.createText(text));
+
+	  this.moreAnchor.textContent = this.normalizeEllipsis(this.ellipsis());
+	  this.renderer.appendChild(this.innerElem, this.moreAnchor);
+
+	  if (addMoreListener) {
+	    this.destroyMoreClickListener = this.renderer.listen(this.moreAnchor, 'click', (e: MouseEvent) => {
+	      e.preventDefault();
+	      this.moreClickEmitter.emit(e);
+	    });
+	  }
+	} else {
+	  const finalText = text + this.normalizeEllipsis(this.ellipsis());
+	  this.renderer.appendChild(this.innerElem, this.renderer.createText(finalText));
+	}
+	return truncatedLength;
   }
 
   private getTruncatedText(original: string, max: number): string {
@@ -293,7 +299,7 @@ export class EllipsisDirective implements AfterViewInit {
     let high = max;
     let best = -1;
     while (low <= high) {
-      const mid = Math.floor((high - low) / 2);
+      const mid = low + Math.floor((high - low) / 2);
       if (callback(mid)) {
         best = mid;
         low = mid + 1;

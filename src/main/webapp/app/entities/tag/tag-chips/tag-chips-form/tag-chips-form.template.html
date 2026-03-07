@@ -10,7 +10,6 @@
     [attr.id]="inputId()"
     [attr.placeholder]="placeholder()"
     [attr.aria-label]="placeholder()"
-    [disabled]="disabled()"
     (blur)="blurEvent.emit($event)"
     (keydown)="onKeyDown($event)"
     (keyup)="onKeyUp($event)"
@@ -21,5 +20,5 @@
     popupClass="zindex-popover click-outside-exclude"
   />
   <!-- Color Picker -->
-  <input type="color" formControlName="color" [disabled]="disabled()" class="color-picker" />
+  <input type="color" formControlName="color" class="color-picker" />
 </form>

@@ -40,9 +40,9 @@ export class TagInputComponent implements ControlValueAccessor {
   separatorKeys: string[] = default_tag_input.separatorKeyCodes;
   hideForm = input<boolean>(default_tag_input.hideForm);
   errorMessages = default_tag_input.errorMessages;
-  theme = default_tag_input.theme;
-  inputId = default_tag_input.inputId;
-  inputClass = default_tag_input.inputClass;
+  theme = input<string>(default_tag_input.theme);
+  inputId = input<string | null>(default_tag_input.inputId);
+  inputClass = input<string>(default_tag_input.inputClass);
   /* ------------------ Outputs ------------------ */
   tagAdded = output<ITag>();
   tagRemoved = output<ITag>();

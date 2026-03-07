@@ -30,7 +30,7 @@ import { DATE_TIME_FORMAT, DATE_TIME_INPUT_FORMAT } from 'app/config/input.const
   templateUrl: './note-create.component.html',
   styleUrls: ['../note.scss'],
   standalone: true,
-  imports: [SharedModule, FormsModule, ReactiveFormsModule, ClickOutsideDirective, InputTextareaDirective],
+  imports: [SharedModule, FormsModule, ReactiveFormsModule, ClickOutsideDirective, InputTextareaDirective, TagInputComponent],
 })
 export class NoteCreateComponent implements AfterViewInit {
   // output event
