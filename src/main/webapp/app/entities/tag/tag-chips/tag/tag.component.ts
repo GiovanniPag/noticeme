@@ -1,13 +1,14 @@
-import { Component, ChangeDetectionStrategy, input, output, computed, inject, signal, ElementRef } from '@angular/core';
+import { Component, input, output, computed, inject, signal, ElementRef } from '@angular/core';
 
 import { ITag } from 'app/entities/tag/tag.model';
+import SharedModule from 'app/shared/shared.module';
 
 @Component({
   selector: 'jhi-tag-chip',
   standalone: true,
   templateUrl: './tag.template.html',
   styleUrl: './tag-component.style.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SharedModule],
   host: {
     '[class.moving]': 'moving()',
     '[class.blink]': 'blinking()',

@@ -1,6 +1,7 @@
-@use '~bootstrap/scss/functions';
-@use '~bootstrap/scss/variables';
-@use '../../../content/scss/bootstrap-variables';
+@use 'sass:color';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import '../../../content/scss/bootstrap-variables';
 
 /* ==========================================================================
 Sidebar
@@ -27,7 +28,7 @@ Sidebar
       color: $white;
     }
     .side-link:hover {
-      background: darken($primary, 20%);
+      background: color.adjust($primary, $lightness: -20%);
     }
   }
 }

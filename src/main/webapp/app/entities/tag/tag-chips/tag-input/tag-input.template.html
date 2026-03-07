@@ -7,7 +7,7 @@
       [index]="i"
       [disabled]="disabled()"
       (removeTag)="removeTag(tag)"
-      (selectTag)="selectTag(i)"
+      (selectTag)="selectItem(i)"
       (keyDownTag)="onTagKeydown($event, i)"
       (blurTag)="onTagBlurred($event, i)"
     >
@@ -18,10 +18,10 @@
       #TagChipsFormComponent
       [disabled]="disabled()"
       [placeholder]="(tags().length ? placeholder() : secondaryPlaceholder()) | translate"
-      [noteid]="noteid()"
+      [noteId]="noteid()"
       [existingTags]="tags()"
-      [inputClass]="inputClass()"
-      [inputId]="inputId()"
+      [inputClass]="inputClass"
+      [inputId]="inputId"
       (submitTag)="addTagByName($event)"
       (blurEvent)="blur()"
       (keyDownEvent)="onInputKeydown($event)"
@@ -35,7 +35,7 @@
 <div [ngClass]="theme" class="error-messages">
   @for (error of errors(); track error.msg) {
   <p class="error-message" jhitranslate="error">
-    <span [jhiTranslate]="error.msg" [translateValues]="error.translateValues"></span>
+    <span jhiTranslate="error.msg" [translateValues]="error.translateValues"></span>
   </p>
   }
 </div>

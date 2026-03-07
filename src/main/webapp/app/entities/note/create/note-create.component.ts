@@ -1,191 +1,125 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
-import { Observable } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
+import { AfterViewInit, Component, ViewChild, computed, effect, inject, output, signal } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
+import { finalize, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
-import { INote, Note } from '../note.model';
-import { ITag } from 'app/entities/tag/tag.model';
+import dayjs from 'dayjs/esm';
+
+import { INote } from '../note.model';
 import { IUser } from 'app/entities/user/user.model';
-import { DataUtils, FileLoadError } from 'app/core/util/data-util.service';
-import { EventManager, EventWithContent } from 'app/core/util/event-manager.service';
-import { AlertError } from 'app/shared/alert/alert-error.model';
-import { AlertService, Alert } from 'app/core/util/alert.service';
-
-import { DATE_TIME_FORMAT, DATE_TIME_INPUT_FORMAT } from 'app/config/input.constants';
-import { UserService } from 'app/entities/user/user.service';
+import { UserService } from 'app/entities/user/service/user.service';
 import { NoteService } from '../service/note.service';
-import { FormBuilder, Validators } from '@angular/forms';
-import * as dayjs from 'dayjs';
 import { NoteStatus } from 'app/entities/enumerations/note-status.model';
-import { MinDateValidator } from 'app/shared/date/MinDateValidator.directive';
+import { NoteFormGroup, NoteFormService } from '../update/note-form.service';
 import { TagInputComponent } from 'app/entities/tag/tag-chips/tag-input/tag-input.component';
+
+import SharedModule from 'app/shared/shared.module';
+import { ClickOutsideDirective } from 'app/shared/outside/click-outside.directive';
+import { InputTextareaDirective } from 'app/shared/autosize/autotextarea.directive';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { AlertError } from 'app/shared/alert/alert-error.model';
+import { EventManager, EventWithContent } from 'app/core/util/event-manager.service';
+import { DataUtils, FileLoadError } from 'app/core/util/data-util.service';
+
+import { AlertService, Alert } from 'app/core/util/alert.service';
+import { DATE_TIME_FORMAT, DATE_TIME_INPUT_FORMAT } from 'app/config/input.constants';
 
 @Component({
   selector: 'jhi-note-create',
   templateUrl: './note-create.component.html',
   styleUrls: ['../note.scss'],
+  standalone: true,
+  imports: [SharedModule, FormsModule, ReactiveFormsModule, ClickOutsideDirective, InputTextareaDirective],
 })
-export class NoteCreateComponent implements OnInit, AfterViewInit {
-  /**
-   * @name onSubmit
-   */
-  @Output() public oncreate: EventEmitter<INote> = new EventEmitter();
-
-  @ViewChild('field_title') titleText!: ElementRef;
-  @ViewChild('field_content') contentText!: ElementRef;
-  @ViewChild('tagInput') tagInput!: TagInputComponent;
-
-  owner: IUser | undefined;
-  tags: ITag[] = [];
-  status = NoteStatus.NORMAL;
-  allNoteStatus = NoteStatus;
-
-  usersSharedCollection: IUser[] = [];
-
-  maxTagLength = 50;
-  maxTitleLength = 255;
-  maxContentLength = 20000;
-  minDate = dayjs().format(DATE_TIME_INPUT_FORMAT);
-
-  createForm = this.fb.group({
-    title: [null, [Validators.maxLength(255)]],
-    content: [null, [Validators.maxLength(20000)]],
-    alarmDate: [null, [MinDateValidator(this.minDate)]],
-    status: [null, [Validators.required]],
-    tags: [],
-    collaborators: [],
+export class NoteCreateComponent implements AfterViewInit {
+  // output event
+  readonly oncreate = output<INote>();
+  // constants
+  readonly maxTitleLength = 255;
+  readonly maxContentLength = 20000;
+  readonly minDate = dayjs().format(DATE_TIME_INPUT_FORMAT);
+  readonly noteStatusValues = Object.keys(NoteStatus);
+  // ----- Signals (component state) -----
+  readonly usersSharedCollection = signal<IUser[]>([]);
+  readonly isSaving = signal(false);
+  readonly selected = signal(false);
+  // ----- Alerts
+  readonly alerts = signal<Alert[]>([]);
+  readonly alertMaxTitle = signal<Alert | undefined>(undefined);
+  readonly alertMaxContent = signal<Alert | undefined>(undefined);
+  // ----- View refs -----
+  @ViewChild('tagInput') private readonly tagInput?: TagInputComponent;
+  // ----- Injects
+  private readonly dataUtils = inject(DataUtils);
+  private readonly eventManager = inject(EventManager);
+  private readonly noteService = inject(NoteService);
+  private readonly noteFormService = inject(NoteFormService);
+  private readonly userService = inject(UserService);
+  private readonly alertService = inject(AlertService);
+  // ---- FORM
+  readonly noteCreateForm: NoteFormGroup = this.noteFormService.createNoteFormGroup();
+  // ----- Derived state -----
+  private readonly hasValue = computed((): boolean => {
+    const title = (this.noteCreateForm.controls.title.value ?? '').trim();
+    const content = (this.noteCreateForm.controls.content.value ?? '').trim();
+    const alarmDate = this.noteCreateForm.controls.alarmDate.value;
+    const alarmValid = !!alarmDate && dayjs(alarmDate, DATE_TIME_FORMAT, true).isValid();
+    return title.length > 0 || content.length > 0 || alarmValid || (this.noteCreateForm.controls.tags.value?.length ?? 0) > 0;
   });
 
-  private alertMaxTitle?: Alert;
-  private alertMaxContent?: Alert;
-  private alerts: Alert[] = [];
+  readonly canSubmit = computed((): boolean => {
+    const alarmInvalid = this.noteCreateForm.controls.alarmDate.invalid;
+    const otherOk =
+      this.noteCreateForm.controls.status.valid && this.noteCreateForm.controls.title.valid && this.noteCreateForm.controls.content.valid;
+    const formOk = this.noteCreateForm.valid || (alarmInvalid && otherOk);
+    return formOk && !this.isSaving() && !this.selected() && this.hasValue();
+  });
 
-  private isSaving = false;
-  private selected = false;
+  constructor() {
+    this.alerts.set(this.alertService.get());
+    this.resetForm();
+    this.loadRelationshipsOptions();
+    // Live warning alerts (no DOM needed; just watch form controls)
+    effect(() => {
+      const titleLen = (this.noteCreateForm.controls.title.value ?? '').length;
+      const current = this.alertMaxTitle();
+      this.alertMaxTitle.set(this.checkInputLenght(100, 'warning.titlelength', titleLen, this.maxTitleLength, current));
+    });
 
-  constructor(
-    protected dataUtils: DataUtils,
-    protected eventManager: EventManager,
-    protected noteService: NoteService,
-    protected userService: UserService,
-    protected fb: FormBuilder,
-    protected alertService: AlertService,
-  ) {
-    this.userService.getCurrent().subscribe((data: HttpResponse<IUser>) => (data.body ? (this.owner = data.body) : null));
-  }
-
-  ngAfterViewInit(): void {
-    this.tagInput.inputForm!.popup.selectItem.subscribe(() => {
-      this.selected = true;
-      setTimeout(() => (this.selected = false), 10);
+    effect(() => {
+      const contentLen = (this.noteCreateForm.controls.content.value ?? '').length;
+      const current = this.alertMaxContent();
+      this.alertMaxContent.set(this.checkInputLenght(500, 'warning.contentlength', contentLen, this.maxContentLength, current));
     });
   }
 
-  ngOnInit(): void {
-    this.alerts = this.alertService.get();
-    this.resetForm();
-
-    this.usersSharedCollection = this.userService.addUserToCollectionIfMissing(this.usersSharedCollection);
-
-    this.alertMaxTitle = this.checkInputLenght(
-      100,
-      'warning.titlelength',
-      this.createForm.get(['title'])!.value.length ?? 0,
-      this.maxTitleLength,
-      this.alertMaxTitle,
-    );
-    this.alertMaxContent = this.checkInputLenght(
-      500,
-      'warning.contentlength',
-      this.createForm.get(['content'])!.value.length ?? 0,
-      this.maxContentLength,
-      this.alertMaxContent,
-    );
-
-    this.loadRelationshipsOptions();
+  ngAfterViewInit(): void {
+    const popup = this.tagInput?.inputForm?.popup;
+    popup?.selectItem.subscribe(() => {
+      this.selected.set(true);
+      setTimeout(() => this.selected.set(false), 10);
+    });
   }
 
+  // ----- UI actions -----
   closeAndSaveNote(): void {
-    if (this.canSubmit()) {
-      this.save();
-    }
+    if (this.canSubmit()) this.save();
   }
 
-  addWarningAlert(translationKey?: string, translationParams?: { [key: string]: unknown }): Alert {
-    return this.alertService.addAlert({ type: 'warning', timeout: 0, translationKey, translationParams }, this.alerts);
+  unPinNote(): void {
+    this.noteCreateForm.controls.status.setValue(NoteStatus.NORMAL);
   }
 
-  checkInputLenght(
-    limit: number,
-    translationKey: string,
-    currentLenght: number,
-    maxLenght: number,
-    alertToDisplay: Alert | undefined,
-  ): Alert | undefined {
-    const remainingChar = maxLenght - currentLenght >= 0 ? maxLenght - currentLenght : 0;
-    if (remainingChar <= limit) {
-      if (!alertToDisplay || alertToDisplay.closed === true) {
-        alertToDisplay = this.addWarningAlert(translationKey, { remainingCharachters: remainingChar });
-      } else {
-        alertToDisplay.translationParams!.remainingCharachters = remainingChar;
-        this.alertService.translateDynamicMessage(alertToDisplay);
-      }
-    } else {
-      if (alertToDisplay?.closed === false) {
-        alertToDisplay.close?.(this.alerts);
-      }
-    }
-    return alertToDisplay;
+  pinNote(): void {
+    this.noteCreateForm.controls.status.setValue(NoteStatus.PINNED);
   }
 
-  pushAlert(elem: HTMLInputElement | undefined): void {
-    if (elem && elem === this.titleText.nativeElement) {
-      this.alertMaxTitle = this.checkInputLenght(100, 'warning.titlelength', elem.value.length, this.maxTitleLength, this.alertMaxTitle);
-    }
-    if (elem && elem === this.contentText.nativeElement) {
-      this.alertMaxContent = this.checkInputLenght(
-        500,
-        'warning.contentlength',
-        elem.value.length,
-        this.maxContentLength,
-        this.alertMaxContent,
-      );
-    }
+  resetDate(): void {
+    this.noteCreateForm.controls.alarmDate.reset(null);
   }
 
-  save(): void {
-    this.isSaving = true;
-    const note = this.createFromForm();
-    if (note.id === undefined) {
-      this.subscribeToSaveResponse(this.noteService.create(note));
-    }
-  }
-
-  getSelectedUser(option: IUser, selectedVals?: IUser[]): IUser {
-    if (selectedVals) {
-      for (const selectedVal of selectedVals) {
-        if (option.id === selectedVal.id) {
-          return selectedVal;
-        }
-      }
-    }
-    return option;
-  }
-
-  trackUserById(index: number, item: IUser): number {
-    return item.id!;
-  }
-
-  resetForm(): void {
-    if (this.alertMaxTitle?.closed === false) {
-      this.alertMaxTitle.close?.(this.alerts);
-    }
-    if (this.alertMaxContent?.closed === false) {
-      this.alertMaxContent.close?.(this.alerts);
-    }
-    this.emptyForm();
-  }
-
+  // ----- File helpers -----
   byteSize(base64String: string): string {
     return this.dataUtils.byteSize(base64String);
   }
@@ -195,52 +129,28 @@ export class NoteCreateComponent implements OnInit, AfterViewInit {
   }
 
   setFileData(event: Event, field: string, isImage: boolean): void {
-    this.dataUtils.loadFileToForm(event, this.createForm, field, isImage).subscribe({
+    this.dataUtils.loadFileToForm(event, this.noteCreateForm, field, isImage).subscribe({
       error: (err: FileLoadError) =>
         this.eventManager.broadcast(new EventWithContent<AlertError>('noticeMeApp.error', { ...err, key: 'error.file.' + err.key })),
     });
   }
 
-  unPinNote(): void {
-    this.status = NoteStatus.NORMAL;
-    this.createForm.patchValue({ status: NoteStatus.NORMAL });
+  // ----- Save flow -----
+  save(): void {
+    this.isSaving.set(true);
+    const note = this.noteFormService.getNote(this.noteCreateForm);
+    if (note.id === null) {
+      this.subscribeToSaveResponse(this.noteService.create(note));
+      return;
+    }
+    this.isSaving.set(false);
   }
 
-  pinNote(): void {
-    this.status = NoteStatus.PINNED;
-    this.createForm.patchValue({ status: NoteStatus.PINNED });
-  }
-
-  canSubmit(): boolean {
-    return (
-      (this.createForm.valid ||
-        (this.createForm.get('alarmDate')!.invalid &&
-          this.createForm.get('status')!.valid &&
-          this.createForm.get('title')!.valid &&
-          this.createForm.get('content')!.valid &&
-          this.createForm.get('owner')!.valid)) &&
-      !this.isSaving &&
-      !this.selected &&
-      this.hasValue()
-    );
-  }
-
-  hasValue(): boolean {
-    return (
-      this.createForm.get(['title'])!.value.trim().length > 0 ||
-      this.createForm.get(['content'])!.value.trim().length > 0 ||
-      dayjs(this.createForm.get(['alarmDate'])!.value, DATE_TIME_FORMAT).isValid() ||
-      this.tags.length > 0
-    );
-  }
-
-  resetDate(): void {
-    this.createForm.get('alarmDate')!.reset();
-  }
-
-  public modelChangeFn($event: ITag[]): void {
-    this.tags = $event;
-    this.createForm.patchValue({ tags: this.tags });
+  protected subscribeToSaveResponse(result: Observable<HttpResponse<INote>>): void {
+    result.pipe(finalize(() => this.onSaveFinalize())).subscribe({
+      next: res => (res.body ? this.onSaveSuccess(res.body) : this.onSaveError()),
+      error: () => this.onSaveError(),
+    });
   }
 
   protected onSaveSuccess(newNote: INote): void {
@@ -253,55 +163,55 @@ export class NoteCreateComponent implements OnInit, AfterViewInit {
   }
 
   protected onSaveFinalize(): void {
-    this.isSaving = false;
+    this.isSaving.set(false);
   }
 
-  protected subscribeToSaveResponse(result: Observable<HttpResponse<INote>>): void {
-    result.pipe(finalize(() => this.onSaveFinalize())).subscribe(
-      data => (data.body ? this.onSaveSuccess(data.body) : this.onSaveError()),
-      () => this.onSaveError(),
-    );
+  // ----- Alerts -----
+  private addWarningAlert(translationKey?: string, translationParams?: Record<string, unknown>): Alert {
+    return this.alertService.addAlert({ type: 'warning', timeout: 0, translationKey, translationParams }, this.alerts());
   }
 
-  protected emptyForm(): void {
-    this.tags = [];
-    this.status = NoteStatus.NORMAL;
-    this.createForm.patchValue({
-      title: '',
-      content: '',
-      alarmDate: null,
-      status: this.status,
-      tags: this.tags,
-      collaborators: null,
-    });
+  private checkInputLenght(
+    limit: number,
+    translationKey: string,
+    currentLength: number,
+    maxLength: number,
+    alertToDisplay: Alert | undefined,
+  ): Alert | undefined {
+    const remaining = Math.max(0, maxLength - currentLength);
+    if (remaining <= limit) {
+      if (!alertToDisplay || alertToDisplay.closed === true) {
+        alertToDisplay = this.addWarningAlert(translationKey, { remainingCharachters: remaining });
+      } else {
+        alertToDisplay.translationParams!.remainingCharachters = remaining;
+        this.alertService.translateDynamicMessage(alertToDisplay);
+      }
+    } else {
+      if (alertToDisplay?.closed === false) {
+        alertToDisplay.close?.(this.alerts());
+      }
+    }
+    return alertToDisplay;
   }
 
-  protected loadRelationshipsOptions(): void {
+  // ----- Form helpers -----
+  private resetForm(): void {
+    const a1 = this.alertMaxTitle();
+    if (a1?.closed === false) a1.close?.(this.alerts());
+    const a2 = this.alertMaxContent();
+    if (a2?.closed === false) a2.close?.(this.alerts());
+    this.noteFormService.resetForm(this.noteCreateForm, { id: null });
+  }
+
+  private loadRelationshipsOptions(): void {
     this.userService
       .query()
       .pipe(map((res: HttpResponse<IUser[]>) => res.body ?? []))
-      .pipe(
-        map((users: IUser[]) =>
-          this.userService.addUserToCollectionIfMissing(users, ...(this.createForm.get('collaborators')!.value ?? [])),
-        ),
-      )
-      .subscribe((users: IUser[]) => (this.usersSharedCollection = users));
+      .pipe(map((users: IUser[]) => this.userService.addUserToCollectionIfMissing<IUser>(users)))
+      .subscribe((users: IUser[]) => this.usersSharedCollection.set(users));
   }
 
-  protected createFromForm(): INote {
-    if (this.createForm.get(['tags'])!.value !== this.tags) {
-      this.createForm.patchValue({ tags: this.tags });
-    }
-    return {
-      ...new Note(),
-      title: this.createForm.get(['title'])!.value,
-      content: this.createForm.get(['content'])!.value,
-      lastUpdateDate: dayjs(dayjs(), DATE_TIME_FORMAT),
-      alarmDate: this.createForm.get(['alarmDate'])!.valid ? dayjs(this.createForm.get(['alarmDate'])!.value, DATE_TIME_FORMAT) : undefined,
-      status: this.createForm.get(['status'])!.value,
-      owner: this.owner,
-      tags: this.createForm.get(['tags'])!.value ?? [],
-      collaborators: this.createForm.get(['collaborators'])!.value,
-    };
+  getSelectedUser(option: IUser, selectedVals?: IUser[] | null): IUser {
+    return selectedVals?.find(v => v.id === option.id) ?? option;
   }
 }

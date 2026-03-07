@@ -1,3 +1,4 @@
+@use 'sass:color';
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import '../../../content/scss/bootstrap-variables';
@@ -84,11 +85,11 @@ Note
 }
 
 .invalid-red {
-  color: saturate($red, 30);
+  color: color.adjust($red, $saturation: 30%);
 
   &:hover,
   &:focus {
-    color: darken(saturate($red, 30), 10);
+    color: color.adjust(color.adjust($red, $saturation: 30%), $lightness: -10%);
   }
 }
 
@@ -132,7 +133,7 @@ Note
 }
 
 .small-text {
-  color: darken($secondary, 20);
+  color: color.adjust($secondary, $lightness: -20%);
   font-weight: 300;
   font-size: 0.8rem;
 }

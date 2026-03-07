@@ -5,14 +5,14 @@
 
     <div class="d-flex justify-content-end">
       <button class="btn btn-info me-2" (click)="reset()" [disabled]="isLoading">
-        <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
+        <fa-icon icon="sync" [animation]="isLoading() ? 'spin' : undefined"></fa-icon>
         <span jhiTranslate="noticeMeApp.note.home.refreshListLabel">Refresh list</span>
       </button>
     </div>
   </h2>
 
 <!-- Add Form -->
-@if(canShowCreate()){
+@if (canShowCreate()) {
     <jhi-note-create (oncreate)="addNote($event)"></jhi-note-create>
 }
 <!-- No Result Warning -->
@@ -30,7 +30,7 @@
     [infiniteScrollDistance]="0"
   >
   <!-- Pinned Notes -->
-  @if(pinnedNotes().length > 0){
+  @if (pinnedNotes().length > 0) {
   	<div class="grid-wrapper">
         <label>
           <span jhiTranslate="noticeMeApp.note.home.titlepinned">Pinned Notes</span>
@@ -39,38 +39,38 @@
         #gridPinned
         id="gridPinned"
         class="muuri-grid"
-        muuriGrid
+        jhiGrid
         [config]="layoutConfig"
         (gridCreated)="onPinnedGridCreated($event)"
         (resized)="onResized()"
       >
-       @for(note of pinnedNotes();  track trackId(note)){
+       @for (note of pinnedNotes();  track trackId(note)) {
        
         <div
           (mousedown)="onMouseDown($event)"
           (click)="onClick($event, note)"
           class="muuri-grid-item"
-          muuriGridItem
+          jhiGridItem
         >
           <div class="muuri-grid-item-content" (resized)="onResized()">
             <div class="card-img-top">
-              <jhi-carousel-attach
+              <jhi-carousel-attachment
                 [attachments]="note.attachments!"
                 [disableRemove]="true"
                 [showNavigationIndicators]="false"
                 [showNavigationArrows]="false"
-              ></jhi-carousel-attach>
+              ></jhi-carousel-attachment>
             </div>
             <div class="card-body">
               <h5 class="card-title">{{ note.title }}</h5>
-              <p class="card-text summary-text" ellipsis [ellipsis-content]="note.content ?? ''"></p>
+              <p class="card-text summary-text" jhiEllipsis [ellipsisContent]="note.content ?? ''"></p>
               <jhi-tag-input
                 #tagInput
                 class="form-group mb-0 w-100"
                 [(ngModel)]="note.tags"
                 [hideForm]="true"
                 [noteid]="note.id"
-                [disable]="note.status === allNoteStatus.DELETED"
+                [disabledInput]="note.status === allNoteStatus.DELETED"
                 (ngModelChange)="modelChangeFn($event, note)"
               >
               </jhi-tag-input>
@@ -88,9 +88,9 @@
  	</div>
     }
      <!-- Other Notes -->
-      @if(otherNotes().length > 0){
+      @if (otherNotes().length > 0) {
   	<div class="grid-wrapper">
-  	   @if(pinnedNotes().length > 0){
+  	   @if (pinnedNotes().length > 0) {
         <label>
           <span jhiTranslate="noticeMeApp.note.home.titleother">Other Notes</span>
         </label>
@@ -99,38 +99,38 @@
         #gridOther
         id="gridOther"
         class="muuri-grid"
-        muuriGrid
+        jhiGrid
         [config]="layoutConfig"
         (gridCreated)="onOtherGridCreated($event)"
         (resized)="onResized()"
       >
-       @for(note of otherNotes();  track trackId(note)){
+       @for (note of otherNotes();  track trackId(note)) {
        
         <div
           (mousedown)="onMouseDown($event)"
           (click)="onClick($event, note)"
           class="muuri-grid-item"
-          muuriGridItem
+          jhiGridItem
         >
           <div class="muuri-grid-item-content" (resized)="onResized()">
             <div class="card-img-top">
-              <jhi-carousel-attach
+              <jhi-carousel-attachment
                 [attachments]="note.attachments!"
                 [disableRemove]="true"
                 [showNavigationIndicators]="false"
                 [showNavigationArrows]="false"
-              ></jhi-carousel-attach>
+              ></jhi-carousel-attachment>
             </div>
             <div class="card-body">
               <h5 class="card-title">{{ note.title }}</h5>
-              <p class="card-text summary-text" ellipsis [ellipsis-content]="note.content ?? ''"></p>
+              <p class="card-text summary-text" jhiEllipsis [ellipsisContent]="note.content ?? ''"></p>
               <jhi-tag-input
                 #tagInput
                 class="form-group mb-0 w-100"
                 [(ngModel)]="note.tags"
                 [hideForm]="true"
                 [noteid]="note.id"
-                [disable]="note.status === allNoteStatus.DELETED"
+                [disabledInput]="note.status === allNoteStatus.DELETED"
                 (ngModelChange)="modelChangeFn($event, note)"
               >
               </jhi-tag-input>
@@ -147,7 +147,8 @@
       </div>
  	</div>
     }
+    </div>
   }
-  <jhi-alert-error />
-  <jhi-alert />
+  <jhi-alert-error/>
+  <jhi-alert/>
 </div>

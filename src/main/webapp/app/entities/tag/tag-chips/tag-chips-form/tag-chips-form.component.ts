@@ -1,20 +1,20 @@
-import { Component, ViewChild, ChangeDetectionStrategy, ElementRef, input, output, inject, signal, computed, effect } from '@angular/core';
+import { Component, ViewChild, ElementRef, input, output, inject, signal, computed, effect } from '@angular/core';
 import { NonNullableFormBuilder, Validators, ValidatorFn, AbstractControl, ValidationErrors, ReactiveFormsModule } from '@angular/forms';
-import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbTypeaheadModule, NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 import { HttpResponse } from '@angular/common/http';
 import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { Observable, OperatorFunction, of } from 'rxjs';
 
 import { TagService } from '../../service/tag.service';
 import { ITag } from '../../tag.model';
+import SharedModule from 'app/shared/shared.module';
 
 @Component({
   selector: 'jhi-tag-chips-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgbTypeaheadModule],
+  imports: [ReactiveFormsModule, NgbTypeaheadModule, SharedModule],
   styleUrls: ['./tag-chips-form.style.scss'],
   templateUrl: './tag-chips-form.template.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TagChipsFormComponent {
   /* ==========================================================
@@ -36,6 +36,7 @@ export class TagChipsFormComponent {
   /* ==========================================================
    * Dependencies
    * ========================================================== */
+  @ViewChild('typeahead') public popup!: NgbTypeahead;
   @ViewChild('tagInput', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   readonly searching = signal(false);
   readonly hasErrors = computed(() => this.tagNameControl.invalid && this.tagNameControl.dirty);
@@ -158,7 +159,7 @@ export class TagChipsFormComponent {
    * ========================================================== */
   getErrorMessages(
     messages: Record<string, { msg: string; translateValues?: Record<string, unknown> }>,
-  ): Record<string, { msg: string; translateValues?: Record<string, unknown> }> {
+  ): { msg: string; translateValues?: Record<string, unknown> }[] {
     return Object.keys(messages)
       .filter(err => this.tagNameControl.hasError(err))
       .map(err => messages[err]);

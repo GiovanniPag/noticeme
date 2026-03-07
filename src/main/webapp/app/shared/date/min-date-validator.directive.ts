@@ -1,6 +1,6 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { DATE_TIME_FORMAT } from 'app/config/input.constants';
-import dayjs from 'dayjs/esm';
+import dayjs, { Dayjs } from 'dayjs/esm';
 
 export default function MinDateValidator(minDate: string | Date): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {

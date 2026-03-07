@@ -1,7 +1,8 @@
 // CORE
-@use 'bootstrap/scss/functions';
-@use 'bootstrap/scss/variables';
-@use '../../../content/scss/bootstrap-variables';
+@use 'sass:color';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import '../../../content/scss/bootstrap-variables';
 
 // THEME
 // minimal container-border-bottom: 1px solid transparent,
@@ -36,8 +37,8 @@ $noticeme-tag-theme: (
   line-height: $tag-line-height,
   background: $color-primary-noticeme,
   background-focused: $color-focused-noticeme,
-  background-active: darken($color-focused-noticeme, 5%),
-  background-hover: darken($color-primary-noticeme, 5%),
+  background-active: color.adjust($color-focused-noticeme, $lightness: -5%),
+  background-hover: color.adjust($color-primary-noticeme, $lightness: -5%),
   background-editing: #fff,
   border-editing: 1px solid #ccc,
   box-shadow: 0 2px 3px 1px #d4d1d1,

@@ -1,22 +1,26 @@
 <div class="createform">
+  <!-- click outside directive -->
   <form
+    jhiClickOutside
     #notecreateform
     autocomplete="off"
     name="createForm"
     role="form"
     novalidate
     (ngSubmit)="closeAndSaveNote()"
-    [formGroup]="createForm"
+    [formGroup]="noteCreateForm"
     (clickOutside)="closeAndSaveNote()"
     [exclude]="'.click-outside-exclude'"
     [excludeBeforeClick]="true"
     [delayClickOutsideInit]="true"
   >
+    <!-- Header -->
     <div class="modal-header d-flex">
+      <!-- status stays hidden but in form -->
       <div class="form-group" [hidden]="true">
         <input class="form-control" name="status" id="field_status" data-cy="status" formControlName="status" [readonly]="true" />
       </div>
-
+      <!-- Title -->
       <div class="form-group mb-0 w-100">
         <input
           type="text"
@@ -31,43 +35,46 @@
           maxlength="{{ maxTitleLength }}"
         />
       </div>
-      <div *ngIf="createForm.get('title')!.invalid && (createForm.get('title')!.dirty || createForm.get('title')!.touched)">
-        <small
-          class="form-text text-danger pl-3"
-          *ngIf="createForm.get('title')?.errors?.maxlength"
-          jhiTranslate="entity.validation.maxlength"
-          [translateValues]="{ max: 255 }"
-        >
-          This field cannot be longer than 255 characters.
-        </small>
-      </div>
-
+      @let titleRef = noteCreateForm.controls.title;
+      @if (titleRef.invalid && (titleRef.dirty || titleRef.touched)) {
+        <div>
+          @if (titleRef.errors?.maxlength) {
+            <small class="form-text text-danger pl-3" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: 255 }">
+              This field cannot be longer than 255 characters.
+            </small>
+          }
+        </div>
+      }
+      <!-- Pin / Unpin -->
       <div class="btn-group" role="group" aria-label="pin group">
-        <button
-          [hidden]="this.status === allNoteStatus.PINNED"
-          type="button"
-          class="btn btn-light"
-          ngbTooltip="{{ 'noticeMeApp.note.toolbar.pin' | translate }}"
-          placement="top"
-          container="body"
-          (click)="pinNote()"
-        >
-          <fa-icon [icon]="['far', 'check-circle']"></fa-icon>
-        </button>
-        <button
-          [hidden]="this.status !== allNoteStatus.PINNED"
-          type="button"
-          class="btn btn-light"
-          ngbTooltip="{{ 'noticeMeApp.note.toolbar.unpin' | translate }}"
-          placement="top"
-          container="body"
-          (click)="unPinNote()"
-        >
-          <fa-icon icon="check-circle"></fa-icon>
-        </button>
+        @if (noteCreateForm.controls.status.value !== 'PINNED') {
+          <button
+            type="button"
+            class="btn btn-light"
+            ngbTooltip="{{ 'noticeMeApp.note.toolbar.pin' | translate }}"
+            placement="top"
+            container="body"
+            (click)="pinNote()"
+          >
+            <fa-icon [icon]="['far', 'check-circle']"></fa-icon>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="btn btn-light"
+            ngbTooltip="{{ 'noticeMeApp.note.toolbar.unpin' | translate }}"
+            placement="top"
+            container="body"
+            (click)="unPinNote()"
+          >
+            <fa-icon icon="check-circle"></fa-icon>
+          </button>
+        }
       </div>
     </div>
+    <!-- Body -->
     <div class="modal-body">
+      <!-- Content -->
       <div class="form-group mb-0">
         <textarea
           jhiInputTextarea
@@ -81,41 +88,41 @@
           maxlength="{{ maxContentLength }}"
         ></textarea>
       </div>
-
+      <!-- Tags -->
       <div class="form-group mb-0 w-100">
-        <div class="form-group" [hidden]="true">
-          <input class="form-control" name="tags" id="field_tags" data-cy="tags" formControlName="tags" [readonly]="true" />
-        </div>
         <jhi-tag-input
           #tagInput
           class="form-group mb-0 w-100"
-          [(ngModel)]="this.tags"
-          [ngModelOptions]="{ standalone: true }"
+          name="tags"
+          id="field_tags"
+          data-cy="tags"
+          formControlName="tags"
           inputClass="w-100"
-          (ngModelChange)="modelChangeFn($event)"
         >
         </jhi-tag-input>
       </div>
     </div>
-
+    <!-- Footer -->
     <div class="modal-footer">
       <div class="btn-toolbar w-100 justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
         <div class="btn-group" role="group" aria-label="action group">
+          <!-- Alarm popover -->
           <button
             type="button"
             class="btn btn-light"
-            [ngClass]="{ 'invalid-red': createForm.get('alarmDate')?.errors }"
-            ngbTooltip="{{ 'noticeMeApp.note.toolbar.alarm' | translate }}"
-            container="body"
-            [ngbPopover]="popAlarmDate"
-            placement="top auto"
-            [autoClose]="'outside'"
+            [class.invalid-red]="noteCreateForm.controls.alarmDate.errors"
             #popoverAlarm="ngbPopover"
+            [ngbPopover]="popAlarmDate"
             [popoverTitle]="popAlarmDateTitle"
+            placement="top auto"
+            container="body"
+            [autoClose]="'outside'"
             popoverClass="click-outside-exclude"
+            ngbTooltip="{{ 'noticeMeApp.note.toolbar.alarm' | translate }}"
           >
             <fa-icon [icon]="['far', 'bell']"></fa-icon>
           </button>
+          <!-- TODO: share with others
           <button
             type="button"
             class="btn btn-light"
@@ -129,7 +136,8 @@
             container="body"
           >
             <fa-icon icon="user-plus"></fa-icon>
-          </button>
+          </button> -->
+          <!-- Attachment (placeholder: wire to a file input if/when you add it) -->
           <button
             type="button"
             class="btn btn-light"
@@ -141,12 +149,15 @@
           </button>
         </div>
       </div>
+      <!-- Save -->
       <div class="btn-group" role="group" aria-label="save group">
         <button type="submit" id="save-entity" data-cy="entitySaveButton" [disabled]="!canSubmit()" class="btn btn-primary">
           <span jhiTranslate="entity.action.save">Save</span>
         </button>
       </div>
     </div>
+
+    <!-- Alarm popover templates -->
     <ng-template #popAlarmDate>
       <div>
         <input
@@ -159,22 +170,19 @@
           placeholder="YYYY-MM-DD HH:mm"
           min="{{ minDate }}"
         />
-        <div *ngIf="createForm.get('alarmDate')!.invalid && (createForm.get('alarmDate')!.dirty || createForm.get('alarmDate')!.touched)">
-          <small
-            class="form-text text-danger"
-            [hidden]="!createForm.get('alarmDate')?.errors?.invalidDate"
-            jhiTranslate="entity.validation.MinimumDate"
-          >
-            Alarm date is in the past
-          </small>
-          <small
-            class="form-text text-danger"
-            [hidden]="!createForm.get('alarmDate')?.errors?.ZonedDateTimelocal"
-            jhiTranslate="entity.validation.ZonedDateTimelocal"
-          >
-            This field should be a date and time.
-          </small>
-        </div>
+        @let alarmRef = noteCreateForm.controls.alarmDate;
+        @if (alarmRef.invalid && (alarmRef.dirty || alarmRef.touched)) {
+          <div>
+            @if (alarmRef.errors?.invalidDate) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.MinimumDate"> Alarm date is in the past </small>
+            }
+            @if (alarmRef.errors?.ZonedDateTimelocal) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.ZonedDateTimelocal">
+                This field should be a date and time.
+              </small>
+            }
+          </div>
+        }
       </div>
     </ng-template>
     <ng-template #popAlarmDateTitle>
@@ -186,6 +194,7 @@
       </div>
     </ng-template>
 
+    <!-- sharing popover templates -->
     <ng-template #popCollaborator>
       <div>
         <select
@@ -196,12 +205,11 @@
           name="collaborators"
           formControlName="collaborators"
         >
-          <option
-            [ngValue]="getSelectedUser(userOption, createForm.get('collaborators')!.value)"
-            *ngFor="let userOption of usersSharedCollection; trackBy: trackUserById"
-          >
-            {{ userOption.login }}
-          </option>
+          @for (userOption of usersSharedCollection(); track userOption.id) {
+            <option [ngValue]="getSelectedUser(userOption, null)">
+              {{ userOption.login }}
+            </option>
+          }
         </select>
       </div>
     </ng-template>

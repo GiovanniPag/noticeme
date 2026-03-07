@@ -2,13 +2,15 @@ import { Component, computed, input, inject, output, signal, ViewChild } from '@
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { NgbCarousel, NgbCarouselModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { IAttachment } from '../attachment.model';
+import SharedModule from 'app/shared/shared.module';
 
 @Component({
   selector: 'jhi-carousel-attachment',
   standalone: true,
-  imports: [CommonModule, NgbCarouselModule],
+  imports: [CommonModule, NgbCarouselModule, SharedModule, NgbTooltipModule],
   templateUrl: './carousel.component.html',
 })
 export class jhiCarouselComponent {

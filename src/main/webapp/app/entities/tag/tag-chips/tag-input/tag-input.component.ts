@@ -9,14 +9,14 @@ import { TagChipsFormComponent } from '../tag-chips-form/tag-chips-form.componen
 
 import { default_tag_input } from 'app/config/tag-chips.constants';
 import { TagComponent } from '../tag/tag.component';
+import SharedModule from 'app/shared/shared.module';
 
 @Component({
   selector: 'jhi-tag-input',
   standalone: true,
-  imports: [TagComponent, TagChipsFormComponent],
+  imports: [TagComponent, TagChipsFormComponent, SharedModule],
   styleUrl: './tag-input.style.scss',
   templateUrl: './tag-input.template.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -35,10 +35,10 @@ export class TagInputComponent implements ControlValueAccessor {
   /* ------------------ Inputs ------------------ */
   placeholder = input<string>(default_tag_input.placeholder);
   secondaryPlaceholder = input<string>(default_tag_input.secondaryPlaceholder);
-  disabled = input<boolean>(default_tag_input.disable);
+  readonly disabledInput = input<boolean>(default_tag_input.disable);
   noteid = input<number | undefined>();
   separatorKeys: string[] = default_tag_input.separatorKeyCodes;
-  hideForm = default_tag_input.hideForm;
+  hideForm = input<boolean>(default_tag_input.hideForm);
   errorMessages = default_tag_input.errorMessages;
   theme = default_tag_input.theme;
   inputId = default_tag_input.inputId;
@@ -50,7 +50,9 @@ export class TagInputComponent implements ControlValueAccessor {
   @ViewChild(TagChipsFormComponent) inputForm?: TagChipsFormComponent;
   @ViewChildren(TagComponent) tagComponents!: QueryList<TagComponent>;
   /* ------------------ State ------------------ */
+  readonly disabledByCva = signal(false);
   readonly tags = computed(() => this._tags());
+  readonly disabled = computed(() => this.disabledInput() || this.disabledByCva());
   // TODO: is selected index even needed?
   readonly selectedIndex = signal<number | null>(null);
   isLoading = signal(false);
@@ -65,21 +67,20 @@ export class TagInputComponent implements ControlValueAccessor {
   /* ------------------ CVA ------------------ */
   private _tags = signal<ITag[]>([]);
   private readonly tagService = inject(TagService);
-  constructor() {
-    effect(() => {
-      this.onChange(this._tags());
-    });
-  }
   onChange: (value: ITag[]) => void = () => {};
   onTouched: () => void = () => {};
   writeValue(value: ITag[] | null): void {
     this._tags.set(value ?? []);
   }
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: ITag[]) => void): void {
     this.onChange = fn;
   }
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabledByCva.set(isDisabled);
   }
   /* ------------------ Public API ------------------ */
   focus(applyFocus = false): void {
@@ -102,18 +103,19 @@ export class TagInputComponent implements ControlValueAccessor {
   removeTag(tag: ITag): void {
     const index = this.tags().indexOf(tag);
     this._tags.update(tags => tags.filter(t => t !== tag));
+    this.onChange(this._tags());
     if (this.selectedIndex() === index) {
       this.selectedIndex.set(null);
-    } else if (this.selectedIndex() !== null && this.selectedIndex() > index) {
+    } else if (this.selectedIndex() !== null && this.selectedIndex()! > index) {
       // Adjust selectedIndex if a tag above was removed
-      this.selectedIndex.set(this.selectedIndex() - 1);
+      this.selectedIndex.set(this.selectedIndex()! - 1);
     }
     this.focus(true);
     this.tagRemoved.emit(tag);
   }
 
-  addTagByName(tagName: string): void {
-    const trimmed = tagName.trim();
+  addTagByName(event: { tagName: string; color?: string }): void {
+    const trimmed = event.tagName.trim();
     if (!trimmed || this.isDuplicate(trimmed)) return;
     this.isLoading.set(true);
     this.tagService.findByName(trimmed).subscribe({
@@ -135,6 +137,7 @@ export class TagInputComponent implements ControlValueAccessor {
       copy[index] = changedElement;
       return copy;
     });
+    this.onChange(this._tags());
     this.blur();
   }
 
@@ -147,8 +150,8 @@ export class TagInputComponent implements ControlValueAccessor {
   /* ------------------------------------------------------------------
    * Keyboard Handling
    * ------------------------------------------------------------------ */
-  onTagKeydown(event: KeyboardEvent, index: number): void {
-    switch (event.key) {
+  onTagKeydown(e: { event: KeyboardEvent; model: ITag }, index: number): void {
+    switch (e.event.key) {
       case 'Backspace':
       case 'Delete':
         this.removeTag(this.tags()[index]);
@@ -160,7 +163,7 @@ export class TagInputComponent implements ControlValueAccessor {
         this.focusNext(index);
         break;
       case 'Tab':
-        if (event.shiftKey) {
+        if (e.event.shiftKey) {
           this.focusPrevious(index);
         } else {
           this.focusNext(index);
@@ -169,7 +172,7 @@ export class TagInputComponent implements ControlValueAccessor {
       default:
         return;
     }
-    event.preventDefault();
+    e.event.preventDefault();
   }
 
   onInputKeydown(event: KeyboardEvent): void {
@@ -177,7 +180,7 @@ export class TagInputComponent implements ControlValueAccessor {
       event.preventDefault();
       const value = this.inputForm?.inputText;
       if (value) {
-        this.addTagByName(value);
+        this.addTagByName({ tagName: value });
       }
     }
     if (event.key === 'Backspace' && !this.inputForm?.inputText) {
@@ -204,6 +207,7 @@ export class TagInputComponent implements ControlValueAccessor {
   /* ------------------ Private ------------------ */
   private appendTag(tag: ITag): void {
     this._tags.update(tags => [...tags, tag]);
+    this.onChange(this._tags());
     this.tagAdded.emit(tag);
     this.inputForm?.reset();
     this.focus();

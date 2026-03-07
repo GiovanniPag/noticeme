@@ -7,6 +7,7 @@ import { Alert, AlertService } from 'app/core/util/alert.service';
 @Component({
   selector: 'jhi-alert',
   templateUrl: './alert.component.html',
+  standalone: true,
   imports: [CommonModule, NgbModule],
 })
 export class AlertComponent implements OnInit, OnDestroy {

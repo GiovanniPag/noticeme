@@ -1,26 +1,17 @@
-import {
-  Component,
-  DestroyRef,
-  takeUntilDestroyed,
-  ChangeDetectionStrategy,
-  NgZone,
-  OnInit,
-  WritableSignal,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, NgZone, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute, Data, ParamMap, Router, RouterModule } from '@angular/router';
-import { Observable, Subscription, combineLatest, filter, tap } from 'rxjs';
+import { Observable, combineLatest, filter, tap } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import dayjs from 'dayjs/esm';
 
 import SharedModule from 'app/shared/shared.module';
-import { SortByDirective, SortDirective, SortService, type SortState, sortStateSignal } from 'app/shared/sort';
-import { FormatMediumDatetimePipe } from 'app/shared/date';
+import { SortService, type SortState, sortStateSignal } from 'app/shared/sort';
+import { EllipsisDirective } from 'app/shared/ellipsis/ellipsis.directive';
+import { MuuriGridDirective } from 'app/shared/muuri-wrapper/muuri-grid.directive';
+import { MuuriGridItemDirective } from 'app/shared/muuri-wrapper/muuri-grid-item.directive';
 import { FormsModule } from '@angular/forms';
 
 import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
@@ -28,6 +19,8 @@ import { DEFAULT_SORT_DATA, ITEM_DELETED_EVENT, SORT } from 'app/config/navigati
 import { DataUtils } from 'app/core/util/data-util.service';
 import { ParseLinks } from 'app/core/util/parse-links.service';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+import { jhiCarouselComponent } from 'app/entities/attachment/carousel/carousel.component';
+import { TagInputComponent } from 'app/entities/tag/tag-chips/tag-input/tag-input.component';
 import { NoteDeleteDialogComponent } from '../delete/note-delete-dialog.component';
 import { NoteUpdateDialogComponent } from '../update/note-update-dialog.component';
 import { ModalCloseReason } from 'app/entities/enumerations/modal-close-reason.model';
@@ -35,30 +28,29 @@ import { NoteStatus } from 'app/entities/enumerations/note-status.model';
 import { EntityArrayResponseType, EntityResponseType, NoteService } from '../service/note.service';
 import { INote } from '../note.model';
 import { AttachmentService } from 'app/entities/attachment/service/attachment.service';
-import { IAttachment } from 'app/entities/attachment/attachment.model';
 import { ITag } from 'app/entities/tag/tag.model';
 
-import { animations } from 'app/config/animations';
 import { GridOptions } from 'muuri';
 import Grid from 'muuri';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NoteCreateComponent } from '../create/note-create.component';
 
 @Component({
   selector: 'jhi-note',
   standalone: true,
   templateUrl: './note.component.html',
   styleUrls: ['../note.scss'],
-  animations,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterModule,
+    NoteCreateComponent,
     FormsModule,
     SharedModule,
-    SortDirective,
-    SortByDirective,
-    FormatMediumDatetimePipe,
     InfiniteScrollDirective,
     jhiCarouselComponent,
     TagInputComponent,
+    EllipsisDirective,
+    MuuriGridDirective,
+    MuuriGridItemDirective,
   ],
 })
 export class NoteComponent implements OnInit {
