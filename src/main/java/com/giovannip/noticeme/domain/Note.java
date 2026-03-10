@@ -155,7 +155,12 @@ public class Note extends AbstractAuditingEntity<Long> implements Serializable {
         attachment.setNote(null);
         return this;
     }
-
+    
+    public Note detachAttachment(Attachment attachment) {
+        this.attachments.remove(attachment);
+        return this;
+    }
+    
     public User getOwner() {
         return this.owner;
     }

@@ -144,7 +144,7 @@ public class AttachmentService {
         LOG.debug("Request to delete Attachment : {}", id);
         Attachment attachment = attachmentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Attachment not found"));
         Note note = attachment.getNote();
-        note.removeAttachment(attachment);
-        noteRepository.save(note);
+        note.detachAttachment(attachment);
+        attachmentRepository.delete(attachment);
     }
 }

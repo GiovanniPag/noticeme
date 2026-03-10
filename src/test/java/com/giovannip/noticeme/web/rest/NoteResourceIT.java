@@ -14,7 +14,6 @@ import com.giovannip.noticeme.domain.Note;
 import com.giovannip.noticeme.domain.User;
 import com.giovannip.noticeme.domain.enumeration.NoteStatus;
 import com.giovannip.noticeme.repository.NoteRepository;
-import com.giovannip.noticeme.repository.UserRepository;
 import com.giovannip.noticeme.service.NoteService;
 import com.giovannip.noticeme.service.dto.NoteDTO;
 import com.giovannip.noticeme.service.mapper.NoteMapper;
@@ -45,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 @IntegrationTest
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(username = "user")
 class NoteResourceIT {
 
     private static final String DEFAULT_TITLE = "AAAAAAAAAA";
@@ -71,9 +70,6 @@ class NoteResourceIT {
 
     @Autowired
     private NoteRepository noteRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Mock
     private NoteRepository noteRepositoryMock;
@@ -103,10 +99,7 @@ class NoteResourceIT {
     public static Note createEntity(EntityManager em) {
         Note note = new Note().title(DEFAULT_TITLE).content(DEFAULT_CONTENT).alarmDate(DEFAULT_ALARM_DATE).status(DEFAULT_STATUS);
         // Add required entity
-        User user = UserResourceIT.createEntity();
-        em.persist(user);
-        em.flush();
-        note.setOwner(user);
+        note.setOwner(getOrCreateUser(em, "user"));
         return note;
     }
 
@@ -119,10 +112,7 @@ class NoteResourceIT {
     public static Note createUpdatedEntity(EntityManager em) {
         Note updatedNote = new Note().title(UPDATED_TITLE).content(UPDATED_CONTENT).alarmDate(UPDATED_ALARM_DATE).status(UPDATED_STATUS);
         // Add required entity
-        User user = UserResourceIT.createEntity();
-        em.persist(user);
-        em.flush();
-        updatedNote.setOwner(user);
+        updatedNote.setOwner(getOrCreateUser(em, "user"));
         return updatedNote;
     }
 
@@ -507,5 +497,27 @@ class NoteResourceIT {
 
     protected void assertPersistedNoteToMatchUpdatableProperties(Note expectedNote) {
         assertNoteAllUpdatablePropertiesEquals(expectedNote, getPersistedNote(expectedNote));
+    }
+    
+    private static User getOrCreateUser(EntityManager em, String login) {
+        return em
+            .createQuery("select u from User u where u.login = :login", User.class)
+            .setParameter("login", login)
+            .getResultStream()
+            .findFirst()
+            .orElseGet(() -> {
+                User user = new User();
+                user.setLogin(login);
+                user.setPassword("password");
+                user.setActivated(true);
+                user.setEmail(login + "@example.com");
+                user.setFirstName("Test");
+                user.setLastName("User");
+                user.setImageUrl("");
+                user.setLangKey("en");
+                em.persist(user);
+                em.flush();
+                return user;
+            });
     }
 }
