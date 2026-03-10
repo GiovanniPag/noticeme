@@ -1,11 +1,11 @@
-import { Directive, ElementRef, NgZone, DestroyRef, inject, input, output, signal, effect } from '@angular/core';
+import { Directive, AfterViewInit, ElementRef, NgZone, DestroyRef, inject, input, output, signal, effect } from '@angular/core';
 import Grid, { GridOptions, Item } from 'muuri';
 
 @Directive({
   selector: '[jhiGrid]',
   standalone: true,
 })
-export class MuuriGridDirective {
+export class MuuriGridDirective implements AfterViewInit {
   readonly config = input.required<GridOptions>();
   readonly gridCreated = output<Grid>();
   readonly grid = signal<Grid | null>(null);
@@ -13,19 +13,16 @@ export class MuuriGridDirective {
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
 
-  constructor() {
-    // React to config changes (signal-based)
-    effect(() => {
-      const cfg = this.config();
-      this.destroyGrid();
-      this.createGrid(cfg);
+  ngAfterViewInit(): void {
+    // defer one tick so children can render
+    queueMicrotask(() => {
+      this.createGrid(this.config());
     });
-    // Cleanup
+
     this.destroyRef.onDestroy(() => {
       this.destroyGrid();
     });
   }
-
   // ---- Public API used by muuriGridItem directive ----
   addItem(itemElRef: ElementRef<HTMLElement>): Item[] {
     const grid = this.grid();
@@ -47,14 +44,14 @@ export class MuuriGridDirective {
   }
 
   refresh(): void {
-    this.grid()?.refreshItems();
+    this.grid()?.refreshItems().layout();
   }
 
   // ---- Internals ----
   private createGrid(cfg: GridOptions): void {
+    if (this.grid()) return;
     this.zone.runOutsideAngular(() => {
-      const host = this.elRef.nativeElement;
-      const grid = new Grid(host, cfg);
+      const grid = new Grid(this.elRef.nativeElement, cfg);
       // store + emit inside Angular
       this.zone.run(() => {
         this.grid.set(grid);

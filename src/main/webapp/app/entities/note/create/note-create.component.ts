@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild, computed, effect, inject, output, signal } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, OnInit, ViewChild, computed, effect, inject, output, signal } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { finalize, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -18,12 +18,12 @@ import { ClickOutsideDirective } from 'app/shared/outside/click-outside.directiv
 import { InputTextareaDirective } from 'app/shared/autosize/autotextarea.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { AlertError } from 'app/shared/alert/alert-error.model';
 import { EventManager, EventWithContent } from 'app/core/util/event-manager.service';
 import { DataUtils, FileLoadError } from 'app/core/util/data-util.service';
 
-import { AlertService, Alert } from 'app/core/util/alert.service';
 import { DATE_TIME_FORMAT, DATE_TIME_INPUT_FORMAT } from 'app/config/input.constants';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { AlertError } from 'app/shared/alert/alert-error.model';
 
 @Component({
   selector: 'jhi-note-create',
@@ -32,7 +32,7 @@ import { DATE_TIME_FORMAT, DATE_TIME_INPUT_FORMAT } from 'app/config/input.const
   standalone: true,
   imports: [SharedModule, FormsModule, ReactiveFormsModule, ClickOutsideDirective, InputTextareaDirective, TagInputComponent],
 })
-export class NoteCreateComponent implements AfterViewInit {
+export class NoteCreateComponent implements AfterViewInit, OnInit {
   // output event
   readonly oncreate = output<INote>();
   // constants
@@ -44,64 +44,85 @@ export class NoteCreateComponent implements AfterViewInit {
   readonly usersSharedCollection = signal<IUser[]>([]);
   readonly isSaving = signal(false);
   readonly selected = signal(false);
+  readonly noteFormService = inject(NoteFormService);
+  readonly noteCreateForm: NoteFormGroup = this.noteFormService.createNoteFormGroup();
   // ----- Alerts
-  readonly alerts = signal<Alert[]>([]);
-  readonly alertMaxTitle = signal<Alert | undefined>(undefined);
-  readonly alertMaxContent = signal<Alert | undefined>(undefined);
+  readonly titleValue = toSignal(this.noteCreateForm.controls.title.valueChanges, {
+    initialValue: this.noteCreateForm.controls.title.value ?? '',
+  });
+
+  readonly contentValue = toSignal(this.noteCreateForm.controls.content.valueChanges, {
+    initialValue: this.noteCreateForm.controls.content.value ?? '',
+  });
+  readonly titleLength = computed(() => (this.titleValue() ?? '').length);
+  readonly contentLength = computed(() => (this.contentValue() ?? '').length);
+  readonly titleRemaining = computed(() => this.maxTitleLength - this.titleLength());
+  readonly contentRemaining = computed(() => this.maxContentLength - this.contentLength());
+  readonly showTitleWarning = signal(true);
+  readonly showContentWarning = signal(true);
+  readonly shouldShowTitleWarning = computed(() => this.showTitleWarning() && this.titleRemaining() <= 100 && this.titleRemaining() >= 0);
+  readonly shouldShowContentWarning = computed(
+    () => this.showContentWarning() && this.contentRemaining() <= 500 && this.contentRemaining() >= 0,
+  );
   // ----- View refs -----
   @ViewChild('tagInput') private readonly tagInput?: TagInputComponent;
   // ----- Injects
   private readonly dataUtils = inject(DataUtils);
   private readonly eventManager = inject(EventManager);
   private readonly noteService = inject(NoteService);
-  private readonly noteFormService = inject(NoteFormService);
   private readonly userService = inject(UserService);
-  private readonly alertService = inject(AlertService);
+  private readonly destroyRef = inject(DestroyRef);
   // ---- FORM
-  readonly noteCreateForm: NoteFormGroup = this.noteFormService.createNoteFormGroup();
   // ----- Derived state -----
-  private readonly hasValue = computed((): boolean => {
+
+  constructor() {
+    this.resetForm();
+    this.noteCreateForm.controls.title.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.showTitleWarning.set(true);
+    });
+
+    this.noteCreateForm.controls.content.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.showContentWarning.set(true);
+    });
+  }
+
+  ngOnInit(): void {
+    this.loadRelationshipsOptions();
+  }
+
+  ngAfterViewInit(): void {
+    const popup = this.tagInput?.inputForm?.popup;
+    popup?.selectItem.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.selected.set(true);
+      setTimeout(() => this.selected.set(false), 150);
+    });
+  }
+
+  hasValue(): boolean {
     const title = (this.noteCreateForm.controls.title.value ?? '').trim();
     const content = (this.noteCreateForm.controls.content.value ?? '').trim();
     const alarmDate = this.noteCreateForm.controls.alarmDate.value;
     const alarmValid = !!alarmDate && dayjs(alarmDate, DATE_TIME_FORMAT, true).isValid();
     return title.length > 0 || content.length > 0 || alarmValid || (this.noteCreateForm.controls.tags.value?.length ?? 0) > 0;
-  });
+  }
 
-  readonly canSubmit = computed((): boolean => {
-    const alarmInvalid = this.noteCreateForm.controls.alarmDate.invalid;
+  canSubmit(): boolean {
+    if (this.isSaving() || this.selected()) {
+      return false;
+    }
+    const alarmOk = !this.noteCreateForm.controls.alarmDate.value || this.noteCreateForm.controls.alarmDate.valid;
     const otherOk =
       this.noteCreateForm.controls.status.valid && this.noteCreateForm.controls.title.valid && this.noteCreateForm.controls.content.valid;
-    const formOk = this.noteCreateForm.valid || (alarmInvalid && otherOk);
-    return formOk && !this.isSaving() && !this.selected() && this.hasValue();
-  });
-
-  constructor() {
-    this.alerts.set(this.alertService.get());
-    this.resetForm();
-    this.loadRelationshipsOptions();
-    // Live warning alerts (no DOM needed; just watch form controls)
-    effect(() => {
-      const titleLen = (this.noteCreateForm.controls.title.value ?? '').length;
-      const current = this.alertMaxTitle();
-      this.alertMaxTitle.set(this.checkInputLenght(100, 'warning.titlelength', titleLen, this.maxTitleLength, current));
-    });
-
-    effect(() => {
-      const contentLen = (this.noteCreateForm.controls.content.value ?? '').length;
-      const current = this.alertMaxContent();
-      this.alertMaxContent.set(this.checkInputLenght(500, 'warning.contentlength', contentLen, this.maxContentLength, current));
-    });
+    return this.hasValue() && otherOk && alarmOk;
+  }
+  // alerts
+  dismissTitleWarning(): void {
+    this.showTitleWarning.set(false);
   }
 
-  ngAfterViewInit(): void {
-    const popup = this.tagInput?.inputForm?.popup;
-    popup?.selectItem.subscribe(() => {
-      this.selected.set(true);
-      setTimeout(() => this.selected.set(false), 10);
-    });
+  dismissContentWarning(): void {
+    this.showContentWarning.set(false);
   }
-
   // ----- UI actions -----
   closeAndSaveNote(): void {
     if (this.canSubmit()) this.save();
@@ -139,6 +160,8 @@ export class NoteCreateComponent implements AfterViewInit {
   save(): void {
     this.isSaving.set(true);
     const note = this.noteFormService.getNote(this.noteCreateForm);
+    note.title = note.title?.trim() ?? null;
+    note.content = note.content?.trim() ?? null;
     if (note.id === null) {
       this.subscribeToSaveResponse(this.noteService.create(note));
       return;
@@ -165,41 +188,10 @@ export class NoteCreateComponent implements AfterViewInit {
   protected onSaveFinalize(): void {
     this.isSaving.set(false);
   }
-
-  // ----- Alerts -----
-  private addWarningAlert(translationKey?: string, translationParams?: Record<string, unknown>): Alert {
-    return this.alertService.addAlert({ type: 'warning', timeout: 0, translationKey, translationParams }, this.alerts());
-  }
-
-  private checkInputLenght(
-    limit: number,
-    translationKey: string,
-    currentLength: number,
-    maxLength: number,
-    alertToDisplay: Alert | undefined,
-  ): Alert | undefined {
-    const remaining = Math.max(0, maxLength - currentLength);
-    if (remaining <= limit) {
-      if (!alertToDisplay || alertToDisplay.closed === true) {
-        alertToDisplay = this.addWarningAlert(translationKey, { remainingCharachters: remaining });
-      } else {
-        alertToDisplay.translationParams!.remainingCharachters = remaining;
-        this.alertService.translateDynamicMessage(alertToDisplay);
-      }
-    } else {
-      if (alertToDisplay?.closed === false) {
-        alertToDisplay.close?.(this.alerts());
-      }
-    }
-    return alertToDisplay;
-  }
-
   // ----- Form helpers -----
   private resetForm(): void {
-    const a1 = this.alertMaxTitle();
-    if (a1?.closed === false) a1.close?.(this.alerts());
-    const a2 = this.alertMaxContent();
-    if (a2?.closed === false) a2.close?.(this.alerts());
+    this.showTitleWarning.set(true);
+    this.showContentWarning.set(true);
     this.noteFormService.resetForm(this.noteCreateForm, { id: null });
   }
 

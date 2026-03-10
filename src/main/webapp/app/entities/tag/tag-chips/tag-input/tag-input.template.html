@@ -13,7 +13,7 @@
     >
     </jhi-tag-chip>
     }
-
+	@if (!hideForm()) {
     <jhi-tag-chips-form
       #TagChipsFormComponent
       [disabled]="disabled()"
@@ -27,15 +27,16 @@
       (keyDownEvent)="onInputKeydown($event)"
     >
     </jhi-tag-chips-form>
+    }
   </div>
 </div>
 
 <!-- ERRORS -->
 @if (hasErrors()) {
 <div [ngClass]="theme" class="error-messages">
-  @for (error of errors(); track error.msg) {
+  @for (error of errors; track error.msg) {
   <p class="error-message" jhitranslate="error">
-    <span jhiTranslate="error.msg" [translateValues]="error.translateValues"></span>
+    <span jhiTranslate="{{error.msg}}" [translateValues]="error.translateValues"></span>
   </p>
   }
 </div>

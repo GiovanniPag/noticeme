@@ -13,7 +13,7 @@ import {
 import { HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import dayjs from 'dayjs/esm';
 import { finalize, map } from 'rxjs/operators';
@@ -41,7 +41,7 @@ import { NoteStatus } from 'app/entities/enumerations/note-status.model';
 import { NoteFormGroup, NoteFormService } from './note-form.service';
 import { NoteDeleteDialogComponent } from '../delete/note-delete-dialog.component';
 
-import { IAttachment, NewAttachment } from 'app/entities/attachment/attachment.model';
+import { IAttachment, IAttachmentSummary, NewAttachment } from 'app/entities/attachment/attachment.model';
 import { AttachmentService } from 'app/entities/attachment/service/attachment.service';
 import { AttachmentFormGroup, AttachmentFormService } from 'app/entities/attachment/update/attachment-form.service';
 import { AttachmentDeleteDialogComponent } from 'app/entities/attachment/delete/attachment-delete-dialog.component';
@@ -82,6 +82,8 @@ export class NoteUpdateDialogComponent implements AfterViewInit {
       this.updateForm(value);
       this.loadRelationshipsOptions();
       this.loadAttachments();
+    } else {
+      this.attachments.set([]);
     }
   }
 
@@ -114,20 +116,44 @@ export class NoteUpdateDialogComponent implements AfterViewInit {
   protected readonly eventManager = inject(EventManager);
   protected readonly noteService = inject(NoteService);
   protected readonly userService = inject(UserService);
-  protected readonly alertService = inject(AlertService);
   protected readonly attachmentService = inject(AttachmentService);
   protected readonly noteFormService = inject(NoteFormService);
   protected readonly attachmentFormService = inject(AttachmentFormService);
 
   protected editForm: NoteFormGroup = this.noteFormService.createNoteFormGroup();
   protected attachForm: AttachmentFormGroup = this.attachmentFormService.createAttachmentFormGroup();
+  protected readonly titleValue = toSignal(this.editForm.controls.title.valueChanges, {
+    initialValue: this.editForm.controls.title.value ?? '',
+  });
 
-  private alertMaxTitle?: Alert;
-  private alertMaxContent?: Alert;
-  private alerts: Alert[] = [];
+  protected readonly contentValue = toSignal(this.editForm.controls.content.valueChanges, {
+    initialValue: this.editForm.controls.content.value ?? '',
+  });
+
+  protected readonly titleLength = computed(() => (this.titleValue() ?? '').length);
+  protected readonly contentLength = computed(() => (this.contentValue() ?? '').length);
+  protected readonly titleRemaining = computed(() => this.maxTitleLength - this.titleLength());
+  protected readonly contentRemaining = computed(() => this.maxContentLength - this.contentLength());
+
+  protected readonly showTitleWarning = signal(true);
+  protected readonly showContentWarning = signal(true);
+
+  protected readonly shouldShowTitleWarning = computed(
+    () => this.showTitleWarning() && this.titleRemaining() <= 100 && this.titleRemaining() >= 0,
+  );
+
+  protected readonly shouldShowContentWarning = computed(
+    () => this.showContentWarning() && this.contentRemaining() <= 500 && this.contentRemaining() >= 0,
+  );
 
   constructor() {
-    this.alerts = this.alertService.get();
+    this.editForm.controls.title.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.showTitleWarning.set(true);
+    });
+
+    this.editForm.controls.content.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.showContentWarning.set(true);
+    });
     effect(() => {
       const deleted = this.isDeleted();
       if (deleted) {
@@ -149,6 +175,14 @@ export class NoteUpdateDialogComponent implements AfterViewInit {
     });
   }
 
+  dismissTitleWarning(): void {
+    this.showTitleWarning.set(false);
+  }
+
+  dismissContentWarning(): void {
+    this.showContentWarning.set(false);
+  }
+
   closeAndSaveNote(): void {
     if (this.selected()) {
       return;
@@ -166,9 +200,7 @@ export class NoteUpdateDialogComponent implements AfterViewInit {
 
   savePatch(event: Event | undefined): void {
     this.isSaving.set(true);
-    this.pushAlert(event?.target as HTMLInputElement | HTMLTextAreaElement | undefined);
     const note = this.getNoteToPersist();
-    // todo if alarm date is not valid call resetdate
     if (note.id !== null) {
       this.subscribeToSavePatchResponse(this.noteService.partialUpdate(note), note);
     }
@@ -177,7 +209,6 @@ export class NoteUpdateDialogComponent implements AfterViewInit {
   save(reason: string): void {
     this.isSaving.set(true);
     const note = this.getNoteToPersist();
-    // todo if alarm date is not valid call resetdate
     if (note.id !== null) {
       this.subscribeToSaveResponse(this.noteService.update(note), reason);
     } else {
@@ -186,8 +217,6 @@ export class NoteUpdateDialogComponent implements AfterViewInit {
   }
 
   close(reason: string): void {
-    this.closeAlert(this.alertMaxTitle);
-    this.closeAlert(this.alertMaxContent);
     this.activeModal.close(reason);
   }
 
@@ -266,7 +295,7 @@ export class NoteUpdateDialogComponent implements AfterViewInit {
     this.savePatch(undefined);
   }
 
-  deleteAttachment(attachment: IAttachment): void {
+  deleteAttachment(attachment: IAttachment | IAttachmentSummary): void {
     const modalRef = this.modalService.open(AttachmentDeleteDialogComponent, { size: 'lg', backdrop: 'static' });
     modalRef.componentInstance.attachment = attachment;
 
@@ -390,22 +419,6 @@ export class NoteUpdateDialogComponent implements AfterViewInit {
       fileSize: null,
       note: this.noteState(),
     });
-
-    this.alertMaxTitle = this.checkInputLength(
-      100,
-      'warning.titlelength',
-      note.title?.length ?? 0,
-      this.maxTitleLength,
-      this.alertMaxTitle,
-    );
-
-    this.alertMaxContent = this.checkInputLength(
-      500,
-      'warning.contentlength',
-      note.content?.length ?? 0,
-      this.maxContentLength,
-      this.alertMaxContent,
-    );
   }
 
   protected loadRelationshipsOptions(): void {
@@ -428,64 +441,13 @@ export class NoteUpdateDialogComponent implements AfterViewInit {
     });
   }
 
-  private addWarningAlert(translationKey?: string, translationParams?: Record<string, unknown>): Alert {
-    const alert = this.alertService.addAlert({ type: 'warning', timeout: 0, translationKey, translationParams }, this.alerts);
-    return alert;
-  }
-
-  private checkInputLength(
-    limit: number,
-    translationKey: string,
-    currentLength: number,
-    maxLength: number,
-    alertToDisplay: Alert | undefined,
-  ): Alert | undefined {
-    const remainingCharacters = Math.max(maxLength - currentLength, 0);
-
-    if (remainingCharacters <= limit) {
-      if (!alertToDisplay || alertToDisplay.closed === true) {
-        return this.addWarningAlert(translationKey, { remainingCharachters: remainingCharacters });
-      }
-      alertToDisplay.translationParams!.remainingCharachters = remainingCharacters;
-      this.alertService.translateDynamicMessage(alertToDisplay);
-      return alertToDisplay;
-    }
-
-    if (alertToDisplay?.closed === false) {
-      alertToDisplay.close?.(this.alerts);
-    }
-    return alertToDisplay;
-  }
-
-  private pushAlert(elem: HTMLInputElement | HTMLTextAreaElement | undefined): void {
-    if (!elem) {
-      return;
-    }
-    if (elem === this.titleText?.nativeElement) {
-      this.alertMaxTitle = this.checkInputLength(100, 'warning.titlelength', elem.value.length, this.maxTitleLength, this.alertMaxTitle);
-    }
-    if (elem === this.contentText?.nativeElement) {
-      this.alertMaxContent = this.checkInputLength(
-        500,
-        'warning.contentlength',
-        elem.value.length,
-        this.maxContentLength,
-        this.alertMaxContent,
-      );
-    }
-  }
-
-  private closeAlert(alert: Alert | undefined): void {
-    if (alert?.closed === false) {
-      alert.close?.(this.alerts);
-    }
-  }
-
   private getNoteToPersist(): INote | NewNote {
     if (this.editForm.controls.alarmDate.invalid) {
       this.resetDate();
     }
-
-    return this.noteFormService.getNote(this.editForm);
+    const formValue = this.noteFormService.getNote(this.editForm);
+    return {
+      ...formValue,
+    };
   }
 }

@@ -68,8 +68,13 @@ export class NoteComponent implements OnInit {
   isFirstFetch = computed(() => Object.keys(this.links()).length === 0);
   status = signal<string | undefined>(undefined);
   collab = signal<boolean | undefined>(undefined);
+  alarm = signal<boolean | undefined>(undefined);
 
   allNoteStatus = NoteStatus;
+  readonly canShowCreate = computed(
+    () =>
+      (!this.status() || this.status() === NoteStatus.NORMAL || this.status() === NoteStatus.PINNED) && (!this.collab() || !this.alarm()),
+  );
   // ========================
   // Muuri Grid Config
   // ========================
@@ -124,17 +129,12 @@ export class NoteComponent implements OnInit {
   ngOnInit(): void {
     combineLatest([this.activatedRoute.queryParamMap, this.activatedRoute.data])
       .pipe(
-        tap(([params, data]) => this.fillComponentAttributeFromRoute(params, data)),
-        tap(() => this.reset()),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe();
-    // Watch status & collab signals
-    this.activatedRoute.queryParams
-      .pipe(
-        tap(params => {
-          this.status.set(params['status']);
-          this.collab.set(params['isCollaborator']);
+        tap(([params, data]) => {
+          this.fillComponentAttributeFromRoute(params, data);
+          this.status.set(params.get('status') ?? undefined);
+          this.collab.set(params.get('isCollaborator') === 'true');
+          this.alarm.set(params.get('hasAlarm') === 'true');
+          this.reset();
         }),
         takeUntilDestroyed(this.destroyRef),
       )
@@ -241,6 +241,8 @@ export class NoteComponent implements OnInit {
   loadOne(id: number): void {
     this.queryBackendOne(id).subscribe({
       next: (res: EntityResponseType) => {
+		console.log('loadOne response', res.body);
+		console.log('attachments', res.body?.attachments);
         this.updateNote(res.body);
       },
     });
@@ -300,10 +302,6 @@ export class NoteComponent implements OnInit {
     return this.translateService.instant('noticeMeApp.note.detail.yearsAgo', { time }) as string;
   }
 
-  canShowCreate(): boolean {
-    return (!this.status() || this.status() === NoteStatus.NORMAL || this.status() === NoteStatus.PINNED) && !this.collab();
-  }
-
   trackByFn(index: number, tag: INote): number {
     return tag.id;
   }
@@ -351,7 +349,10 @@ export class NoteComponent implements OnInit {
     if (!note.id) return;
     this.isSaving.set(true);
     this.noteService
-      .partialUpdate(note)
+      .partialUpdate({
+        id: note.id,
+        tags: note.tags ?? [],
+      })
       .pipe(
         finalize(() => this.isSaving.set(false)),
         takeUntilDestroyed(this.destroyRef),
@@ -367,6 +368,7 @@ export class NoteComponent implements OnInit {
       size: this.itemsPerPage,
       status: this.status(),
       isCollaborator: !!this.collab(),
+      hasAlarm: !!this.alarm(),
       eagerload: true,
     };
     if (this.hasMorePage()) {
@@ -390,6 +392,8 @@ export class NoteComponent implements OnInit {
 
   protected updateNote(data: INote | null): void {
     if (!data) return;
+	console.log('updateNote incoming', data.id, data.attachments);
+
     const pinnedNotesArr = this.pinnedNotes();
     const otherNotesArr = this.otherNotes();
     // Try to find the note in pinned or other
@@ -413,7 +417,17 @@ export class NoteComponent implements OnInit {
         this.otherNotes.update(notes => notes.filter(note => note.id !== data.id));
         this.pinnedNotes.update(notes => [...notes, data]);
       }
+    } else {
+      if (data.status === NoteStatus.PINNED) {
+        this.pinnedNotes.update(notes => [...notes, data]);
+      } else {
+        this.otherNotes.update(notes => [...notes, data]);
+      }
     }
+
+	console.log('after pinned', this.pinnedNotes().find(n => n.id === data.id));
+	console.log('after other', this.otherNotes().find(n => n.id === data.id));
+
     this.relayoutAll();
   }
 

@@ -1,10 +1,14 @@
 @use '../../tag.scss' as *;
 
 :host {
+  display: inline-flex;
+  align-items: center;
   outline: 0;
   overflow: visible;
   transition: opacity 1s;
   z-index: 1;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
 }
 
 :host(.blink) {
@@ -34,25 +38,36 @@
 }
 
 .remove-icon {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  padding: 0;
+  margin: 0 0 0 0.25rem;
   overflow: visible !important;
   width: 20px;
   height: 16px;
   transition: all 0.15s;
-  display: inline-block;
-  text-align: right;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 
   path {
     fill: $color-arrow-noticeme;
   }
 
   svg {
-    vertical-align: bottom;
-    height: 34px;
+	vertical-align: middle;
+	height: 14px;
+	width: 14px;
   }
 }
 
 .remove-icon:hover {
-  transform: scale(1.5) translateY(-3px);
+  transform: scale(1.5);
 }
 
 :host:focus,

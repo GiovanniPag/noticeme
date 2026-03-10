@@ -1,6 +1,7 @@
 package com.giovannip.noticeme.service;
 
 import com.giovannip.noticeme.domain.Note;
+import com.giovannip.noticeme.domain.User;
 import com.giovannip.noticeme.domain.enumeration.NoteStatus;
 import com.giovannip.noticeme.repository.NoteRepository;
 import com.giovannip.noticeme.security.AuthoritiesConstants;
@@ -27,11 +28,13 @@ public class NoteService {
     private static final Logger LOG = LoggerFactory.getLogger(NoteService.class);
 
     private final NoteRepository noteRepository;
+    private final UserService userService;
 
     private final NoteMapper noteMapper;
 
-    public NoteService(NoteRepository noteRepository, NoteMapper noteMapper) {
+    public NoteService(NoteRepository noteRepository, NoteMapper noteMapper, UserService userService) {
         this.noteRepository = noteRepository;
+        this.userService = userService;
         this.noteMapper = noteMapper;
     }
 
@@ -44,6 +47,10 @@ public class NoteService {
     public NoteDTO save(NoteDTO noteDTO) {
         LOG.debug("Request to save Note : {}", noteDTO);
         Note note = noteMapper.toEntity(noteDTO);
+        if (note.getId() == null) {
+            User currentUser = this.userService.getCurrentUser().orElseThrow();
+            note.setOwner(currentUser);
+        }
         note = noteRepository.save(note);
         return noteMapper.toDto(note);
     }
@@ -56,9 +63,13 @@ public class NoteService {
      */
     public NoteDTO update(NoteDTO noteDTO) {
         LOG.debug("Request to update Note : {}", noteDTO);
-        Note note = noteMapper.toEntity(noteDTO);
-        note = noteRepository.save(note);
-        return noteMapper.toDto(note);
+        Note existingNote = noteRepository
+                .findById(noteDTO.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Note not found with id " + noteDTO.getId()));
+        // copy editable fields, but DO NOT touch attachments
+        noteMapper.partialUpdate(existingNote, noteDTO);
+        existingNote = noteRepository.save(existingNote);
+        return noteMapper.toDto(existingNote);
     }
 
     /**
@@ -123,11 +134,11 @@ public class NoteService {
      * @return the list of entities.
      */
     @Transactional(readOnly = true)
-    public Page<NoteDTO> findAllByStatus(Pageable pageable, String status, boolean hasAlarm) {
+    public Page<NoteDTO> findAllByStatus(Pageable pageable, String status, boolean hasAlarm, boolean isCollaborator) {
         LOG.debug("Request to get all Notes by status");
 
         Collection<NoteStatus> statuses = noteStatusFilter(status);
-
+        
         Page<Note> page;
         if (SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN)) {
             page = hasAlarm
@@ -152,7 +163,7 @@ public class NoteService {
      * @return the list of entities.
      */
     @Transactional(readOnly = true)
-    public Page<NoteDTO> findAllWithEagerRelationshipsByStatus(Pageable pageable, String status, boolean hasAlarm) {
+    public Page<NoteDTO> findAllWithEagerRelationshipsByStatus(Pageable pageable, String status, boolean hasAlarm, boolean isCollaborator) {
         LOG.debug("Request to get all Notes with eager relationships by status");
 
         Collection<NoteStatus> statuses = noteStatusFilter(status);

@@ -1,4 +1,4 @@
-import { Directive, ElementRef, DestroyRef, inject, output, effect } from '@angular/core';
+import { Directive, AfterViewInit, ElementRef, DestroyRef, inject, output, effect } from '@angular/core';
 import { Item } from 'muuri';
 import { MuuriGridDirective } from './muuri-grid.directive';
 
@@ -6,26 +6,28 @@ import { MuuriGridDirective } from './muuri-grid.directive';
   selector: '[jhiGridItem]',
   standalone: true,
 })
-export class MuuriGridItemDirective {
+export class MuuriGridItemDirective implements AfterViewInit {
   readonly itemCreated = output<Item>();
   private readonly destroyRef = inject(DestroyRef);
   private readonly elRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly gridDir = inject(MuuriGridDirective, { host: true });
 
-  constructor() {
-    effect(() => {
-      const grid = this.gridDir.grid(); // track grid signal
+  ngAfterViewInit(): void {
+    queueMicrotask(() => {
+      const grid = this.gridDir.grid();
       if (!grid) return;
-      const el = this.elRef.nativeElement;
-      // Prevent duplicate registration
-      const existing = grid.getItem(el);
+
+      const existing = grid.getItem(this.elRef.nativeElement);
       if (existing) return;
+
       const items = this.gridDir.addItem(this.elRef);
-      if (items.length) this.itemCreated.emit(items[0]);
-      this.gridDir.refresh();
+      if (items.length) {
+        this.itemCreated.emit(items[0]);
+        this.gridDir.refresh();
+      }
     });
+
     this.destroyRef.onDestroy(() => {
-      // grid may already be destroyed; removeItem handles it safely
       this.gridDir.removeItem(this.elRef);
     });
   }

@@ -1,11 +1,16 @@
 package com.giovannip.noticeme.service;
 
 import com.giovannip.noticeme.domain.Attachment;
+import com.giovannip.noticeme.domain.Note;
 import com.giovannip.noticeme.repository.AttachmentRepository;
+import com.giovannip.noticeme.repository.NoteRepository;
 import com.giovannip.noticeme.security.AuthoritiesConstants;
 import com.giovannip.noticeme.security.SecurityUtils;
 import com.giovannip.noticeme.service.dto.AttachmentDTO;
 import com.giovannip.noticeme.service.mapper.AttachmentMapper;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +29,13 @@ public class AttachmentService {
     private static final Logger LOG = LoggerFactory.getLogger(AttachmentService.class);
 
     private final AttachmentRepository attachmentRepository;
+    private final NoteRepository noteRepository;
 
     private final AttachmentMapper attachmentMapper;
 
-    public AttachmentService(AttachmentRepository attachmentRepository, AttachmentMapper attachmentMapper) {
+    public AttachmentService(AttachmentRepository attachmentRepository, AttachmentMapper attachmentMapper, NoteRepository noteRepository) {
         this.attachmentRepository = attachmentRepository;
+        this.noteRepository = noteRepository;
         this.attachmentMapper = attachmentMapper;
     }
 
@@ -38,10 +45,14 @@ public class AttachmentService {
      * @param attachmentDTO the entity to save.
      * @return the persisted entity.
      */
+    @Transactional
     public AttachmentDTO save(AttachmentDTO attachmentDTO) {
         LOG.debug("Request to save Attachment : {}", attachmentDTO);
         Attachment attachment = attachmentMapper.toEntity(attachmentDTO);
-        attachment = attachmentRepository.save(attachment);
+        Note note = noteRepository.findById(attachment.getNote().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Note not found"));
+        note.addAttachment(attachment);
+        noteRepository.flush();
         return attachmentMapper.toDto(attachment);
     }
 
@@ -131,8 +142,13 @@ public class AttachmentService {
      *
      * @param id the id of the entity.
      */
+    @Transactional
     public void delete(Long id) {
         LOG.debug("Request to delete Attachment : {}", id);
-        attachmentRepository.deleteById(id);
+        Attachment attachment = attachmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Attachment not found"));
+        Note note = attachment.getNote();
+        note.removeAttachment(attachment);
+        noteRepository.save(note);
     }
 }

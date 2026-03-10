@@ -3,6 +3,7 @@ package com.giovannip.noticeme.service.mapper;
 import com.giovannip.noticeme.domain.Attachment;
 import com.giovannip.noticeme.domain.Note;
 import com.giovannip.noticeme.service.dto.AttachmentDTO;
+import com.giovannip.noticeme.service.dto.AttachmentSummaryDTO;
 import com.giovannip.noticeme.service.dto.NoteDTO;
 import org.mapstruct.*;
 
@@ -18,4 +19,12 @@ public interface AttachmentMapper extends EntityMapper<AttachmentDTO, Attachment
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")
     NoteDTO toDtoNoteId(Note note);
+    
+    @Named("toSummary")
+    @BeanMapping(ignoreByDefault = true)
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "fileName", source = "fileName")
+    @Mapping(target = "dataContentType", source = "dataContentType")
+    @Mapping(target = "fileSize", source = "fileSize")
+    AttachmentSummaryDTO toSummaryDto(Attachment attachment);
 }

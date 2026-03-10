@@ -41,7 +41,13 @@ import {
   faTrashRestoreAlt,
   faTrash,
   faCheckCircle,
+  faDownload,
   // jhipster-needle-add-icon-import
+  faFile,
+  faFilePdf,
+  faFileWord,
+  faFileExcel,
+  faImage,
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -109,4 +115,10 @@ export const fontAwesomeIcons = [
   faFolder,
   faFolderOpen,
   farCheckCircle,
+  faDownload,
+  faFile,
+  faFilePdf,
+  faFileWord,
+  faFileExcel,
+  faImage,
 ];

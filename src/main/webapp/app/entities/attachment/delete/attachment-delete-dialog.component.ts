@@ -4,7 +4,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import SharedModule from 'app/shared/shared.module';
 import { ITEM_DELETED_EVENT } from 'app/config/navigation.constants';
-import { IAttachment } from '../attachment.model';
+import { IAttachment, IAttachmentSummary } from '../attachment.model';
 import { AttachmentService } from '../service/attachment.service';
 
 @Component({
@@ -12,7 +12,7 @@ import { AttachmentService } from '../service/attachment.service';
   imports: [SharedModule, FormsModule],
 })
 export class AttachmentDeleteDialogComponent {
-  attachment?: IAttachment;
+  attachment?: IAttachment | IAttachmentSummary;
 
   protected attachmentService = inject(AttachmentService);
   protected activeModal = inject(NgbActiveModal);

@@ -2,7 +2,7 @@
   <div class="col-8">
     <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
       <h2 id="jhi-tag-heading" data-cy="TagCreateUpdateHeading" jhiTranslate="noticeMeApp.tag.home.createOrEditLabel">
-        Genera o modifica un Tag
+        {{ editForm.controls.id.value !== null ? 'Edit Tag' : 'Create Tag' }}
       </h2>
 
       <div>
@@ -41,7 +41,21 @@
         @let colorRef = editForm.get('color')!;
         <div class="mb-3">
           <label class="form-label" for="field_color" jhiTranslate="noticeMeApp.tag.color">Color</label>
-          <input type="text" class="form-control" name="color" id="field_color" data-cy="color" formControlName="color" />
+          <div class="d-flex align-items-center gap-3">
+          <input
+            type="color"
+            class="form-control form-control-color"
+            id="field_color"
+            data-cy="color"
+            formControlName="color"
+            title="Choose tag color"
+          />
+          <input
+            type="text"
+            class="form-control"
+            [value]="editForm.controls.color.value ?? ''"
+            readonly
+          />
           @if (colorRef.invalid && (colorRef.dirty || colorRef.touched)) {
             <div>
               @if (editForm.get('color')?.errors?.maxlength) {
@@ -52,43 +66,6 @@
             </div>
           }
         </div>
-
-        <div class="mb-3">
-          <label class="form-label" for="field_owner" jhiTranslate="noticeMeApp.tag.owner">Owner</label>
-          <select class="form-control" id="field_owner" data-cy="owner" name="owner" formControlName="owner" [compareWith]="compareUser">
-            @if (!editForm.get('owner')!.value) {
-              <option [ngValue]="null" selected></option>
-            }
-            @for (userOption of usersSharedCollection; track $index) {
-              <option [ngValue]="userOption">{{ userOption.id }}</option>
-            }
-          </select>
-        </div>
-        @if (editForm.get(['owner'])!.invalid && (editForm.get(['owner'])!.dirty || editForm.get(['owner'])!.touched)) {
-          <div>
-            @if (editForm.get(['owner'])?.errors?.required) {
-              <small class="form-text text-danger" jhiTranslate="entity.validation.required">Questo campo è obbligatorio.</small>
-            }
-          </div>
-        }
-
-        <div class="mb-3">
-          <label for="field_notes" jhiTranslate="noticeMeApp.tag.notes">Notes</label>
-          <select
-            class="form-control"
-            id="field_notes"
-            data-cy="notes"
-            multiple
-            name="notes"
-            formControlName="notes"
-            [compareWith]="compareNote"
-          >
-            @for (noteOption of notesSharedCollection; track $index) {
-              <option [ngValue]="noteOption">{{ noteOption.id }}</option>
-            }
-          </select>
-        </div>
-      </div>
 
       <div>
         <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">

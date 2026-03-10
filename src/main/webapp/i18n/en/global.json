@@ -163,7 +163,7 @@
     }
   },
   "warning": {
-    "titlelength": "{{remainingCharachters} remaining charachters.}",
-    "contentlength": "{{remainingCharachters} remaining charachters."
+    "titlelength": "{{remainingCharacters} remaining charachters.}",
+    "contentlength": "{{remainingCharacters} remaining charachters."
   }
 }

@@ -161,7 +161,7 @@
     }
   },
   "warning": {
-    "titlelength": "{{remainingCharachters}} caratteri rimanenti.",
-    "contentlength": "{{remainingCharachters}} caratteri rimanenti."
+    "titlelength": "{{remainingCharacters}} caratteri rimanenti.",
+    "contentlength": "{{remainingCharacters}} caratteri rimanenti."
   }
 }

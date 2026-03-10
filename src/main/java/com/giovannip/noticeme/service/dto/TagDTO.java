@@ -23,7 +23,6 @@ public class TagDTO implements Serializable {
     @Size(max = 20)
     private String color;
 
-    @NotNull
     private UserDTO owner;
 
     private Set<NoteDTO> notes = new HashSet<>();

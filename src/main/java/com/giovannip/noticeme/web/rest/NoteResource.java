@@ -147,6 +147,7 @@ public class NoteResource {
         @org.springdoc.core.annotations.ParameterObject Pageable pageable,
         @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload,
         @RequestParam(required = false, defaultValue = "false") Boolean hasAlarm,
+        @RequestParam(required = false, defaultValue = "false") Boolean isCollaborator,
         @RequestParam(required = false) String status
     ) {
         LOG.debug(
@@ -154,20 +155,17 @@ public class NoteResource {
             ("undefined".equals(status) ? "" : " with status: " + status) +
             (hasAlarm ? " with alarm" : "")
         );
-        Page<NoteDTO> page = resolveNotesPage(pageable, eagerload, hasAlarm, status);
+        Page<NoteDTO> page = resolveNotesPage(pageable, eagerload, hasAlarm, isCollaborator, status);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
-    private Page<NoteDTO> resolveNotesPage(Pageable pageable, boolean eagerload, boolean hasAlarm, String status) {
-        if (status == null) {
-            return noteService.findAll(pageable);
-        }
+    private Page<NoteDTO> resolveNotesPage(Pageable pageable, boolean eagerload, boolean hasAlarm, boolean isCollaborator, String status) {
         if (eagerload) {
-            return noteService.findAllWithEagerRelationshipsByStatus(pageable, status, hasAlarm);
+            return noteService.findAllWithEagerRelationshipsByStatus(pageable, status, hasAlarm, isCollaborator);
         }
 
-        return noteService.findAllByStatus(pageable, status, hasAlarm);
+        return noteService.findAllByStatus(pageable, status, hasAlarm, isCollaborator);
     }
 
     /**

@@ -4,7 +4,7 @@
     <span jhiTranslate="noticeMeApp.note.home.title">Notes</span>
 
     <div class="d-flex justify-content-end">
-      <button class="btn btn-info me-2" (click)="reset()" [disabled]="isLoading">
+      <button class="btn btn-info me-2" (click)="reset()" [disabled]="isLoading()">
         <fa-icon icon="sync" [animation]="isLoading() ? 'spin' : undefined"></fa-icon>
         <span jhiTranslate="noticeMeApp.note.home.refreshListLabel">Refresh list</span>
       </button>
@@ -41,14 +41,17 @@
             @for (note of pinnedNotes(); track trackId(note)) {
               <div (mousedown)="onMouseDown($event)" (click)="onClick($event, note)" class="muuri-grid-item" jhiGridItem>
                 <div class="muuri-grid-item-content" (resized)="onResized()">
+                  @if ((note.attachments?.length ?? 0) > 0) {
                   <div class="card-img-top">
                     <jhi-carousel-attachment
                       [attachments]="note.attachments!"
                       [disableRemove]="true"
                       [showNavigationIndicators]="false"
                       [showNavigationArrows]="false"
+                      [resolveData]="false"
                     ></jhi-carousel-attachment>
                   </div>
+                  }
                   <div class="card-body">
                     <h5 class="card-title">{{ note.title }}</h5>
                     <p class="card-text summary-text" jhiEllipsis [ellipsisContent]="note.content ?? ''"></p>
@@ -95,14 +98,17 @@
             @for (note of otherNotes(); track trackId(note)) {
               <div (mousedown)="onMouseDown($event)" (click)="onClick($event, note)" class="muuri-grid-item" jhiGridItem>
                 <div class="muuri-grid-item-content" (resized)="onResized()">
+                  @if ((note.attachments?.length ?? 0) > 0) {
                   <div class="card-img-top">
                     <jhi-carousel-attachment
                       [attachments]="note.attachments!"
                       [disableRemove]="true"
                       [showNavigationIndicators]="false"
                       [showNavigationArrows]="false"
+                      [resolveData]="false"
                     ></jhi-carousel-attachment>
                   </div>
+                  }
                   <div class="card-body">
                     <h5 class="card-title">{{ note.title }}</h5>
                     <p class="card-text summary-text" jhiEllipsis [ellipsisContent]="note.content ?? ''"></p>

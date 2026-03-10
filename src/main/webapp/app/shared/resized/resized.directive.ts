@@ -17,6 +17,9 @@ export class ResizedDirective {
     this.observer = new ResizeObserver(entries => {
       const entry = entries[0];
       const newRect = entry.contentRect;
+      if (this.oldRect && this.oldRect.width === newRect.width && this.oldRect.height === newRect.height) {
+        return;
+      }
       const event: ResizedEvent = createResizedEvent(newRect, this.oldRect);
       this.oldRect = newRect;
       // Emit inside Angular
