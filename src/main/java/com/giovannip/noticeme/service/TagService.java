@@ -156,10 +156,10 @@ public class TagService {
     public Optional<TagDTO> findOne(Long id) {
         LOG.debug("Request to get Tag : {}", id);
         if (SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN)) {
-            return tagRepository.findById(id).map(tagMapper::toDto);
+            return tagRepository.findOneWithNotesById(id).map(tagMapper::toDto);
         }
         String login = SecurityUtils.getCurrentUserLogin().orElseThrow();
-        return tagRepository.findOneByIdAndOwnerLogin(id, login).map(tagMapper::toDto);
+        return tagRepository.findOneWithNotesByIdAndOwnerLogin(id, login).map(tagMapper::toDto);
     }
 
     /**
