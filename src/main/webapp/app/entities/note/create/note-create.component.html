@@ -1,0 +1,188 @@
+<div class="createform">
+  <!-- click outside directive -->
+  <form
+    jhiClickOutside
+    #notecreateform
+    autocomplete="off"
+    name="createForm"
+    role="form"
+    novalidate
+    (ngSubmit)="closeAndSaveNote()"
+    [formGroup]="noteCreateForm"
+    (clickOutside)="closeAndSaveNote()"
+    [exclude]="'.click-outside-exclude'"
+    [excludeBeforeClick]="true"
+    [delayClickOutsideInit]="true"
+  >
+    <!-- Header -->
+    <div class="modal-header d-flex">
+      <!-- status stays hidden but in form -->
+      <div class="form-group" [hidden]="true">
+        <input class="form-control" name="status" id="field_status" data-cy="status" formControlName="status" [readonly]="true" />
+      </div>
+      <!-- Title -->
+      <div class="form-group mb-0 w-100">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="{{ 'noticeMeApp.note.placeholder.title' | translate }}"
+          name="title"
+          id="field_title"
+          #field_title
+          data-cy="title"
+          formControlName="title"
+          autocomplete="off"
+          maxlength="{{ maxTitleLength }}"
+        />
+      </div>
+
+      @let titleRef = noteCreateForm.controls.title;
+      @if (titleRef.invalid && (titleRef.dirty || titleRef.touched)) {
+        <div>
+          @if (titleRef.errors?.maxlength) {
+            <small class="form-text text-danger pl-3" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: 255 }">
+              This field cannot be longer than 255 characters.
+            </small>
+          }
+        </div>
+      }
+      @if (shouldShowTitleWarning()) {
+        <div class="alert alert-warning d-flex justify-content-between align-items-center mt-2 mb-2 py-2 px-3">
+          <small>
+            {{ 'warning.titlelength' | translate: { remainingCharacters: titleRemaining() } }}
+          </small>
+          <button type="button" class="btn-close ms-2" aria-label="Close" (click)="dismissTitleWarning()"></button>
+        </div>
+      }
+      <!-- Pin / Unpin -->
+      <div class="btn-group" role="group" aria-label="pin group">
+        @if (noteCreateForm.controls.status.value !== 'PINNED') {
+          <button
+            type="button"
+            class="btn btn-light"
+            ngbTooltip="{{ 'noticeMeApp.note.toolbar.pin' | translate }}"
+            placement="top"
+            container="body"
+            (click)="pinNote()"
+          >
+            <fa-icon [icon]="['far', 'check-circle']"></fa-icon>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="btn btn-light"
+            ngbTooltip="{{ 'noticeMeApp.note.toolbar.unpin' | translate }}"
+            placement="top"
+            container="body"
+            (click)="unPinNote()"
+          >
+            <fa-icon icon="check-circle"></fa-icon>
+          </button>
+        }
+      </div>
+    </div>
+    <!-- Body -->
+    <div class="modal-body">
+      <!-- Content -->
+      <div class="form-group mb-0">
+        <textarea
+          jhiInputTextarea
+          class="form-control pb-0"
+          placeholder="{{ 'noticeMeApp.note.placeholder.content' | translate }}"
+          name="content"
+          id="field_content"
+          #field_content
+          data-cy="content"
+          formControlName="content"
+          maxlength="{{ maxContentLength }}"
+        ></textarea>
+      </div>
+      @if (shouldShowContentWarning()) {
+        <div class="alert alert-warning d-flex justify-content-between align-items-center mt-2 mb-2 py-2 px-3">
+          <small>
+            {{ 'warning.contentlength' | translate: { remainingCharacters: contentRemaining() } }}
+          </small>
+          <button type="button" class="btn-close ms-2" aria-label="Close" (click)="dismissContentWarning()"></button>
+        </div>
+      }
+      <!-- Tags -->
+      <div class="form-group mb-0 w-100">
+        <jhi-tag-input
+          #tagInput
+          class="form-group mb-0 w-100"
+          name="tags"
+          id="field_tags"
+          data-cy="tags"
+          formControlName="tags"
+          inputClass="w-100"
+        >
+        </jhi-tag-input>
+      </div>
+    </div>
+    <!-- Footer -->
+    <div class="modal-footer">
+      <div class="btn-toolbar w-100 justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+        <div class="btn-group" role="group" aria-label="action group">
+          <!-- Alarm popover -->
+          <button
+            type="button"
+            class="btn btn-light"
+            [class.invalid-red]="noteCreateForm.controls.alarmDate.errors"
+            #popoverAlarm="ngbPopover"
+            [ngbPopover]="popAlarmDate"
+            [popoverTitle]="popAlarmDateTitle"
+            placement="top auto"
+            container="body"
+            [autoClose]="'outside'"
+            popoverClass="click-outside-exclude"
+            ngbTooltip="{{ 'noticeMeApp.note.toolbar.alarm' | translate }}"
+          >
+            <fa-icon [icon]="['far', 'bell']"></fa-icon>
+          </button>
+        </div>
+      </div>
+      <!-- Save -->
+      <div class="btn-group" role="group" aria-label="save group">
+        <button type="submit" id="save-entity" data-cy="entitySaveButton" [disabled]="!canSubmit()" class="btn btn-primary">
+          <span jhiTranslate="entity.action.save">Save</span>
+        </button>
+      </div>
+    </div>
+    <!-- Alarm popover templates -->
+    <ng-template #popAlarmDate>
+      <div>
+        <input
+          id="field_alarmDate"
+          data-cy="alarmDate"
+          type="datetime-local"
+          class="form-control"
+          name="alarmDate"
+          formControlName="alarmDate"
+          placeholder="YYYY-MM-DD HH:mm"
+          min="{{ minDate }}"
+        />
+        @let alarmRef = noteCreateForm.controls.alarmDate;
+        @if (alarmRef.invalid && (alarmRef.dirty || alarmRef.touched)) {
+          <div>
+            @if (alarmRef.errors?.invalidDate) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.MinimumDate"> Alarm date is in the past </small>
+            }
+            @if (alarmRef.errors?.ZonedDateTimelocal) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.ZonedDateTimelocal">
+                This field should be a date and time.
+              </small>
+            }
+          </div>
+        }
+      </div>
+    </ng-template>
+    <ng-template #popAlarmDateTitle>
+      <div class="d-flex w-100 align-items-center justify-content-between">
+        <label class="h6 mb-0" jhiTranslate="noticeMeApp.note.toolbar.alarmdate" for="field_alarmDate">Alarm Date</label>
+        <button type="button" class="btn btn-light btn-sm" (click)="resetDate()">
+          <fa-icon icon="times"></fa-icon>
+        </button>
+      </div>
+    </ng-template>
+  </form>
+</div>

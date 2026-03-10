@@ -1,6 +1,9 @@
 {
   "global": {
-    "title": "NoticeMe",
+    "title": {
+      "notice": "Notice",
+      "me": "Me"
+    },
     "browsehappy": "You are using an <strong>outdated</strong> browser. Please <a href=\"http://browsehappy.com/?locale=en\">upgrade your browser</a> to improve your experience.",
     "menu": {
       "home": "Home",
@@ -8,7 +11,19 @@
       "entities": {
         "main": "Entities",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)",
-        "adminAuthority": "Authority"
+        "tag": "Tag",
+        "note": "Note",
+        "attachment": "Attachment",
+        "noteAccess": "Note Access"
+      },
+      "sidebar": {
+        "title": "main menu",
+        "tags": "Tags",
+        "note": "Notes",
+        "archive": "Archive",
+        "trash": "Trash",
+        "alarm": "Alarms",
+        "shared": "Shared"
       },
       "account": {
         "main": "Account",
@@ -99,7 +114,8 @@
       "open": "Open",
       "save": "Save",
       "view": "View",
-      "show": "Show {{otherEntity}}"
+      "show": "Show {{otherEntity}}",
+      "close": "Close"
     },
     "detail": {
       "field": "Field",
@@ -119,7 +135,8 @@
       "pattern": "This field should follow pattern for {{ pattern }}.",
       "number": "This field should be a number.",
       "datetimelocal": "This field should be a date and time.",
-      "patternLogin": "This field can only contain letters, digits and e-mail addresses."
+      "patternLogin": "This field can only contain letters, digits and e-mail addresses.",
+      "MinimumDate": "This date has passed."
     },
     "filters": {
       "set": "Following filters are set",
@@ -136,6 +153,7 @@
     "userexists": "Login name already used!",
     "emailexists": "Email is already in use!",
     "idexists": "A new {{ entityName }} cannot already have an ID",
+    "tagnameesxists": "A new {{ entityName }} cannot have an existing name",
     "idnull": "Invalid ID",
     "idinvalid": "Invalid ID",
     "idnotfound": "ID cannot be found",
@@ -144,5 +162,8 @@
       "not.image": "File was expected to be an image but was found to be \"{{ fileType }}\""
     }
   },
-  "footer": "This is your footer"
+  "warning": {
+    "titlelength": "{{remainingCharacters} remaining charachters.}",
+    "contentlength": "{{remainingCharacters} remaining charachters."
+  }
 }

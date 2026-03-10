@@ -1,0 +1,26 @@
+{
+  "noticeMeApp": {
+    "noteAccess": {
+      "home": {
+        "title": "Accesso Note",
+        "refreshListLabel": "Ricarica lista",
+        "createLabel": "Genera un nuovo Accesso per la nota",
+        "createOrEditLabel": "Genera o modifica un Accesso per la nota",
+        "notFound": "Nessun Accesso per la nota trovato"
+      },
+      "created": "&Egrave; stato generato un nuovo Accesso per la nota con identificatore {{ param }}",
+      "updated": "&Egrave; stato aggiornato Accesso per la nota identificato da {{ param }}",
+      "deleted": "&Egrave; stato eliminato Accesso per la nota con identificatore {{ param }}",
+      "delete": {
+        "question": "Sei sicuro di volere eliminare Accesso per la nota {{ id }}?"
+      },
+      "detail": {
+        "title": "Accesso per la nota"
+      },
+      "id": "ID",
+      "role": "Ruolo",
+      "note": "Nota",
+      "user": "Utente"
+    }
+  }
+}

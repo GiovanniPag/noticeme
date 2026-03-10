@@ -10,11 +10,11 @@ import { translationNotFoundMessage } from 'app/config/translation.config';
  */
 @Directive({
   selector: '[jhiTranslate]',
+  standalone: true,
 })
 export default class TranslateDirective implements OnChanges, OnInit, OnDestroy {
   readonly jhiTranslate = input.required<string>();
   readonly translateValues = input<Record<string, unknown>>();
-
   private readonly directiveDestroyed = new Subject();
 
   private readonly el = inject(ElementRef);

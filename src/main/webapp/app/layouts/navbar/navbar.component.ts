@@ -9,6 +9,7 @@ import { LANGUAGES } from 'app/config/language.constants';
 import { AccountService } from 'app/core/auth/account.service';
 import { LoginService } from 'app/login/login.service';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
+import { SideBarService } from '../sidebar/sidebar.service';
 import { EntityNavbarItems } from 'app/entities/entity-navbar-items';
 import { environment } from 'environments/environment';
 import ActiveMenuDirective from './active-menu.directive';
@@ -22,7 +23,6 @@ import NavbarItem from './navbar-item.model';
 })
 export default class NavbarComponent implements OnInit {
   inProduction?: boolean;
-  isNavbarCollapsed = signal(true);
   languages = LANGUAGES;
   openAPIEnabled?: boolean;
   version = '';
@@ -33,6 +33,7 @@ export default class NavbarComponent implements OnInit {
   private readonly translateService = inject(TranslateService);
   private readonly stateStorageService = inject(StateStorageService);
   private readonly profileService = inject(ProfileService);
+  private readonly sideBarService = inject(SideBarService);
   private readonly router = inject(Router);
 
   constructor() {
@@ -50,13 +51,17 @@ export default class NavbarComponent implements OnInit {
     });
   }
 
+  isAuthenticated(): boolean {
+    return this.account() !== null;
+  }
+
   changeLanguage(languageKey: string): void {
     this.stateStorageService.storeLocale(languageKey);
     this.translateService.use(languageKey);
   }
 
-  collapseNavbar(): void {
-    this.isNavbarCollapsed.set(true);
+  collapseSidebar(): void {
+    this.sideBarService.closeSidebar();
   }
 
   login(): void {
@@ -64,12 +69,12 @@ export default class NavbarComponent implements OnInit {
   }
 
   logout(): void {
-    this.collapseNavbar();
+    this.collapseSidebar();
     this.loginService.logout();
-    this.router.navigate(['']);
+    this.router.navigate(['/login']);
   }
 
-  toggleNavbar(): void {
-    this.isNavbarCollapsed.update(isNavbarCollapsed => !isNavbarCollapsed);
+  toggleSidebar(): void {
+    this.sideBarService.toggleSidebar();
   }
 }

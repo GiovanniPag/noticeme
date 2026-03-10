@@ -1,0 +1,80 @@
+@use '../../tag.scss' as *;
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  outline: 0;
+  overflow: visible;
+  transition: opacity 1s;
+  z-index: 1;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+}
+
+:host(.blink) {
+  animation: blink 0.3s normal forwards ease-in-out;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.3;
+  }
+}
+
+:host(.disabled) {
+  cursor: not-allowed;
+}
+
+.tag-wrapper {
+  flex-direction: row;
+  display: flex;
+}
+
+.tag__text {
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove-icon {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  padding: 0;
+  margin: 0 0 0 0.25rem;
+  overflow: visible !important;
+  width: 20px;
+  height: 16px;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  path {
+    fill: $color-arrow-noticeme;
+  }
+
+  svg {
+    vertical-align: middle;
+    height: 14px;
+    width: 14px;
+  }
+}
+
+.remove-icon:hover {
+  transform: scale(1.5);
+}
+
+:host:focus,
+:host:active {
+  .remove-icon {
+    path {
+      fill: $color-arrow-noticeme-focused;
+    }
+  }
+}

@@ -37,8 +37,30 @@ import {
   faUsers,
   faUsersCog,
   faWrench,
+  faLink,
+  faTrashRestoreAlt,
+  faTrash,
+  faCheckCircle,
+  faDownload,
   // jhipster-needle-add-icon-import
+  faFile,
+  faFilePdf,
+  faFileWord,
+  faFileExcel,
+  faImage,
 } from '@fortawesome/free-solid-svg-icons';
+
+import {
+  faStickyNote,
+  faBell as farBell,
+  faTrashAlt as farTrashAlt,
+  faFileArchive,
+  faBookmark,
+  faShareSquare,
+  faFolder,
+  faFolderOpen,
+  faCheckCircle as farCheckCircle,
+} from '@fortawesome/free-regular-svg-icons';
 
 export const fontAwesomeIcons = [
   faArrowLeft,
@@ -80,4 +102,23 @@ export const fontAwesomeIcons = [
   faUsersCog,
   faWrench,
   // jhipster-needle-add-icon-import
+  faLink,
+  faTrashRestoreAlt,
+  faTrash,
+  faCheckCircle,
+  faStickyNote,
+  farBell,
+  farTrashAlt,
+  faFileArchive,
+  faBookmark,
+  faShareSquare,
+  faFolder,
+  faFolderOpen,
+  farCheckCircle,
+  faDownload,
+  faFile,
+  faFilePdf,
+  faFileWord,
+  faFileExcel,
+  faImage,
 ];

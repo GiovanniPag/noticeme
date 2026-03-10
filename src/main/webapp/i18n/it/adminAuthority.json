@@ -2,22 +2,22 @@
   "noticeMeApp": {
     "adminAuthority": {
       "home": {
-        "title": "Authorities",
-        "refreshListLabel": "Refresh list",
-        "createLabel": "Genera un nuovo Authority",
-        "createOrEditLabel": "Genera o modifica un Authority",
-        "notFound": "No Authorities found"
+        "title": "Aurit&agrave;",
+        "refreshListLabel": "Ricarica lista",
+        "createLabel": "Genera una nuova Aurit&agrave;",
+        "createOrEditLabel": "Genera o modifica un'Aurit&agrave;",
+        "notFound": "nessuna Aurit&agrave; trovate"
       },
-      "created": "&Egrave; stato generato un nuovo Authority con identificatore {{ param }}",
-      "updated": "&Egrave; stato aggiornato Authority identificato da {{ param }}",
-      "deleted": "&Egrave; stato eliminato Authority con identificatore {{ param }}",
+      "created": "&Egrave; stata generata una nuova Aurit&agrave; con identificatore {{ param }}",
+      "updated": "&Egrave; stata aggiornata Aurit&agrave; identificata da {{ param }}",
+      "deleted": "&Egrave; stata eliminata Aurit&agrave; con identificatore {{ param }}",
       "delete": {
-        "question": "Sei sicuro di volere eliminare Authority {{ id }}?"
+        "question": "Sei sicuro di volere eliminare Aurit&agrave; {{ id }}?"
       },
       "detail": {
-        "title": "Authority"
+        "title": "Aurit&agrave;"
       },
-      "name": "Name"
+      "name": "Nome"
     }
   }
 }

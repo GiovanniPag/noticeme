@@ -1,0 +1,334 @@
+@let note = noteState();
+@if (note) {
+  <form
+    jhiClickOutside
+    #noteupdateform
+    autocomplete="off"
+    class="scrollable-modal"
+    name="editForm"
+    role="form"
+    novalidate
+    [formGroup]="editForm"
+    (ngSubmit)="closeAndSaveNote()"
+    (clickOutside)="closeAndSaveNote()"
+    [exclude]="'button, .click-outside-exclude'"
+    [excludeBeforeClick]="true"
+    [delayClickOutsideInit]="true"
+  >
+    @if (attachments().length > 0) {
+      <jhi-carousel-attachment
+        #carousel
+        [attachments]="attachments()"
+        (remove)="deleteAttachment($event)"
+        [disableRemove]="isDeleted()"
+        [resolveData]="true"
+      >
+      </jhi-carousel-attachment>
+    }
+
+    <div class="modal-header d-flex">
+      <div class="form-group" hidden>
+        <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" readonly />
+      </div>
+
+      <div class="form-group" hidden>
+        <input class="form-control" name="owner" id="field_owner" data-cy="owner" formControlName="owner" readonly />
+      </div>
+
+      <div class="form-group" hidden>
+        <input class="form-control" name="status" id="field_status" data-cy="status" formControlName="status" readonly />
+      </div>
+
+      <div class="form-group mb-0 w-100">
+        <input
+          #field_title
+          type="text"
+          class="form-control"
+          name="title"
+          id="field_title"
+          data-cy="title"
+          formControlName="title"
+          autocomplete="off"
+          [maxlength]="maxTitleLength"
+          [placeholder]="'noticeMeApp.note.placeholder.title' | translate"
+          (input)="savePatch($event)"
+        />
+      </div>
+      @let titleRef = editForm.get('title')!;
+      @if (titleRef.invalid && (titleRef.dirty || titleRef.touched)) {
+        <div>
+          @if (editForm.get('title')?.errors?.maxlength) {
+            <small class="form-text text-danger pl-3" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: 255 }">
+              This field cannot be longer than 255 characters.
+            </small>
+          }
+        </div>
+      }
+      @if (!isDeleted()) {
+        <div class="btn-group" role="group" aria-label="pin group">
+          <button
+            [hidden]="note.status === allNoteStatus.PINNED"
+            type="button"
+            class="btn btn-light"
+            [ngbTooltip]="'noticeMeApp.note.toolbar.pin' | translate"
+            placement="top"
+            container="body"
+            (click)="pinNote()"
+          >
+            <fa-icon [icon]="['far', 'check-circle']"></fa-icon>
+          </button>
+
+          <button
+            [hidden]="note.status !== allNoteStatus.PINNED"
+            type="button"
+            class="btn btn-light"
+            [ngbTooltip]="'noticeMeApp.note.toolbar.unpin' | translate"
+            placement="top"
+            container="body"
+            (click)="unPinNote()"
+          >
+            <fa-icon icon="check-circle"></fa-icon>
+          </button>
+        </div>
+      }
+    </div>
+    <div class="modal-body">
+      <div class="form-group mb-0">
+        <textarea
+          #field_content
+          jhiInputTextarea
+          class="form-control pb-0"
+          name="content"
+          id="field_content"
+          data-cy="content"
+          formControlName="content"
+          ngbAutofocus
+          [maxlength]="maxContentLength"
+          [placeholder]="'noticeMeApp.note.placeholder.content' | translate"
+          (input)="savePatch($event)"
+        ></textarea>
+      </div>
+      <div class="form-group mb-0 w-100">
+        <jhi-tag-input
+          #tagInput
+          name="tags"
+          id="field_tags"
+          data-cy="tags"
+          formControlName="tags"
+          class="form-group mb-0 w-100"
+          inputClass="w-100"
+          [disabledInput]="isDeleted()"
+          [noteid]="note.id"
+          (ngModelChange)="modelChangeFn($event)"
+        >
+        </jhi-tag-input>
+      </div>
+
+      <div class="d-flex">
+        <div class="ml-auto mr-1 small-text">
+          @if (isDeleted()) {
+            <span class="m-0" jhiTranslate="noticeMeApp.note.detail.isInTrash">in trash bin</span>
+            <span class="m-0"> - </span>
+          }
+          <span class="m-0" jhiTranslate="noticeMeApp.note.lastModifiedDate" for="field_lastModifiedDate">lastModifiedDate</span>
+          <span class="m-0">{{ formattedLastUpdateDate() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="btn-toolbar w-100 justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+        @if (!isDeleted()) {
+          <div class="btn-group" role="group" aria-label="action group">
+            <button
+              type="button"
+              class="btn btn-light"
+              [ngClass]="{ 'invalid-red': editForm.controls.alarmDate.errors }"
+              [ngbTooltip]="'noticeMeApp.note.toolbar.alarm' | translate"
+              container="body"
+              [ngbPopover]="popAlarmDate"
+              #popoverAlarm="ngbPopover"
+              placement="top auto"
+              [autoClose]="'outside'"
+              [popoverTitle]="popAlarmDateTitle"
+              popoverClass="click-outside-exclude"
+            >
+              <fa-icon [icon]="['far', 'bell']"></fa-icon>
+            </button>
+
+            <!-- <button
+              type="button"
+              class="btn btn-light"
+              [ngbPopover]="popCollaborator"
+              [autoClose]="'outside'"
+              #popoverAlarm="ngbPopover"
+              [popoverTitle]="popCollaboratorTitle"
+              popoverClass="click-outside-exclude"
+              [ngbTooltip]="'noticeMeApp.note.toolbar.collaborator' | translate"
+              placement="top auto"
+              container="body"
+            >
+              <fa-icon icon="user-plus"></fa-icon>
+            </button> -->
+
+            <label
+              type="button"
+              for="upload_attach"
+              class="btn btn-light mb-0"
+              [ngbTooltip]="'noticeMeApp.note.toolbar.attachment' | translate"
+              placement="top"
+              container="body"
+            >
+              <fa-icon icon="link"></fa-icon>
+            </label>
+
+            <input
+              type="file"
+              name="attachment"
+              data-cy="data"
+              id="upload_attach"
+              [disabled]="isSaving()"
+              (change)="setFileData($event, 'data', false)"
+            />
+
+            @if (note.status !== allNoteStatus.ARCHIVED) {
+              <button
+                type="button"
+                class="btn btn-light"
+                [ngbTooltip]="'noticeMeApp.note.toolbar.archive' | translate"
+                placement="top"
+                container="body"
+                (click)="archiveNote()"
+              >
+                <fa-icon [icon]="['far', 'folder']"></fa-icon>
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="btn btn-light"
+                [ngbTooltip]="'noticeMeApp.note.toolbar.unarchive' | translate"
+                placement="top"
+                container="body"
+                (click)="unArchiveNote()"
+              >
+                <fa-icon [icon]="['far', 'folder-open']"></fa-icon>
+              </button>
+            }
+
+            <button
+              type="button"
+              class="btn btn-light"
+              [ngbTooltip]="'noticeMeApp.note.toolbar.delete' | translate"
+              placement="top"
+              container="body"
+              (click)="deleteNote()"
+            >
+              <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+            </button>
+          </div>
+        } @else {
+          <div class="btn-group" role="group" aria-label="action group">
+            <button
+              type="button"
+              class="btn btn-light"
+              [ngbTooltip]="'noticeMeApp.note.toolbar.restore' | translate"
+              placement="top"
+              container="body"
+              (click)="unDeleteNote()"
+            >
+              <fa-icon icon="trash-restore-alt"></fa-icon>
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-light"
+              data-cy="entityDeleteButton"
+              [ngbTooltip]="'noticeMeApp.note.toolbar.permanentdelete' | translate"
+              placement="top"
+              container="body"
+              (click)="permanentDeleteNote()"
+            >
+              <fa-icon icon="trash"></fa-icon>
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="btn-group" role="group" aria-label="save group">
+        <button type="submit" id="save-entity" data-cy="entitySaveButton" class="btn btn-primary" [disabled]="!canSubmit()">
+          <span jhiTranslate="entity.action.close">Close</span>
+        </button>
+      </div>
+    </div>
+
+    <ng-template #popAlarmDate>
+      <div>
+        <input
+          id="field_alarmDate"
+          data-cy="alarmDate"
+          type="datetime-local"
+          class="form-control"
+          name="alarmDate"
+          formControlName="alarmDate"
+          placeholder="YYYY-MM-DD HH:mm"
+          [min]="minDate"
+        />
+        @let alertRef = editForm.get('alarmDate')!;
+        @if (alertRef.invalid && (alertRef.dirty || alertRef.touched)) {
+          <div>
+            <small
+              class="form-text text-danger"
+              [hidden]="!editForm.controls.alarmDate.errors?.invalidDate"
+              jhiTranslate="entity.validation.MinimumDate"
+            >
+              Alarm date is in the past
+            </small>
+
+            <small
+              class="form-text text-danger"
+              [hidden]="!editForm.controls.alarmDate.errors?.ZonedDateTimelocal"
+              jhiTranslate="entity.validation.ZonedDateTimelocal"
+            >
+              This field should be a date and time.
+            </small>
+          </div>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template #popAlarmDateTitle>
+      <div class="d-flex w-100 align-items-center justify-content-between">
+        <label class="h6 mb-0" jhiTranslate="noticeMeApp.note.toolbar.alarmdate" for="field_alarmDate">Alarm Date</label>
+        <button type="button" class="btn btn-light btn-sm" (click)="resetDate()">
+          <fa-icon icon="times"></fa-icon>
+        </button>
+      </div>
+    </ng-template>
+
+    <!-- <ng-template #popCollaborator>
+      <div>
+        <select
+          class="form-control"
+          id="field_collaborators"
+          data-cy="collaborator"
+          multiple
+          name="collaborators"
+          formControlName="collaborators"
+          [compareWith]="compareUser"
+        >
+          @for (userOption of usersSharedCollection(); track userOption.id) {
+            <option [ngValue]="userOption">
+              {{ userOption.login }}
+            </option>
+          }
+        </select>
+      </div>
+    </ng-template>
+
+    <ng-template #popCollaboratorTitle>
+      <div class="d-flex w-100 text-center">
+        <label class="h6 mb-0" jhiTranslate="noticeMeApp.note.collaborator" for="field_collaborators">Collaborator</label>
+      </div>
+    </ng-template>-->
+  </form>
+}

@@ -1,0 +1,58 @@
+// CORE
+@use 'sass:color';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import '../../../content/scss/bootstrap-variables';
+
+// THEME
+// minimal container-border-bottom: 1px solid transparent,
+$noticeme-theme: (
+  transition: all 0.25s,
+  container-padding: $container-padding,
+  container-margin: $container-margin,
+  container-height: $container-height,
+  container-border-bottom: 2px solid $color-primary-noticeme,
+  container-border-bottom-focused: 2px solid $color-focused-noticeme,
+  container-border-bottom-invalid: 2px solid $color-error-noticeme,
+  input-border: $input-border,
+  input-padding: $input-padding,
+  input-font-size: $input-font-size,
+  input-height: $input-height,
+  font-family: $font-family,
+  error-message-font-size: $error-message-font-size,
+  error-message-color: $error-message-color,
+  error-message-margin: $error-message-margin,
+);
+
+$noticeme-tag-theme: (
+  flex: true,
+  font-family: $font-family,
+  font-weight: $tag-font-weight,
+  font-size: $tag-font-size,
+  letter-spacing: $tag-letter-spacing,
+  border-radius: $tag-border-radius,
+  margin: $tag-margin,
+  padding: $tag-padding,
+  height: $tag-height,
+  line-height: $tag-line-height,
+  background: $color-primary-noticeme,
+  background-focused: $color-focused-noticeme,
+  background-active: color.adjust($color-focused-noticeme, $lightness: -5%),
+  background-hover: color.adjust($color-primary-noticeme, $lightness: -5%),
+  background-editing: #fff,
+  border-editing: 1px solid #ccc,
+  box-shadow: 0 2px 3px 1px #d4d1d1,
+  color: $tag-color,
+  color-focused: #fff,
+  color-active: #fff,
+  color-hover: initial,
+  transition: all 0.3s,
+);
+
+.ng2-tag-input {
+  @include tag-input-theme($noticeme-theme);
+}
+
+.error-message {
+  @include error-message($noticeme-theme);
+}

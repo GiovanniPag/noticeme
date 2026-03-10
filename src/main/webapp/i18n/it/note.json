@@ -1,0 +1,64 @@
+{
+  "noticeMeApp": {
+    "note": {
+      "placeholder": {
+        "title": "Titolo",
+        "content": "Contenuto",
+        "tag_1": "+ Tag",
+        "tag_2": "Aggiungi tag"
+      },
+      "toolbar": {
+        "archive": "Archivia",
+        "unarchive": "Rimuovi dall'archivio",
+        "delete": "Elimina",
+        "alarm": "Allarme",
+        "alarmdate": "Data allarme",
+        "tags": "Etichetta",
+        "collaborator": "Collaboratori",
+        "attachment": "Allegati",
+        "restore": "Ripristina",
+        "unpin": "Stacca Nota",
+        "pin": "Fissa Nota",
+        "permanentdelete": "Elimina definitivamente"
+      },
+      "home": {
+        "title": "Note",
+        "titlepinned": "Note Fissate",
+        "titleother": "Altre Note",
+        "refreshListLabel": "Aggiorna Lista",
+        "createLabel": "Genera una nuova Nota",
+        "createOrEditLabel": "Genera o modifica una Nota",
+        "notFound": "Nessuna Nota Trovata"
+      },
+      "created": "&Egrave; stata generata una nuova Nota con identificatore {{ param }}",
+      "updated": "&Egrave; stata aggiornata la Nota identificata da {{ param }}",
+      "deleted": "&Egrave; stata eliminata la Nota con identificatore {{ param }}",
+      "delete": {
+        "question": "Sei sicuro di volere eliminare Nota {{ id }}?"
+      },
+      "detail": {
+        "title": "Nota",
+        "isInTrash": "nota nel cestino",
+        "secondsAgo": " qualche secondo fa",
+        "minutesAgo": " qualche minuto fa",
+        "hoursAgo": " {{ time }} ora/e fa",
+        "daysAgo": " {{ time }} giorno/i fa",
+        "monthsAgo": " {{ time }} mese/i fa",
+        "yearsAgo": " {{ time }} anno/i fa"
+      },
+      "id": "ID",
+      "title": "Titolo",
+      "content": "Contenuto",
+      "alarmDate": "Allarme",
+      "status": "Stato",
+      "attachment": "Allegato",
+      "createdBy": "Creata da",
+      "createdDate": "Creata il",
+      "lastModifiedBy": "Modificata da",
+      "lastModifiedDate": "Ultima modifica:",
+      "owner": "Proprietario",
+      "tag": "Tag",
+      "collaborator": "Collaboratori"
+    }
+  }
+}

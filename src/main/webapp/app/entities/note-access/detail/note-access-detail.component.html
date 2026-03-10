@@ -1,0 +1,48 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (noteAccess(); as noteAccessRef) {
+      <div>
+        <h2 data-cy="noteAccessDetailsHeading"><span jhiTranslate="noticeMeApp.noteAccess.detail.title">Note Access</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ noteAccessRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="noticeMeApp.noteAccess.role">Role</span></dt>
+          <dd>
+            <span [jhiTranslate]="'noticeMeApp.AccessRole.' + (noteAccessRef.role ?? 'null')">{{
+              { null: '', VIEWER: 'VIEWER', EDITOR: 'EDITOR' }[noteAccessRef.role ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="noticeMeApp.noteAccess.note">Note</span></dt>
+          <dd>
+            @if (noteAccess()!.note) {
+              <div>
+                <a [routerLink]="['/note', noteAccess()!.note?.id, 'view']">{{ noteAccessRef.note?.id }}</a>
+              </div>
+            }
+          </dd>
+          <dt><span jhiTranslate="noticeMeApp.noteAccess.user">User</span></dt>
+          <dd>
+            <span>{{ noteAccessRef.user?.id }}</span>
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Indietro</span>
+        </button>
+
+        <button type="button" [routerLink]="['/note-access', noteAccessRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Modifica</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

@@ -1,6 +1,9 @@
 {
   "global": {
-    "title": "NoticeMe",
+    "title": {
+      "notice": "Notice",
+      "me": "Me"
+    },
     "browsehappy": "Stai utilizzando un browser <strong> non aggiornato </ strong> <a href=\"http://browsehappy.com/?locale=it\"> Aggiorna il tuo browser per </a> migliorare la tua esperienza.",
     "menu": {
       "home": "Home",
@@ -8,7 +11,19 @@
       "entities": {
         "main": "Entità",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)",
-        "adminAuthority": "Authority"
+        "tag": "Etichette",
+        "note": "Note",
+        "attachment": "Allegati",
+        "noteAccess": "Accesso Note"
+      },
+      "sidebar": {
+        "title": "Menù principale",
+        "tags": "Etichette",
+        "note": "Note",
+        "archive": "Archivio",
+        "trash": "Cestino",
+        "alarm": "Promemoria",
+        "shared": "Condivise"
       },
       "account": {
         "main": "Utente",
@@ -90,15 +105,16 @@
   },
   "entity": {
     "action": {
-      "addblob": "Aggiungi blob",
+      "addblob": "Aggiungi File",
       "addimage": "Aggiungi immagine",
       "back": "Indietro",
       "cancel": "Annulla",
       "delete": "Elimina",
       "edit": "Modifica",
-      "open": "Open",
+      "open": "Apri",
       "save": "Salva",
       "view": "Visualizza",
+      "close": "Chiudi",
       "show": "Show {{otherEntity}}"
     },
     "detail": {
@@ -135,6 +151,7 @@
     "userexists": "Il nome utente è già in uso!",
     "emailexists": "L'email è già in uso!",
     "idexists": "Un(a) nuovo/a {{entityName}} non può già avere un ID",
+    "tagnameesxists": "Un(a) nuovo/a {{ entityName }} non può avere un nome esistente",
     "idnull": "Invalid ID",
     "idinvalid": "Invalid Id",
     "idnotfound": "ID cannot be found",
@@ -143,5 +160,8 @@
       "not.image": "File was expected to be an image but was found to be \"{{ fileType }}\""
     }
   },
-  "footer": "Piè di pagina"
+  "warning": {
+    "titlelength": "{{remainingCharacters}} caratteri rimanenti.",
+    "contentlength": "{{remainingCharacters}} caratteri rimanenti."
+  }
 }

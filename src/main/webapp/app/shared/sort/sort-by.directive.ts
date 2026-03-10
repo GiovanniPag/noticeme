@@ -6,6 +6,7 @@ import { SortDirective } from './sort.directive';
 
 @Directive({
   selector: '[jhiSortBy]',
+  standalone: true,
 })
 export class SortByDirective {
   readonly jhiSortBy = input.required<string>();

@@ -1,0 +1,64 @@
+{
+  "noticeMeApp": {
+    "note": {
+      "placeholder": {
+        "title": "Title",
+        "content": "Content",
+        "tag_1": "+ Tag",
+        "tag_2": "Add tag"
+      },
+      "toolbar": {
+        "archive": "Archive",
+        "unarchive": "Unarchive",
+        "delete": "Delete",
+        "alarm": "Alarm",
+        "alarmdate": "Alarm Date",
+        "tags": "Tag",
+        "collaborator": "Collaborator",
+        "attachment": "Attachment",
+        "restore": "Restore",
+        "unpin": "Unpin",
+        "pin": "Pin",
+        "permanentdelete": "Permanently delete"
+      },
+      "home": {
+        "title": "Notes",
+        "titlepinned": "Pinned Notes",
+        "titleother": "Other Notes",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Note",
+        "createOrEditLabel": "Create or edit a Note",
+        "notFound": "No Notes found"
+      },
+      "created": "A new Note is created with identifier {{ param }}",
+      "updated": "A Note is updated with identifier {{ param }}",
+      "deleted": "A Note is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Note {{ id }}?"
+      },
+      "detail": {
+        "title": "Note",
+        "isInTrash": "note in the trash",
+        "secondsAgo": " some seconds ago",
+        "minutesAgo": " some minutes ago",
+        "hoursAgo": " {{time}} hour(s) ago",
+        "daysAgo": " {{time}} day(s) ago",
+        "monthsAgo": " {{time}} month(s) ago",
+        "yearsAgo": " {{time}} year(s) ago"
+      },
+      "id": "ID",
+      "title": "Title",
+      "content": "Content",
+      "alarmDate": "Alarm Date",
+      "status": "Status",
+      "attachment": "Attachment",
+      "owner": "Owner",
+      "tag": "Tag",
+      "createdBy": "Created by",
+      "createdDate": "Created date",
+      "lastModifiedBy": "Modified by",
+      "lastModifiedDate": "Last update:",
+      "collaborator": "Collaborator"
+    }
+  }
+}

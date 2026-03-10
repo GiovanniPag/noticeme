@@ -1,0 +1,30 @@
+{
+  "noticeMeApp": {
+    "attachment": {
+      "home": {
+        "title": "Allegati",
+        "refreshListLabel": "Ricarica lista",
+        "createLabel": "Genera un nuovo Allegato",
+        "createOrEditLabel": "Genera o modifica un Allegato",
+        "notFound": "Nessun Allegato trovato"
+      },
+      "created": "&Egrave; stato generato un nuovo Allegato con identificatore {{ param }}",
+      "updated": "&Egrave; stato aggiornato Allegato identificato da {{ param }}",
+      "deleted": "&Egrave; stato eliminato Allegato con identificatore {{ param }}",
+      "delete": {
+        "question": "Sei sicuro di volere eliminare Allegato {{ id }}?"
+      },
+      "detail": {
+        "title": "Allegato"
+      },
+      "id": "ID",
+      "fileName": "Nome del file",
+      "data": "Data",
+      "fileSize": "Dimesione del File",
+      "note": "Note",
+      "tooltip": {
+        "delete": "Elimina Allegato"
+      }
+    }
+  }
+}

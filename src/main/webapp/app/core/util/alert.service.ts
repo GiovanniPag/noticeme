@@ -16,15 +16,16 @@ export interface Alert {
   toast?: boolean;
   position?: string;
   close?: (alerts: Alert[]) => void;
+  closed?: boolean;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AlertService {
-  timeout = 5000;
-  toast = false;
-  position = 'top right';
+  timeout = 3000;
+  toast = true;
+  position = '';
 
   // unique id for each alert. Starts from 0.
   private alertId = 0;
@@ -66,7 +67,7 @@ export class AlertService {
     alert.toast = alert.toast ?? this.toast;
     alert.position = alert.position ?? this.position;
     alert.close = (alertsArray: Alert[]) => this.closeAlert(alert.id, alertsArray);
-
+    alert.closed = alert.closed ?? false;
     (extAlerts ?? this.alerts).push(alert);
 
     if (alert.timeout > 0) {
@@ -78,11 +79,25 @@ export class AlertService {
     return alert;
   }
 
+  translateDynamicMessage(alert: Alert): Alert {
+    if (alert.translationKey) {
+      const translatedMessage = this.translateService.instant(alert.translationKey, alert.translationParams);
+      // if translation key exists
+      if (translatedMessage !== `${translationNotFoundMessage}[${alert.translationKey}]`) {
+        alert.message = translatedMessage;
+      } else {
+        alert.message ??= alert.translationKey;
+      }
+    }
+    return alert;
+  }
+
   private closeAlert(alertId: number, extAlerts?: Alert[]): void {
     const alerts = extAlerts ?? this.alerts;
     const alertIndex = alerts.map(alert => alert.id).indexOf(alertId);
     // if found alert then remove
     if (alertIndex >= 0) {
+      alerts[alertIndex].closed = true;
       alerts.splice(alertIndex, 1);
     }
   }

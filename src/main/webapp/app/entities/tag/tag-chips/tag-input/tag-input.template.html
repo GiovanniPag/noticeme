@@ -1,0 +1,43 @@
+<div [ngClass]="theme" class="ng2-tag-input" (click)="focus(true)">
+  <!-- TAGS -->
+  <div class="ng2-tags-container">
+    @for (tag of tags(); track tag.id; let i = $index) {
+    <jhi-tag-chip
+      [model]="tag"
+      [index]="i"
+      [disabled]="disabled()"
+      (removeTag)="removeTag(tag)"
+      (selectTag)="selectItem(i)"
+      (keyDownTag)="onTagKeydown($event, i)"
+      (blurTag)="onTagBlurred($event, i)"
+    >
+    </jhi-tag-chip>
+    } @if (!hideForm()) {
+    <jhi-tag-chips-form
+      #TagChipsFormComponent
+      [disabled]="disabled()"
+      [placeholder]="(tags().length ? placeholder() : secondaryPlaceholder()) | translate"
+      [noteId]="noteid()"
+      [existingTags]="tags()"
+      [inputClass]="inputClass()"
+      [inputId]="inputId()"
+      (submitTag)="addTagByName($event)"
+      (blurEvent)="blur()"
+      (keyDownEvent)="onInputKeydown($event)"
+    >
+    </jhi-tag-chips-form>
+    }
+  </div>
+</div>
+
+<!-- ERRORS -->
+@if (hasErrors()) {
+<div [ngClass]="theme" class="error-messages">
+  @for (error of errors; track error.msg) {
+  <p class="error-message" jhitranslate="error">
+    <span jhiTranslate="{{error.msg}}" [translateValues]="error.translateValues"></span>
+  </p>
+  }
+</div>
+}
+<ng-content></ng-content>
