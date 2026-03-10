@@ -227,7 +227,7 @@ export class EllipsisDirective implements AfterViewInit {
   // -----------------------
   private truncateText(max: number, addMoreListener: boolean): number {
     const original = this.originalText();
-    let text = this.getTruncatedText(original, max);
+    const text = this.getTruncatedText(original, max);
     const truncatedLength = text.length;
     const textTruncated = truncatedLength !== original.length;
     this.renderer.setProperty(this.innerElem, 'textContent', '');

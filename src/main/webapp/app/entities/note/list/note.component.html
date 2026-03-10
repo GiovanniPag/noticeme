@@ -26,9 +26,7 @@
       <!-- Pinned Notes -->
       @if (pinnedNotes().length > 0) {
         <div class="grid-wrapper">
-          <label>
             <span jhiTranslate="noticeMeApp.note.home.titlepinned">Pinned Notes</span>
-          </label>
           <div
             #gridPinned
             id="gridPinned"
@@ -82,9 +80,7 @@
       @if (otherNotes().length > 0) {
         <div class="grid-wrapper">
           @if (pinnedNotes().length > 0) {
-            <label>
               <span jhiTranslate="noticeMeApp.note.home.titleother">Other Notes</span>
-            </label>
           }
           <div
             #gridOther

@@ -13,7 +13,6 @@ import { translationNotFoundMessage } from 'app/config/translation.config';
   standalone: true,
 })
 export default class TranslateDirective implements OnChanges, OnInit, OnDestroy {
-  readonly jhiTranslate = input.required<string>();
   readonly translateValues = input<Record<string, unknown>>();
 
   private readonly directiveDestroyed = new Subject();

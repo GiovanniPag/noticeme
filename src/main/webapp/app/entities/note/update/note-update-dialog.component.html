@@ -127,11 +127,11 @@
       <div class="d-flex">
         <div class="ml-auto mr-1 small-text">
           @if (isDeleted()) {
-            <label class="m-0" jhiTranslate="noticeMeApp.note.detail.isInTrash">in trash bin</label>
-            <label class="m-0"> - </label>
+            <span class="m-0" jhiTranslate="noticeMeApp.note.detail.isInTrash">in trash bin</span>
+            <span class="m-0"> - </span>
           }
-          <label class="m-0" jhiTranslate="noticeMeApp.note.lastModifiedDate" for="field_lastModifiedDate">lastModifiedDate</label>
-          <label class="m-0">{{ formattedLastUpdateDate() }}</label>
+          <span class="m-0" jhiTranslate="noticeMeApp.note.lastModifiedDate" for="field_lastModifiedDate">lastModifiedDate</span>
+          <span class="m-0">{{ formattedLastUpdateDate() }}</span>
         </div>
       </div>
     </div>

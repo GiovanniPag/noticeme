@@ -245,8 +245,6 @@ export class NoteComponent implements OnInit {
   loadOne(id: number): void {
     this.queryBackendOne(id).subscribe({
       next: (res: EntityResponseType) => {
-        console.log('loadOne response', res.body);
-        console.log('attachments', res.body?.attachments);
         this.updateNote(res.body);
       },
     });
@@ -397,8 +395,6 @@ export class NoteComponent implements OnInit {
 
   protected updateNote(data: INote | null): void {
     if (!data) return;
-    console.log('updateNote incoming', data.id, data.attachments);
-
     const pinnedNotesArr = this.pinnedNotes();
     const otherNotesArr = this.otherNotes();
     // Try to find the note in pinned or other
@@ -429,16 +425,6 @@ export class NoteComponent implements OnInit {
         this.otherNotes.update(notes => [...notes, data]);
       }
     }
-
-    console.log(
-      'after pinned',
-      this.pinnedNotes().find(n => n.id === data.id),
-    );
-    console.log(
-      'after other',
-      this.otherNotes().find(n => n.id === data.id),
-    );
-
     this.relayoutAll();
   }
 

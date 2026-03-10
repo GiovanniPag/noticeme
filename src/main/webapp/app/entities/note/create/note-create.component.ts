@@ -156,6 +156,9 @@ export class NoteCreateComponent implements AfterViewInit, OnInit {
     });
   }
 
+  getSelectedUser(option: IUser, selectedVals?: IUser[] | null): IUser {
+    return selectedVals?.find(v => v.id === option.id) ?? option;
+  }
   // ----- Save flow -----
   save(): void {
     this.isSaving.set(true);
@@ -201,9 +204,5 @@ export class NoteCreateComponent implements AfterViewInit, OnInit {
       .pipe(map((res: HttpResponse<IUser[]>) => res.body ?? []))
       .pipe(map((users: IUser[]) => this.userService.addUserToCollectionIfMissing<IUser>(users)))
       .subscribe((users: IUser[]) => this.usersSharedCollection.set(users));
-  }
-
-  getSelectedUser(option: IUser, selectedVals?: IUser[] | null): IUser {
-    return selectedVals?.find(v => v.id === option.id) ?? option;
   }
 }

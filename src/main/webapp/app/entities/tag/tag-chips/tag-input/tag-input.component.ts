@@ -61,7 +61,9 @@ export class TagInputComponent implements ControlValueAccessor {
   /* ------------------ CVA ------------------ */
   private _tags = signal<ITag[]>([]);
   private readonly tagService = inject(TagService);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onChange: (value: ITag[]) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onTouched: () => void = () => {};
   writeValue(value: ITag[] | null): void {
     this._tags.set(value ?? []);
