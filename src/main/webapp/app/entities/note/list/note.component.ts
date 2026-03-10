@@ -73,8 +73,7 @@ export class NoteComponent implements OnInit {
 
   allNoteStatus = NoteStatus;
   readonly canShowCreate = computed(
-    () =>
-      (!this.status() || this.status() === NoteStatus.NORMAL || this.status() === NoteStatus.PINNED) && (!this.collab() || !this.alarm()),
+    () => (!this.status() || this.status() === NoteStatus.NORMAL || this.status() === NoteStatus.PINNED) && !this.collab() && !this.alarm(),
   );
   // ========================
   // Muuri Grid Config

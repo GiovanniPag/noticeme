@@ -65,6 +65,7 @@ export class TagFormService {
   private getFormDefaults(): TagFormDefaults {
     return {
       id: null,
+      color: null,
     };
   }
 }
