@@ -29,8 +29,8 @@
           </dd>
           <dt><span jhiTranslate="noticeMeApp.tag.notes">Notes</span></dt>
           <dd>
-          @if (relatedNotes().length) {
-            @for (note of relatedNotes(); track $index; let last = $last) {
+          @if (tagRef.notes?.length) {
+            @for (note of tagRef.notes; track note.id) {
 			<div class="mb-2">
 		      <button type="button" class="btn btn-link p-0" (click)="openRelatedNote(note)">
 		        {{ note.title || ('Note #' + note.id) }}

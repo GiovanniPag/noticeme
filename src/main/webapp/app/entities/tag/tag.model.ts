@@ -6,7 +6,7 @@ export interface ITag {
   tagName?: string | null;
   color?: string | null;
   owner?: Pick<IUser, 'id'> | null;
-  notes?: Pick<INote, 'id'>[] | null;
+  notes?: Pick<INote, 'id' | 'title' | 'status'>[] | null;
 }
 
 export type NewTag = Omit<ITag, 'id'> & { id: null };

@@ -69,6 +69,7 @@ export class NoteComponent implements OnInit {
   status = signal<string | undefined>(undefined);
   collab = signal<boolean | undefined>(undefined);
   alarm = signal<boolean | undefined>(undefined);
+  pendingEditNoteId = signal<number | null>(null);
 
   allNoteStatus = NoteStatus;
   readonly canShowCreate = computed(
@@ -120,7 +121,7 @@ export class NoteComponent implements OnInit {
   protected modalService = inject(NgbModal);
   protected ngZone = inject(NgZone);
   private destroyRef = inject(DestroyRef);
-
+  private lastOpenedEditNoteId: number | null = null;
   trackId = (item: INote): number => this.noteService.getNoteIdentifier(item);
 
   // ========================
@@ -134,6 +135,9 @@ export class NoteComponent implements OnInit {
           this.status.set(params.get('status') ?? undefined);
           this.collab.set(params.get('isCollaborator') === 'true');
           this.alarm.set(params.get('hasAlarm') === 'true');
+          const editNoteId = params.get('editNoteId');
+          this.pendingEditNoteId.set(editNoteId ? Number(editNoteId) : null);
+          this.lastOpenedEditNoteId = null;
           this.reset();
         }),
         takeUntilDestroyed(this.destroyRef),
@@ -241,8 +245,8 @@ export class NoteComponent implements OnInit {
   loadOne(id: number): void {
     this.queryBackendOne(id).subscribe({
       next: (res: EntityResponseType) => {
-		console.log('loadOne response', res.body);
-		console.log('attachments', res.body?.attachments);
+        console.log('loadOne response', res.body);
+        console.log('attachments', res.body?.attachments);
         this.updateNote(res.body);
       },
     });
@@ -388,11 +392,12 @@ export class NoteComponent implements OnInit {
     this.fillComponentAttributesFromResponseHeader(response.headers);
     this.fillComponentAttributesFromResponseBody(response.body);
     this.relayoutAll();
+    this.tryOpenPendingEditDialog();
   }
 
   protected updateNote(data: INote | null): void {
     if (!data) return;
-	console.log('updateNote incoming', data.id, data.attachments);
+    console.log('updateNote incoming', data.id, data.attachments);
 
     const pinnedNotesArr = this.pinnedNotes();
     const otherNotesArr = this.otherNotes();
@@ -425,8 +430,14 @@ export class NoteComponent implements OnInit {
       }
     }
 
-	console.log('after pinned', this.pinnedNotes().find(n => n.id === data.id));
-	console.log('after other', this.otherNotes().find(n => n.id === data.id));
+    console.log(
+      'after pinned',
+      this.pinnedNotes().find(n => n.id === data.id),
+    );
+    console.log(
+      'after other',
+      this.otherNotes().find(n => n.id === data.id),
+    );
 
     this.relayoutAll();
   }
@@ -478,5 +489,33 @@ export class NoteComponent implements OnInit {
   private relayoutAll(): void {
     this.scheduleGridLayout(this.gridPinned);
     this.scheduleGridLayout(this.gridOther);
+  }
+
+  private tryOpenPendingEditDialog(): void {
+    const editNoteId = this.pendingEditNoteId();
+
+    if (!editNoteId || this.lastOpenedEditNoteId === editNoteId) {
+      return;
+    }
+
+    const noteFromList = this.pinnedNotes().find(note => note.id === editNoteId) ?? this.otherNotes().find(note => note.id === editNoteId);
+
+    if (noteFromList) {
+      this.lastOpenedEditNoteId = editNoteId;
+      this.clearEditNoteQueryParam();
+      this.openUpdateDialog(noteFromList);
+      return;
+    }
+  }
+
+  private clearEditNoteQueryParam(): void {
+    this.ngZone.run(() => {
+      this.router.navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: { editNoteId: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
   }
 }
