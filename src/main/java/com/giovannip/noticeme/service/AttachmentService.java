@@ -8,9 +8,7 @@ import com.giovannip.noticeme.security.AuthoritiesConstants;
 import com.giovannip.noticeme.security.SecurityUtils;
 import com.giovannip.noticeme.service.dto.AttachmentDTO;
 import com.giovannip.noticeme.service.mapper.AttachmentMapper;
-
 import jakarta.persistence.EntityNotFoundException;
-
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +47,7 @@ public class AttachmentService {
     public AttachmentDTO save(AttachmentDTO attachmentDTO) {
         LOG.debug("Request to save Attachment : {}", attachmentDTO);
         Attachment attachment = attachmentMapper.toEntity(attachmentDTO);
-        Note note = noteRepository.findById(attachment.getNote().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Note not found"));
+        Note note = noteRepository.findById(attachment.getNote().getId()).orElseThrow(() -> new EntityNotFoundException("Note not found"));
         note.addAttachment(attachment);
         noteRepository.flush();
         return attachmentMapper.toDto(attachment);
@@ -145,8 +142,7 @@ public class AttachmentService {
     @Transactional
     public void delete(Long id) {
         LOG.debug("Request to delete Attachment : {}", id);
-        Attachment attachment = attachmentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Attachment not found"));
+        Attachment attachment = attachmentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Attachment not found"));
         Note note = attachment.getNote();
         note.removeAttachment(attachment);
         noteRepository.save(note);

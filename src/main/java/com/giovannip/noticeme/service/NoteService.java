@@ -64,8 +64,8 @@ public class NoteService {
     public NoteDTO update(NoteDTO noteDTO) {
         LOG.debug("Request to update Note : {}", noteDTO);
         Note existingNote = noteRepository
-                .findById(noteDTO.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Note not found with id " + noteDTO.getId()));
+            .findById(noteDTO.getId())
+            .orElseThrow(() -> new IllegalArgumentException("Note not found with id " + noteDTO.getId()));
         // copy editable fields, but DO NOT touch attachments
         noteMapper.partialUpdate(existingNote, noteDTO);
         existingNote = noteRepository.save(existingNote);
@@ -138,7 +138,7 @@ public class NoteService {
         LOG.debug("Request to get all Notes by status");
 
         Collection<NoteStatus> statuses = noteStatusFilter(status);
-        
+
         Page<Note> page;
         if (SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN)) {
             page = hasAlarm

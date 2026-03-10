@@ -15,11 +15,17 @@
     [excludeBeforeClick]="true"
     [delayClickOutsideInit]="true"
   >
-  @if (attachments().length > 0) {
-    <jhi-carousel-attachment #carousel [attachments]="attachments()" (remove)="deleteAttachment($event)" [disableRemove]="isDeleted()" [resolveData]="true">
-    </jhi-carousel-attachment>
+    @if (attachments().length > 0) {
+      <jhi-carousel-attachment
+        #carousel
+        [attachments]="attachments()"
+        (remove)="deleteAttachment($event)"
+        [disableRemove]="isDeleted()"
+        [resolveData]="true"
+      >
+      </jhi-carousel-attachment>
     }
-    
+
     <div class="modal-header d-flex">
       <div class="form-group" hidden>
         <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" readonly />

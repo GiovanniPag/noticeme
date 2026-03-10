@@ -62,11 +62,19 @@ public class AttachmentSummaryDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "AttachmentSummaryDTO{" +
-            "id=" + getId() +
-            ", fileName='" + getFileName() + '\'' +
-            ", dataContentType='" + getDataContentType() + '\'' +
-            ", fileSize=" + getFileSize() +
-            '}';
+        return (
+            "AttachmentSummaryDTO{" +
+            "id=" +
+            getId() +
+            ", fileName='" +
+            getFileName() +
+            '\'' +
+            ", dataContentType='" +
+            getDataContentType() +
+            '\'' +
+            ", fileSize=" +
+            getFileSize() +
+            '}'
+        );
     }
 }

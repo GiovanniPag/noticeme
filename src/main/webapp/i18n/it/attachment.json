@@ -22,9 +22,9 @@
       "data": "Data",
       "fileSize": "Dimesione del File",
       "note": "Note",
-	  "tooltip": {
-        	"delete": "Elimina Allegato"
-       }
+      "tooltip": {
+        "delete": "Elimina Allegato"
+      }
     }
   }
 }

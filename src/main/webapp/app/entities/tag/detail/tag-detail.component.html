@@ -29,18 +29,18 @@
           </dd>
           <dt><span jhiTranslate="noticeMeApp.tag.notes">Notes</span></dt>
           <dd>
-          @if (tagRef.notes?.length) {
-            @for (note of tagRef.notes; track note.id) {
-			<div class="mb-2">
-		      <button type="button" class="btn btn-link p-0" (click)="openRelatedNote(note)">
-		        {{ note.title || ('Note #' + note.id) }}
-		      </button>
-		      <small class="text-muted ms-2">{{ note.status }}</small>
-		    </div>
-            }
+            @if (tagRef.notes?.length) {
+              @for (note of tagRef.notes; track note.id) {
+                <div class="mb-2">
+                  <button type="button" class="btn btn-link p-0" (click)="openRelatedNote(note)">
+                    {{ note.title || 'Note #' + note.id }}
+                  </button>
+                  <small class="text-muted ms-2">{{ note.status }}</small>
+                </div>
+              }
             } @else {
-    <span class="text-muted">No notes</span>
-  }
+              <span class="text-muted">No notes</span>
+            }
           </dd>
         </dl>
 

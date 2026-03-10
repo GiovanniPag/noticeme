@@ -232,34 +232,34 @@ export class EllipsisDirective implements AfterViewInit {
     const textTruncated = truncatedLength !== original.length;
     this.renderer.setProperty(this.innerElem, 'textContent', '');
 
-	// Remove any existing more click listener:
-	if (this.destroyMoreClickListener) {
-	  this.destroyMoreClickListener();
-	  this.destroyMoreClickListener = undefined;
-	}
+    // Remove any existing more click listener:
+    if (this.destroyMoreClickListener) {
+      this.destroyMoreClickListener();
+      this.destroyMoreClickListener = undefined;
+    }
 
-	if (!textTruncated) {
-	  this.renderer.appendChild(this.innerElem, this.renderer.createText(text));
-	  return truncatedLength;
-	}
+    if (!textTruncated) {
+      this.renderer.appendChild(this.innerElem, this.renderer.createText(text));
+      return truncatedLength;
+    }
 
-	if (this.showMore()) {
-	  this.renderer.appendChild(this.innerElem, this.renderer.createText(text));
+    if (this.showMore()) {
+      this.renderer.appendChild(this.innerElem, this.renderer.createText(text));
 
-	  this.moreAnchor.textContent = this.normalizeEllipsis(this.ellipsis());
-	  this.renderer.appendChild(this.innerElem, this.moreAnchor);
+      this.moreAnchor.textContent = this.normalizeEllipsis(this.ellipsis());
+      this.renderer.appendChild(this.innerElem, this.moreAnchor);
 
-	  if (addMoreListener) {
-	    this.destroyMoreClickListener = this.renderer.listen(this.moreAnchor, 'click', (e: MouseEvent) => {
-	      e.preventDefault();
-	      this.moreClickEmitter.emit(e);
-	    });
-	  }
-	} else {
-	  const finalText = text + this.normalizeEllipsis(this.ellipsis());
-	  this.renderer.appendChild(this.innerElem, this.renderer.createText(finalText));
-	}
-	return truncatedLength;
+      if (addMoreListener) {
+        this.destroyMoreClickListener = this.renderer.listen(this.moreAnchor, 'click', (e: MouseEvent) => {
+          e.preventDefault();
+          this.moreClickEmitter.emit(e);
+        });
+      }
+    } else {
+      const finalText = text + this.normalizeEllipsis(this.ellipsis());
+      this.renderer.appendChild(this.innerElem, this.renderer.createText(finalText));
+    }
+    return truncatedLength;
   }
 
   private getTruncatedText(original: string, max: number): string {

@@ -42,47 +42,42 @@
         <div class="mb-3">
           <label class="form-label" for="field_color" jhiTranslate="noticeMeApp.tag.color">Color</label>
           <div class="d-flex align-items-center gap-3">
-          <input
-            type="color"
-            class="form-control form-control-color"
-            id="field_color"
-            data-cy="color"
-            formControlName="color"
-            title="Choose tag color"
-          />
-          <input
-            type="text"
-            class="form-control"
-            [value]="editForm.controls.color.value ?? ''"
-            readonly
-          />
-          @if (colorRef.invalid && (colorRef.dirty || colorRef.touched)) {
-            <div>
-              @if (editForm.get('color')?.errors?.maxlength) {
-                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '20' }"
-                  >Questo campo non può essere più di 20 caratteri.</small
-                >
-              }
-            </div>
-          }
-        </div>
+            <input
+              type="color"
+              class="form-control form-control-color"
+              id="field_color"
+              data-cy="color"
+              formControlName="color"
+              title="Choose tag color"
+            />
+            <input type="text" class="form-control" [value]="editForm.controls.color.value ?? ''" readonly />
+            @if (colorRef.invalid && (colorRef.dirty || colorRef.touched)) {
+              <div>
+                @if (editForm.get('color')?.errors?.maxlength) {
+                  <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '20' }"
+                    >Questo campo non può essere più di 20 caratteri.</small
+                  >
+                }
+              </div>
+            }
+          </div>
         </div>
 
-      <div>
-        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
-          <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Annulla</span>
-        </button>
+        <div>
+          <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+            <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Annulla</span>
+          </button>
 
-        <button
-          type="submit"
-          id="save-entity"
-          data-cy="entityCreateSaveButton"
-          [disabled]="editForm.invalid || isSaving"
-          class="btn btn-primary"
-        >
-          <fa-icon icon="save"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Salva</span>
-        </button>
-      </div>
+          <button
+            type="submit"
+            id="save-entity"
+            data-cy="entityCreateSaveButton"
+            [disabled]="editForm.invalid || isSaving"
+            class="btn btn-primary"
+          >
+            <fa-icon icon="save"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Salva</span>
+          </button>
+        </div>
       </div>
     </form>
   </div>

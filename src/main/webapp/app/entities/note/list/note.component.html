@@ -42,15 +42,15 @@
               <div (mousedown)="onMouseDown($event)" (click)="onClick($event, note)" class="muuri-grid-item" jhiGridItem>
                 <div class="muuri-grid-item-content" (resized)="onResized()">
                   @if ((note.attachments?.length ?? 0) > 0) {
-                  <div class="card-img-top">
-                    <jhi-carousel-attachment
-                      [attachments]="note.attachments!"
-                      [disableRemove]="true"
-                      [showNavigationIndicators]="false"
-                      [showNavigationArrows]="false"
-                      [resolveData]="false"
-                    ></jhi-carousel-attachment>
-                  </div>
+                    <div class="card-img-top">
+                      <jhi-carousel-attachment
+                        [attachments]="note.attachments!"
+                        [disableRemove]="true"
+                        [showNavigationIndicators]="false"
+                        [showNavigationArrows]="false"
+                        [resolveData]="false"
+                      ></jhi-carousel-attachment>
+                    </div>
                   }
                   <div class="card-body">
                     <h5 class="card-title">{{ note.title }}</h5>
@@ -99,15 +99,15 @@
               <div (mousedown)="onMouseDown($event)" (click)="onClick($event, note)" class="muuri-grid-item" jhiGridItem>
                 <div class="muuri-grid-item-content" (resized)="onResized()">
                   @if ((note.attachments?.length ?? 0) > 0) {
-                  <div class="card-img-top">
-                    <jhi-carousel-attachment
-                      [attachments]="note.attachments!"
-                      [disableRemove]="true"
-                      [showNavigationIndicators]="false"
-                      [showNavigationArrows]="false"
-                      [resolveData]="false"
-                    ></jhi-carousel-attachment>
-                  </div>
+                    <div class="card-img-top">
+                      <jhi-carousel-attachment
+                        [attachments]="note.attachments!"
+                        [disableRemove]="true"
+                        [showNavigationIndicators]="false"
+                        [showNavigationArrows]="false"
+                        [resolveData]="false"
+                      ></jhi-carousel-attachment>
+                    </div>
                   }
                   <div class="card-body">
                     <h5 class="card-title">{{ note.title }}</h5>

@@ -19,7 +19,7 @@ public interface AttachmentMapper extends EntityMapper<AttachmentDTO, Attachment
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")
     NoteDTO toDtoNoteId(Note note);
-    
+
     @Named("toSummary")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")

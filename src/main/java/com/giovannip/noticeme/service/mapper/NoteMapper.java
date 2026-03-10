@@ -32,7 +32,7 @@ public interface NoteMapper extends EntityMapper<NoteDTO, Note> {
     @Mapping(target = "removeAttachment", ignore = true)
     @Mapping(target = "removeTag", ignore = true)
     void partialUpdate(@MappingTarget Note entity, NoteDTO dto);
-    
+
     @Named("userId")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")
@@ -49,17 +49,15 @@ public interface NoteMapper extends EntityMapper<NoteDTO, Note> {
     default Set<TagDTO> toDtoTagTagNameSet(Set<Tag> tag) {
         return tag.stream().map(this::toDtoTagTagName).collect(Collectors.toSet());
     }
-    
+
     @Named("attachmentSummarySet")
     default Set<AttachmentSummaryDTO> toDtoAttachmentSummarySet(Set<Attachment> attachments) {
         if (attachments == null) {
             return Set.of();
         }
-        return attachments.stream()
-            .map(this::mapAttachmentSummary)
-            .collect(Collectors.toSet());
+        return attachments.stream().map(this::mapAttachmentSummary).collect(Collectors.toSet());
     }
-   
+
     private AttachmentSummaryDTO mapAttachmentSummary(Attachment attachment) {
         AttachmentSummaryDTO dto = new AttachmentSummaryDTO();
         dto.setId(attachment.getId());

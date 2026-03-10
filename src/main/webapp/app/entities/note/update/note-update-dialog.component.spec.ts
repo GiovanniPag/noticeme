@@ -23,7 +23,7 @@ describe('Note Management Update Component', () => {
   let userService: UserService;
   let tagService: TagService;
 
- /* beforeEach(() => {
+  /* beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [NoteUpdateDialogComponent],
       providers: [

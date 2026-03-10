@@ -37,7 +37,7 @@ public class TagService {
     private static final String ENTITY_NAME = "tag";
     private final TagMapper tagMapper;
 
-    public TagService(TagRepository tagRepository, TagMapper tagMapper, UserService userService, NoteRepository noteRepository ) {
+    public TagService(TagRepository tagRepository, TagMapper tagMapper, UserService userService, NoteRepository noteRepository) {
         this.tagRepository = tagRepository;
         this.noteRepository = noteRepository;
         this.userService = userService;
@@ -78,8 +78,8 @@ public class TagService {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
         Tag existingTag = tagRepository
-                .findById(tagDTO.getId())
-                .orElseThrow(() -> new BadRequestAlertException("Tag not found", ENTITY_NAME, "idnotfound"));
+            .findById(tagDTO.getId())
+            .orElseThrow(() -> new BadRequestAlertException("Tag not found", ENTITY_NAME, "idnotfound"));
         validateOwnership(existingTag);
         String newTagName = tagDTO.getTagName();
         if (
@@ -109,14 +109,11 @@ public class TagService {
         return tagRepository
             .findById(tagDTO.getId())
             .map(existingTag -> {
-            	validateOwnership(existingTag);
+                validateOwnership(existingTag);
                 String newTagName = tagDTO.getTagName();
                 if (tagDTO.getTagName() != null) {
                     boolean nameChanged = !tagDTO.getTagName().equalsIgnoreCase(existingTag.getTagName());
-                    if (
-                        nameChanged &&
-                        tagRepository.existsByTagNameAndOwnerLogin(tagDTO.getTagName(), existingTag.getOwner().getLogin())
-                    ) {
+                    if (nameChanged && tagRepository.existsByTagNameAndOwnerLogin(tagDTO.getTagName(), existingTag.getOwner().getLogin())) {
                         throw new BadRequestAlertException("A tag with this name already exists", ENTITY_NAME, "tagnameexists");
                     }
                     existingTag.setTagName(tagDTO.getTagName());
@@ -183,9 +180,7 @@ public class TagService {
     @Transactional
     public void delete(Long id) {
         LOG.debug("Request to delete Tag : {}", id);
-        Tag tag = tagRepository
-                .findById(id)
-                .orElseThrow(() -> new BadRequestAlertException("Tag not found", ENTITY_NAME, "idnotfound"));
+        Tag tag = tagRepository.findById(id).orElseThrow(() -> new BadRequestAlertException("Tag not found", ENTITY_NAME, "idnotfound"));
         validateOwnership(tag);
         for (Note note : new HashSet<>(tag.getNotes())) {
             note.removeTag(tag);
@@ -245,7 +240,7 @@ public class TagService {
             .findDistinctAllByOwnerIdAndTagNameNotInAndTagNameStartingWithOrderByTagNameAsc(ownerId, noteTags, initial, pageable)
             .map(tagMapper::toDto);
     }
-    
+
     private void validateOwnership(Tag tag) {
         String login = SecurityUtils.getCurrentUserLogin().orElseThrow();
         if (tag.getOwner() == null || !login.equals(tag.getOwner().getLogin())) {

@@ -35,10 +35,13 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         @Param("initial") String initial,
         Pageable pageable
     );
+
     @EntityGraph(attributePaths = "notes")
     Optional<Tag> findOneWithNotesByIdAndOwnerLogin(Long id, String login);
+
     @EntityGraph(attributePaths = "notes")
     Optional<Tag> findOneWithNotesById(Long id);
+
     Optional<Tag> findOneByIdAndOwnerLogin(@Param("id") Long id, @Param("login") String login);
 
     Optional<Tag> findOneByTagNameAndOwnerLogin(@Param("tagName") String tagName, @Param("login") String login);

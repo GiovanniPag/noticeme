@@ -23,10 +23,10 @@
       </div>
       <!-- Floating actions -->
       <div class="position-absolute top-0 end-0 m-2 d-flex gap-2 z-3">
-      @if (hasData(file)) {
-        <button type="button" class="btn btn-light btn-sm" (click)="downloadFile(file)">
-          <fa-icon icon="download"></fa-icon>
-        </button>
+        @if (hasData(file)) {
+          <button type="button" class="btn btn-light btn-sm" (click)="downloadFile(file)">
+            <fa-icon icon="download"></fa-icon>
+          </button>
         }
         @if (!disableRemove()) {
           <button
