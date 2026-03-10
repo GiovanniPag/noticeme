@@ -21,10 +21,10 @@
       "fileName": "Nome del file",
       "data": "Data",
       "fileSize": "Dimesione del File",
-      "note": "Note"
-	   "tooltip": {
-        	"delete": "Elimina Allegato"
-       }
+      "note": "Note",
+      "tooltip": {
+        "delete": "Elimina Allegato"
+      }
     }
   }
 }

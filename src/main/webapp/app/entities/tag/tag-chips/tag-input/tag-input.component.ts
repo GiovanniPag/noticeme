@@ -40,9 +40,9 @@ export class TagInputComponent implements ControlValueAccessor {
   separatorKeys: string[] = default_tag_input.separatorKeyCodes;
   hideForm = input<boolean>(default_tag_input.hideForm);
   errorMessages = default_tag_input.errorMessages;
-  theme = default_tag_input.theme;
-  inputId = default_tag_input.inputId;
-  inputClass = default_tag_input.inputClass;
+  theme = input<string>(default_tag_input.theme);
+  inputId = input<string | null>(default_tag_input.inputId);
+  inputClass = input<string>(default_tag_input.inputClass);
   /* ------------------ Outputs ------------------ */
   tagAdded = output<ITag>();
   tagRemoved = output<ITag>();
@@ -57,17 +57,13 @@ export class TagInputComponent implements ControlValueAccessor {
   readonly selectedIndex = signal<number | null>(null);
   isLoading = signal(false);
   isSaving = signal(false);
-  readonly formStatus = computed(() => this.inputForm?.form.status ?? null);
 
-  readonly errors = computed(() => {
-    if (!this.inputForm) return [];
-    if (this.formStatus() === 'PENDING') return [];
-    return this.inputForm.getErrorMessages(this.errorMessages);
-  });
   /* ------------------ CVA ------------------ */
   private _tags = signal<ITag[]>([]);
   private readonly tagService = inject(TagService);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onChange: (value: ITag[]) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onTouched: () => void = () => {};
   writeValue(value: ITag[] | null): void {
     this._tags.set(value ?? []);
@@ -83,6 +79,17 @@ export class TagInputComponent implements ControlValueAccessor {
     this.disabledByCva.set(isDisabled);
   }
   /* ------------------ Public API ------------------ */
+  get formStatus(): string | null {
+    return this.inputForm?.form.status ?? null;
+  }
+
+  get errors(): { msg: string; translateValues?: Record<string, unknown> }[] {
+    if (!this.inputForm) return [];
+    if (this.formStatus === 'PENDING') return [];
+    const control = this.inputForm.tagNameControl;
+    if (!control.dirty && !control.touched) return [];
+    return this.inputForm.getErrorMessages(this.errorMessages);
+  }
   focus(applyFocus = false): void {
     this.selectedIndex.set(null);
     if (applyFocus) {
@@ -114,20 +121,34 @@ export class TagInputComponent implements ControlValueAccessor {
     this.tagRemoved.emit(tag);
   }
 
-  addTagByName(event: { tagName: string; color?: string }): void {
+  addTagByName(event: { type: 'text'; tagName: string; color: string } | { type: 'existing'; tag: ITag }): void {
+    if (event.type === 'existing') {
+      if (this.isDuplicate(event.tag.tagName ?? '')) return;
+      this.appendTag(event.tag);
+      return;
+    }
     const trimmed = event.tagName.trim();
     if (!trimmed || this.isDuplicate(trimmed)) return;
     this.isLoading.set(true);
     this.tagService.findByName(trimmed).subscribe({
       next: (res: HttpResponse<ITag>) => {
         this.isLoading.set(false);
-        if (res.body) {
-          this.appendTag(res.body);
+        const found = res.body;
+        const exactMatch = found?.tagName?.trim().toLowerCase() === trimmed.toLowerCase();
+        if (found && exactMatch) {
+          if (this.isDuplicate(found.tagName ?? '')) return;
+          this.appendTag(found);
         } else {
-          this.createTag(trimmed);
+          this.createTag(trimmed, event.color);
         }
       },
-      error: () => this.isLoading.set(false),
+      error: err => {
+        this.isLoading.set(false);
+        if (err.status === 404) {
+          this.createTag(trimmed, event.color);
+          return;
+        }
+      },
     });
   }
 
@@ -176,11 +197,11 @@ export class TagInputComponent implements ControlValueAccessor {
   }
 
   onInputKeydown(event: KeyboardEvent): void {
-    if (this.separatorKeys.includes(event.key)) {
+    if (event.key !== 'Enter' && this.separatorKeys.includes(event.key)) {
       event.preventDefault();
       const value = this.inputForm?.inputText;
       if (value) {
-        this.addTagByName({ tagName: value });
+        this.addTagByName({ type: 'text', tagName: value, color: this.inputForm?.tagColorControl.value ?? this.randomHexColor() });
       }
     }
     if (event.key === 'Backspace' && !this.inputForm?.inputText) {
@@ -191,13 +212,16 @@ export class TagInputComponent implements ControlValueAccessor {
     }
   }
 
+  randomHexColor(): string {
+    const random = Math.floor(Math.random() * 16777215);
+    return `#${random.toString(16).padStart(6, '0')}`;
+  }
   /* ------------------------------------------------------------------
    * Errors (Signal-based)
    * ------------------------------------------------------------------ */
 
   hasErrors(): boolean {
-    const currentErrors = this.errors();
-    return Array.isArray(currentErrors) && currentErrors.length > 0;
+    return this.errors.length > 0;
   }
 
   isInputFocused(): boolean {
@@ -213,13 +237,13 @@ export class TagInputComponent implements ControlValueAccessor {
     this.focus();
   }
 
-  private createTag(tagName: string): void {
+  private createTag(tagName: string, color?: string): void {
     this.isSaving.set(true);
     this.tagService
       .create({
         id: null,
         tagName,
-        color: this.inputForm?.tagColorControl.value,
+        color,
       })
       .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe({
@@ -232,11 +256,11 @@ export class TagInputComponent implements ControlValueAccessor {
   }
 
   private isDuplicate(name: string): boolean {
-    const dupe = this._tags().find(t => t.tagName === name);
+    const normalized = name.trim().toLowerCase();
+    const dupe = this._tags().find(t => (t.tagName ?? '').trim().toLowerCase() === normalized);
     if (dupe) {
       const index = this._tags().indexOf(dupe);
-      const tagComponent = this.tagComponents.get(index);
-      tagComponent?.blink();
+      this.tagComponents.get(index)?.blink();
     }
     return !!dupe;
   }

@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef, input, output, inject, signal, computed, effect } from '@angular/core';
 import { NonNullableFormBuilder, Validators, ValidatorFn, AbstractControl, ValidationErrors, ReactiveFormsModule } from '@angular/forms';
-import { NgbTypeaheadModule, NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
+import { NgbTypeaheadModule, NgbTypeahead, NgbTypeaheadSelectItemEvent } from '@ng-bootstrap/ng-bootstrap';
 import { HttpResponse } from '@angular/common/http';
 import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { Observable, OperatorFunction, of } from 'rxjs';
@@ -29,7 +29,7 @@ export class TagChipsFormComponent {
   /* ==========================================================
    * Outputs
    * ========================================================== */
-  readonly submitTag = output<{ tagName: string; color?: string }>();
+  readonly submitTag = output<{ type: 'text'; tagName: string; color: string } | { type: 'existing'; tag: ITag }>();
   readonly blurEvent = output<FocusEvent>();
   readonly keyUpEvent = output<KeyboardEvent>();
   readonly keyDownEvent = output<KeyboardEvent>();
@@ -39,13 +39,12 @@ export class TagChipsFormComponent {
   @ViewChild('typeahead') public popup!: NgbTypeahead;
   @ViewChild('tagInput', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   readonly searching = signal(false);
-  readonly hasErrors = computed(() => this.tagNameControl.invalid && this.tagNameControl.dirty);
   readonly fb = inject(NonNullableFormBuilder);
   readonly form = this.fb.group({
     tagName: this.fb.control('', {
       validators: [minTrimmedLength(1), Validators.maxLength(255)],
     }),
-    color: this.fb.control('#3b82f6'), // default color (blue)
+    color: this.randomHexColor(), // default color (random)
   });
   readonly tagNameControl = this.form.controls.tagName;
   readonly tagColorControl = this.form.controls.color;
@@ -63,6 +62,14 @@ export class TagChipsFormComponent {
     });
   }
 
+  randomHexColor(): string {
+    const random = Math.floor(Math.random() * 16777215);
+    return `#${random.toString(16).padStart(6, '0')}`;
+  }
+
+  hasErrors(): boolean {
+    return this.tagNameControl.invalid && (this.tagNameControl.dirty || this.tagNameControl.touched);
+  }
   /* ==========================================================
    * Actions
    * ========================================================== */
@@ -95,12 +102,11 @@ export class TagChipsFormComponent {
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
       event.preventDefault();
-      if (!this.hasErrors() && this.tagNameControl.value.trim()) {
-        this.submit();
-      }
-    } else {
-      this.keyDownEvent.emit(event);
+      event.stopPropagation();
+      this.submit();
+      return;
     }
+    this.keyDownEvent.emit(event);
   }
 
   onKeyUp(event: KeyboardEvent): void {
@@ -115,23 +121,24 @@ export class TagChipsFormComponent {
     const tagName = this.tagNameControl.value.trim();
     const color = this.form.controls.color.value;
     if (!tagName || this.hasErrors()) return;
-    this.submitTag.emit({ tagName, color });
+    this.submitTag.emit({ type: 'text', tagName, color });
     this.reset();
   }
 
   reset(): void {
-    const color = this.form.controls.color.value;
     this.form.reset({
       tagName: '',
-      color,
+      color: this.randomHexColor(),
     });
+    this.tagNameControl.markAsPristine();
+    this.tagNameControl.markAsUntouched();
   }
 
   /* ==========================================================
    * Typeahead Search
    * ========================================================== */
 
-  search: OperatorFunction<string, readonly string[]> = (text$: Observable<string>) =>
+  search: OperatorFunction<string, readonly ITag[]> = (text$: Observable<string>) =>
     text$.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -149,11 +156,22 @@ export class TagChipsFormComponent {
             noteid: this.noteId(),
             filterby: this.existingTags()?.map(t => t.tagName) ?? [],
           })
-          .pipe(map((res: HttpResponse<ITag[]>) => res.body?.map(tag => tag.tagName ?? '') ?? []));
+          .pipe(map((res: HttpResponse<ITag[]>) => res.body ?? []));
       }),
       tap(() => this.searching.set(false)),
     );
 
+  readonly inputFormatter = (tag: ITag): string => tag.tagName ?? '';
+  readonly resultFormatter = (tag: ITag): string => tag.tagName ?? '';
+
+  onSelectItem(event: NgbTypeaheadSelectItemEvent<ITag>): void {
+    event.preventDefault();
+    this.submitTag.emit({
+      type: 'existing',
+      tag: event.item,
+    });
+    this.reset();
+  }
   /* ==========================================================
    * Error Helper
    * ========================================================== */
@@ -172,6 +190,6 @@ export class TagChipsFormComponent {
 function minTrimmedLength(min: number): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = (control.value as string).trim();
-    return value.length < min ? { minlength: { msg: 'entity.validation.minlength', TranslateValues: { min: 1 } } } : null;
+    return value.length < min ? { minlength: { msg: 'entity.validation.minlength', translateValues: { min: 1 } } } : null;
   };
 }

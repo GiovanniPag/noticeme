@@ -22,8 +22,6 @@ describe('Tag Form Service', () => {
             id: expect.any(Object),
             tagName: expect.any(Object),
             color: expect.any(Object),
-            owner: expect.any(Object),
-            notes: expect.any(Object),
           }),
         );
       });
@@ -36,8 +34,6 @@ describe('Tag Form Service', () => {
             id: expect.any(Object),
             tagName: expect.any(Object),
             color: expect.any(Object),
-            owner: expect.any(Object),
-            notes: expect.any(Object),
           }),
         );
       });

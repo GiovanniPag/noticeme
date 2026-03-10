@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @IntegrationTest
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(username = "user")
 class AttachmentResourceIT {
 
     private static final String DEFAULT_FILE_NAME = "AAAAAAAAAA";
@@ -85,14 +85,10 @@ class AttachmentResourceIT {
             .dataContentType(DEFAULT_DATA_CONTENT_TYPE)
             .fileSize(DEFAULT_FILE_SIZE);
         // Add required entity
-        Note note;
-        if (TestUtil.findAll(em, Note.class).isEmpty()) {
-            note = NoteResourceIT.createEntity(em);
-            em.persist(note);
-            em.flush();
-        } else {
-            note = TestUtil.findAll(em, Note.class).get(0);
-        }
+        Note note = NoteResourceIT.createEntity(em);
+        em.persist(note);
+        em.flush();
+
         attachment.setNote(note);
         return attachment;
     }
@@ -110,14 +106,9 @@ class AttachmentResourceIT {
             .dataContentType(UPDATED_DATA_CONTENT_TYPE)
             .fileSize(UPDATED_FILE_SIZE);
         // Add required entity
-        Note note;
-        if (TestUtil.findAll(em, Note.class).isEmpty()) {
-            note = NoteResourceIT.createUpdatedEntity(em);
-            em.persist(note);
-            em.flush();
-        } else {
-            note = TestUtil.findAll(em, Note.class).get(0);
-        }
+        Note note = NoteResourceIT.createUpdatedEntity(em);
+        em.persist(note);
+        em.flush();
         updatedAttachment.setNote(note);
         return updatedAttachment;
     }

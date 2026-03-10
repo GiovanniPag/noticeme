@@ -10,16 +10,18 @@
     [attr.id]="inputId()"
     [attr.placeholder]="placeholder()"
     [attr.aria-label]="placeholder()"
-    [disabled]="disabled()"
     (blur)="blurEvent.emit($event)"
     (keydown)="onKeyDown($event)"
     (keyup)="onKeyUp($event)"
     #typeahead="ngbTypeahead"
     [ngbTypeahead]="search"
+    [inputFormatter]="inputFormatter"
+    [resultFormatter]="resultFormatter"
+    (selectItem)="onSelectItem($event)"
     container="body"
     placement="auto"
     popupClass="zindex-popover click-outside-exclude"
   />
   <!-- Color Picker -->
-  <input type="color" formControlName="color" [disabled]="disabled()" class="color-picker" />
+  <input type="color" formControlName="color" class="color-picker" />
 </form>

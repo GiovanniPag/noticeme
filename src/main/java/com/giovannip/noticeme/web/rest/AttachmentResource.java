@@ -142,9 +142,17 @@ public class AttachmentResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of attachments in body.
      */
     @GetMapping("")
-    public ResponseEntity<List<AttachmentDTO>> getAllAttachments(@org.springdoc.core.annotations.ParameterObject Pageable pageable) {
+    public ResponseEntity<List<AttachmentDTO>> getAllAttachments(
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable,
+        @RequestParam(required = false) Long noteId
+    ) {
         LOG.debug("REST request to get a page of Attachments");
-        Page<AttachmentDTO> page = attachmentService.findAll(pageable);
+        Page<AttachmentDTO> page;
+        if (noteId != null) {
+            page = attachmentService.findAllByNoteId(pageable, noteId);
+        } else {
+            page = attachmentService.findAll(pageable);
+        }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

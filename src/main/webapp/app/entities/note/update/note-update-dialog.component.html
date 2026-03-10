@@ -15,12 +15,18 @@
     [excludeBeforeClick]="true"
     [delayClickOutsideInit]="true"
   >
-    <jhi-carousel-attachment
-      #carousel
-      [attachments]="attachments()"
-      (remove)="deleteAttachment($event)"
-    ></jhi-carousel-attachment>
-     <div class="modal-header d-flex">
+    @if (attachments().length > 0) {
+      <jhi-carousel-attachment
+        #carousel
+        [attachments]="attachments()"
+        (remove)="deleteAttachment($event)"
+        [disableRemove]="isDeleted()"
+        [resolveData]="true"
+      >
+      </jhi-carousel-attachment>
+    }
+
+    <div class="modal-header d-flex">
       <div class="form-group" hidden>
         <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" readonly />
       </div>
@@ -48,21 +54,17 @@
           (input)="savePatch($event)"
         />
       </div>
-        @let titleRef = editForm.get('title')!;
-          @if (titleRef.invalid && (titleRef.dirty || titleRef.touched)) {
+      @let titleRef = editForm.get('title')!;
+      @if (titleRef.invalid && (titleRef.dirty || titleRef.touched)) {
         <div>
           @if (editForm.get('title')?.errors?.maxlength) {
-            <small
-              class="form-text text-danger pl-3"
-              jhiTranslate="entity.validation.maxlength"
-              [translateValues]="{ max: 255 }"
-            >
+            <small class="form-text text-danger pl-3" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: 255 }">
               This field cannot be longer than 255 characters.
             </small>
           }
         </div>
       }
-	@if (!isDeleted()) {
+      @if (!isDeleted()) {
         <div class="btn-group" role="group" aria-label="pin group">
           <button
             [hidden]="note.status === allNoteStatus.PINNED"
@@ -90,7 +92,7 @@
         </div>
       }
     </div>
-       <div class="modal-body">
+    <div class="modal-body">
       <div class="form-group mb-0">
         <textarea
           #field_content
@@ -106,10 +108,13 @@
           (input)="savePatch($event)"
         ></textarea>
       </div>
-    <div class="form-group mb-0 w-100">
+      <div class="form-group mb-0 w-100">
         <jhi-tag-input
           #tagInput
-          name="tags" id="field_tags" data-cy="tags" formControlName="tags"
+          name="tags"
+          id="field_tags"
+          data-cy="tags"
+          formControlName="tags"
           class="form-group mb-0 w-100"
           inputClass="w-100"
           [disabledInput]="isDeleted()"
@@ -118,20 +123,19 @@
         >
         </jhi-tag-input>
       </div>
-    
-  <div class="d-flex">
+
+      <div class="d-flex">
         <div class="ml-auto mr-1 small-text">
           @if (isDeleted()) {
-            <label class="m-0" jhiTranslate="noticeMeApp.note.detail.isInTrash">in trash bin</label>
-            <label class="m-0"> - </label>
+            <span class="m-0" jhiTranslate="noticeMeApp.note.detail.isInTrash">in trash bin</span>
+            <span class="m-0"> - </span>
           }
-          <label class="m-0" jhiTranslate="noticeMeApp.note.lastModifiedDate" for="field_lastModifiedDate">lastModifiedDate</label>
-          <label class="m-0">{{ formattedLastUpdateDate() }}</label>
-
+          <span class="m-0" jhiTranslate="noticeMeApp.note.lastModifiedDate" for="field_lastModifiedDate">lastModifiedDate</span>
+          <span class="m-0">{{ formattedLastUpdateDate() }}</span>
         </div>
       </div>
     </div>
-    
+
     <div class="modal-footer">
       <div class="btn-toolbar w-100 justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
         @if (!isDeleted()) {
@@ -184,7 +188,7 @@
               data-cy="data"
               id="upload_attach"
               [disabled]="isSaving()"
-              (change)="setFileData($event, 'data', true)"
+              (change)="setFileData($event, 'data', false)"
             />
 
             @if (note.status !== allNoteStatus.ARCHIVED) {
@@ -251,19 +255,13 @@
       </div>
 
       <div class="btn-group" role="group" aria-label="save group">
-        <button
-          type="submit"
-          id="save-entity"
-          data-cy="entitySaveButton"
-          class="btn btn-primary"
-          [disabled]="!canSubmit()"
-        >
+        <button type="submit" id="save-entity" data-cy="entitySaveButton" class="btn btn-primary" [disabled]="!canSubmit()">
           <span jhiTranslate="entity.action.close">Close</span>
         </button>
       </div>
     </div>
-    
-     <ng-template #popAlarmDate>
+
+    <ng-template #popAlarmDate>
       <div>
         <input
           id="field_alarmDate"
@@ -274,8 +272,8 @@
           formControlName="alarmDate"
           placeholder="YYYY-MM-DD HH:mm"
           [min]="minDate"
-        /> 
-		@let alertRef = editForm.get('alarmDate')!;
+        />
+        @let alertRef = editForm.get('alarmDate')!;
         @if (alertRef.invalid && (alertRef.dirty || alertRef.touched)) {
           <div>
             <small
@@ -334,12 +332,3 @@
     </ng-template>-->
   </form>
 }
-    
-    
-    
-    
-    
-    
-    
-    
-    

@@ -68,8 +68,13 @@ export class NoteComponent implements OnInit {
   isFirstFetch = computed(() => Object.keys(this.links()).length === 0);
   status = signal<string | undefined>(undefined);
   collab = signal<boolean | undefined>(undefined);
+  alarm = signal<boolean | undefined>(undefined);
+  pendingEditNoteId = signal<number | null>(null);
 
   allNoteStatus = NoteStatus;
+  readonly canShowCreate = computed(
+    () => (!this.status() || this.status() === NoteStatus.NORMAL || this.status() === NoteStatus.PINNED) && !this.collab() && !this.alarm(),
+  );
   // ========================
   // Muuri Grid Config
   // ========================
@@ -115,7 +120,7 @@ export class NoteComponent implements OnInit {
   protected modalService = inject(NgbModal);
   protected ngZone = inject(NgZone);
   private destroyRef = inject(DestroyRef);
-
+  private lastOpenedEditNoteId: number | null = null;
   trackId = (item: INote): number => this.noteService.getNoteIdentifier(item);
 
   // ========================
@@ -124,17 +129,15 @@ export class NoteComponent implements OnInit {
   ngOnInit(): void {
     combineLatest([this.activatedRoute.queryParamMap, this.activatedRoute.data])
       .pipe(
-        tap(([params, data]) => this.fillComponentAttributeFromRoute(params, data)),
-        tap(() => this.reset()),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe();
-    // Watch status & collab signals
-    this.activatedRoute.queryParams
-      .pipe(
-        tap(params => {
-          this.status.set(params['status']);
-          this.collab.set(params['isCollaborator']);
+        tap(([params, data]) => {
+          this.fillComponentAttributeFromRoute(params, data);
+          this.status.set(params.get('status') ?? undefined);
+          this.collab.set(params.get('isCollaborator') === 'true');
+          this.alarm.set(params.get('hasAlarm') === 'true');
+          const editNoteId = params.get('editNoteId');
+          this.pendingEditNoteId.set(editNoteId ? Number(editNoteId) : null);
+          this.lastOpenedEditNoteId = null;
+          this.reset();
         }),
         takeUntilDestroyed(this.destroyRef),
       )
@@ -147,11 +150,13 @@ export class NoteComponent implements OnInit {
   onPinnedGridCreated(grid: Grid): void {
     this.gridPinned = grid;
     this.registerGridEvents(grid);
+    this.scheduleGridLayout(grid);
   }
 
   onOtherGridCreated(grid: Grid): void {
     this.gridOther = grid;
     this.registerGridEvents(grid);
+    this.scheduleGridLayout(grid);
   }
 
   registerGridEvents(grid: Grid): void {
@@ -247,6 +252,7 @@ export class NoteComponent implements OnInit {
   removeOne(id: number): void {
     this.pinnedNotes.update(list => list.filter(n => n.id !== id));
     this.otherNotes.update(list => list.filter(n => n.id !== id));
+    this.relayoutAll();
   }
 
   reset(): void {
@@ -265,6 +271,7 @@ export class NoteComponent implements OnInit {
     } else {
       this.otherNotes.update(notes => [...notes, note]);
     }
+    this.relayoutAll();
   }
   // ========================
   // Utilities
@@ -294,10 +301,6 @@ export class NoteComponent implements OnInit {
     }
     time = dayjs().diff(lastModified, 'y');
     return this.translateService.instant('noticeMeApp.note.detail.yearsAgo', { time }) as string;
-  }
-
-  canShowCreate(): boolean {
-    return (!this.status() || this.status() === NoteStatus.NORMAL || this.status() === NoteStatus.PINNED) && !this.collab();
   }
 
   trackByFn(index: number, tag: INote): number {
@@ -347,7 +350,10 @@ export class NoteComponent implements OnInit {
     if (!note.id) return;
     this.isSaving.set(true);
     this.noteService
-      .partialUpdate(note)
+      .partialUpdate({
+        id: note.id,
+        tags: note.tags ?? [],
+      })
       .pipe(
         finalize(() => this.isSaving.set(false)),
         takeUntilDestroyed(this.destroyRef),
@@ -363,6 +369,7 @@ export class NoteComponent implements OnInit {
       size: this.itemsPerPage,
       status: this.status(),
       isCollaborator: !!this.collab(),
+      hasAlarm: !!this.alarm(),
       eagerload: true,
     };
     if (this.hasMorePage()) {
@@ -381,6 +388,8 @@ export class NoteComponent implements OnInit {
   protected onResponseSuccess(response: EntityArrayResponseType): void {
     this.fillComponentAttributesFromResponseHeader(response.headers);
     this.fillComponentAttributesFromResponseBody(response.body);
+    this.relayoutAll();
+    this.tryOpenPendingEditDialog();
   }
 
   protected updateNote(data: INote | null): void {
@@ -408,7 +417,14 @@ export class NoteComponent implements OnInit {
         this.otherNotes.update(notes => notes.filter(note => note.id !== data.id));
         this.pinnedNotes.update(notes => [...notes, data]);
       }
+    } else {
+      if (data.status === NoteStatus.PINNED) {
+        this.pinnedNotes.update(notes => [...notes, data]);
+      } else {
+        this.otherNotes.update(notes => [...notes, data]);
+      }
     }
+    this.relayoutAll();
   }
 
   protected fillComponentAttributesFromResponseBody(data: INote[] | null): void {
@@ -442,5 +458,49 @@ export class NoteComponent implements OnInit {
     } else {
       this.links.set({});
     }
+  }
+
+  private scheduleGridLayout(grid?: Grid): void {
+    if (!grid) return;
+
+    // Aspetta che Angular abbia finito il render visivo.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        grid.refreshItems().layout();
+      });
+    });
+  }
+
+  private relayoutAll(): void {
+    this.scheduleGridLayout(this.gridPinned);
+    this.scheduleGridLayout(this.gridOther);
+  }
+
+  private tryOpenPendingEditDialog(): void {
+    const editNoteId = this.pendingEditNoteId();
+
+    if (!editNoteId || this.lastOpenedEditNoteId === editNoteId) {
+      return;
+    }
+
+    const noteFromList = this.pinnedNotes().find(note => note.id === editNoteId) ?? this.otherNotes().find(note => note.id === editNoteId);
+
+    if (noteFromList) {
+      this.lastOpenedEditNoteId = editNoteId;
+      this.clearEditNoteQueryParam();
+      this.openUpdateDialog(noteFromList);
+      return;
+    }
+  }
+
+  private clearEditNoteQueryParam(): void {
+    this.ngZone.run(() => {
+      this.router.navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: { editNoteId: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
   }
 }

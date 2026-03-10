@@ -35,6 +35,7 @@
           maxlength="{{ maxTitleLength }}"
         />
       </div>
+
       @let titleRef = noteCreateForm.controls.title;
       @if (titleRef.invalid && (titleRef.dirty || titleRef.touched)) {
         <div>
@@ -43,6 +44,14 @@
               This field cannot be longer than 255 characters.
             </small>
           }
+        </div>
+      }
+      @if (shouldShowTitleWarning()) {
+        <div class="alert alert-warning d-flex justify-content-between align-items-center mt-2 mb-2 py-2 px-3">
+          <small>
+            {{ 'warning.titlelength' | translate: { remainingCharacters: titleRemaining() } }}
+          </small>
+          <button type="button" class="btn-close ms-2" aria-label="Close" (click)="dismissTitleWarning()"></button>
         </div>
       }
       <!-- Pin / Unpin -->
@@ -88,6 +97,14 @@
           maxlength="{{ maxContentLength }}"
         ></textarea>
       </div>
+      @if (shouldShowContentWarning()) {
+        <div class="alert alert-warning d-flex justify-content-between align-items-center mt-2 mb-2 py-2 px-3">
+          <small>
+            {{ 'warning.contentlength' | translate: { remainingCharacters: contentRemaining() } }}
+          </small>
+          <button type="button" class="btn-close ms-2" aria-label="Close" (click)="dismissContentWarning()"></button>
+        </div>
+      }
       <!-- Tags -->
       <div class="form-group mb-0 w-100">
         <jhi-tag-input
@@ -122,31 +139,6 @@
           >
             <fa-icon [icon]="['far', 'bell']"></fa-icon>
           </button>
-          <!-- TODO: share with others
-          <button
-            type="button"
-            class="btn btn-light"
-            [ngbPopover]="popCollaborator"
-            [autoClose]="'outside'"
-            #popoverAlarm="ngbPopover"
-            [popoverTitle]="popCollaboratorTitle"
-            popoverClass="click-outside-exclude"
-            ngbTooltip="{{ 'noticeMeApp.note.toolbar.collaborator' | translate }}"
-            placement="top auto"
-            container="body"
-          >
-            <fa-icon icon="user-plus"></fa-icon>
-          </button> -->
-          <!-- Attachment (placeholder: wire to a file input if/when you add it) -->
-          <button
-            type="button"
-            class="btn btn-light"
-            ngbTooltip="{{ 'noticeMeApp.note.toolbar.attachment' | translate }}"
-            placement="top"
-            container="body"
-          >
-            <fa-icon icon="link"></fa-icon>
-          </button>
         </div>
       </div>
       <!-- Save -->
@@ -156,7 +148,6 @@
         </button>
       </div>
     </div>
-
     <!-- Alarm popover templates -->
     <ng-template #popAlarmDate>
       <div>
@@ -191,31 +182,6 @@
         <button type="button" class="btn btn-light btn-sm" (click)="resetDate()">
           <fa-icon icon="times"></fa-icon>
         </button>
-      </div>
-    </ng-template>
-
-    <!-- sharing popover templates -->
-    <ng-template #popCollaborator>
-      <div>
-        <select
-          class="form-control"
-          id="field_collaborators"
-          data-cy="collaborator"
-          multiple
-          name="collaborators"
-          formControlName="collaborators"
-        >
-          @for (userOption of usersSharedCollection(); track userOption.id) {
-            <option [ngValue]="getSelectedUser(userOption, null)">
-              {{ userOption.login }}
-            </option>
-          }
-        </select>
-      </div>
-    </ng-template>
-    <ng-template #popCollaboratorTitle>
-      <div class="d-flex w-100 text-center">
-        <label class="h6 mb-0" jhiTranslate="noticeMeApp.note.collaborator" for="field_collaborators">Collaborator</label>
       </div>
     </ng-template>
   </form>

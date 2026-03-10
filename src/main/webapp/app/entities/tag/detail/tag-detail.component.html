@@ -29,11 +29,17 @@
           </dd>
           <dt><span jhiTranslate="noticeMeApp.tag.notes">Notes</span></dt>
           <dd>
-            @for (notes of tagRef.notes; track $index; let last = $last) {
-              <span>
-                <a [routerLink]="['/note', notes.id, 'view']">{{ notes?.id }}</a
-                >{{ last ? '' : ', ' }}
-              </span>
+            @if (tagRef.notes?.length) {
+              @for (note of tagRef.notes; track note.id) {
+                <div class="mb-2">
+                  <button type="button" class="btn btn-link p-0" (click)="openRelatedNote(note)">
+                    {{ note.title || 'Note #' + note.id }}
+                  </button>
+                  <small class="text-muted ms-2">{{ note.status }}</small>
+                </div>
+              }
+            } @else {
+              <span class="text-muted">No notes</span>
             }
           </dd>
         </dl>

@@ -37,13 +37,7 @@ export class TagService {
   }
 
   findByName(tagName: string): Observable<EntityResponseType> {
-    const options = createRequestOption({ name: tagName });
-    return this.query(options).pipe(
-      map(res => {
-        const tag = res.body?.[0] ?? null; // take first tag or null if none
-        return res.clone({ body: tag }); // return as HttpResponse<ITag>
-      }),
-    );
+    return this.http.get<ITag>(`${this.resourceUrl}/by-name/${encodeURIComponent(tagName)}`, { observe: 'response' });
   }
 
   query(req?: any): Observable<EntityArrayResponseType> {

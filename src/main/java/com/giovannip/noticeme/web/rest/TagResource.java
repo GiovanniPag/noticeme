@@ -60,6 +60,7 @@ public class TagResource {
         if (tagDTO.getId() != null) {
             throw new BadRequestAlertException("A new tag cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
         tagDTO = tagService.save(tagDTO);
         return ResponseEntity.created(new URI("/api/tags/" + tagDTO.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, tagDTO.getId().toString()))
@@ -137,12 +138,29 @@ public class TagResource {
      * {@code GET  /tags} : get all the tags.
      *
      * @param pageable the pagination information.
+     * @param initial optional initial text filter.
+     * @param noteid optional note id.
+     * @param filterby optional list of filters.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of tags in body.
      */
     @GetMapping("")
-    public ResponseEntity<List<TagDTO>> getAllTags(@org.springdoc.core.annotations.ParameterObject Pageable pageable) {
+    public ResponseEntity<List<TagDTO>> getAllTags(
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable,
+        @RequestParam(required = false) String initial,
+        @RequestParam(required = false) Long noteid,
+        @RequestParam(required = false) String[] filterby
+    ) {
         LOG.debug("REST request to get a page of Tags");
-        Page<TagDTO> page = tagService.findAll(pageable);
+        Page<TagDTO> page;
+        if (initial != null && !initial.isBlank()) {
+            if (noteid != null) {
+                page = tagService.findFilterAll(pageable, initial, noteid);
+            } else {
+                page = tagService.findFilterAll(pageable, initial, filterby);
+            }
+        } else {
+            page = tagService.findAll(pageable);
+        }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -157,6 +175,19 @@ public class TagResource {
     public ResponseEntity<TagDTO> getTag(@PathVariable("id") Long id) {
         LOG.debug("REST request to get Tag : {}", id);
         Optional<TagDTO> tagDTO = tagService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(tagDTO);
+    }
+
+    /**
+     * {@code GET  /tags/:tagname} : get the tag with the name.
+     *
+     * @param tagname the tagname of the tagDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the tagDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/by-name/{tagname}")
+    public ResponseEntity<TagDTO> getTagByName(@PathVariable("tagname") String tagname) {
+        LOG.debug("REST request to get Tag : {}", tagname);
+        Optional<TagDTO> tagDTO = tagService.findOne(tagname);
         return ResponseUtil.wrapOrNotFound(tagDTO);
     }
 

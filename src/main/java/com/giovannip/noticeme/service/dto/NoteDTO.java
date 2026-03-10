@@ -36,10 +36,12 @@ public class NoteDTO implements Serializable {
     @NotNull
     private NoteStatus status;
 
-    @NotNull
     private UserDTO owner;
 
     private Set<TagDTO> tags = new HashSet<>();
+
+    // Attachment metadata only for note list/detail summary
+    private Set<AttachmentSummaryDTO> attachments = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -129,6 +131,14 @@ public class NoteDTO implements Serializable {
         this.tags = tags;
     }
 
+    public Set<AttachmentSummaryDTO> getAttachments() {
+        return this.attachments;
+    }
+
+    public void setAttachments(Set<AttachmentSummaryDTO> attachments) {
+        this.attachments = attachments;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -165,6 +175,7 @@ public class NoteDTO implements Serializable {
             ", lastModifiedDate=" + lastModifiedDate +
             ", owner=" + getOwner() +
             ", tags=" + getTags() +
+            ", attachments=" + getAttachments() +
             "}";
     }
 }

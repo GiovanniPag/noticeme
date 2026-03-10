@@ -4,6 +4,7 @@ import { Injectable, signal } from '@angular/core';
 export class SideBarService {
   // Expose readonly signal
   private readonly _isActive = signal(false);
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   readonly isActive = this._isActive.asReadonly();
 
   closeSidebar(): void {

@@ -1,9 +1,14 @@
 package com.giovannip.noticeme.service;
 
 import com.giovannip.noticeme.domain.Attachment;
+import com.giovannip.noticeme.domain.Note;
 import com.giovannip.noticeme.repository.AttachmentRepository;
+import com.giovannip.noticeme.repository.NoteRepository;
+import com.giovannip.noticeme.security.AuthoritiesConstants;
+import com.giovannip.noticeme.security.SecurityUtils;
 import com.giovannip.noticeme.service.dto.AttachmentDTO;
 import com.giovannip.noticeme.service.mapper.AttachmentMapper;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +27,13 @@ public class AttachmentService {
     private static final Logger LOG = LoggerFactory.getLogger(AttachmentService.class);
 
     private final AttachmentRepository attachmentRepository;
+    private final NoteRepository noteRepository;
 
     private final AttachmentMapper attachmentMapper;
 
-    public AttachmentService(AttachmentRepository attachmentRepository, AttachmentMapper attachmentMapper) {
+    public AttachmentService(AttachmentRepository attachmentRepository, AttachmentMapper attachmentMapper, NoteRepository noteRepository) {
         this.attachmentRepository = attachmentRepository;
+        this.noteRepository = noteRepository;
         this.attachmentMapper = attachmentMapper;
     }
 
@@ -36,10 +43,13 @@ public class AttachmentService {
      * @param attachmentDTO the entity to save.
      * @return the persisted entity.
      */
+    @Transactional
     public AttachmentDTO save(AttachmentDTO attachmentDTO) {
         LOG.debug("Request to save Attachment : {}", attachmentDTO);
         Attachment attachment = attachmentMapper.toEntity(attachmentDTO);
-        attachment = attachmentRepository.save(attachment);
+        Note note = noteRepository.findById(attachment.getNote().getId()).orElseThrow(() -> new EntityNotFoundException("Note not found"));
+        note.addAttachment(attachment);
+        noteRepository.flush();
         return attachmentMapper.toDto(attachment);
     }
 
@@ -85,7 +95,27 @@ public class AttachmentService {
     @Transactional(readOnly = true)
     public Page<AttachmentDTO> findAll(Pageable pageable) {
         LOG.debug("Request to get all Attachments");
-        return attachmentRepository.findAll(pageable).map(attachmentMapper::toDto);
+        if (SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN)) {
+            return attachmentRepository.findAll(pageable).map(attachmentMapper::toDto);
+        }
+        String login = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return attachmentRepository.findAllByNoteOwnerLogin(login, pageable).map(attachmentMapper::toDto);
+    }
+
+    /**
+     * Get all the attachments.
+     *
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<AttachmentDTO> findAllByNoteId(Pageable pageable, long noteId) {
+        LOG.debug("Request to get all Attachments");
+        if (SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN)) {
+            return attachmentRepository.findAllByNoteId(noteId, pageable).map(attachmentMapper::toDto);
+        }
+        String login = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return attachmentRepository.findAllByNoteOwnerLoginAndNoteId(login, noteId, pageable).map(attachmentMapper::toDto);
     }
 
     /**
@@ -97,7 +127,11 @@ public class AttachmentService {
     @Transactional(readOnly = true)
     public Optional<AttachmentDTO> findOne(Long id) {
         LOG.debug("Request to get Attachment : {}", id);
-        return attachmentRepository.findById(id).map(attachmentMapper::toDto);
+        if (SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN)) {
+            return attachmentRepository.findById(id).map(attachmentMapper::toDto);
+        }
+        String login = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return attachmentRepository.findOneByIdAndNoteOwnerLogin(id, login).map(attachmentMapper::toDto);
     }
 
     /**
@@ -105,8 +139,12 @@ public class AttachmentService {
      *
      * @param id the id of the entity.
      */
+    @Transactional
     public void delete(Long id) {
         LOG.debug("Request to delete Attachment : {}", id);
-        attachmentRepository.deleteById(id);
+        Attachment attachment = attachmentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Attachment not found"));
+        Note note = attachment.getNote();
+        note.detachAttachment(attachment);
+        attachmentRepository.delete(attachment);
     }
 }

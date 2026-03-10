@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @IntegrationTest
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(username = "user")
 class TagResourceIT {
 
     private static final String DEFAULT_TAG_NAME = "AAAAAAAAAA";
@@ -53,9 +53,6 @@ class TagResourceIT {
 
     @Autowired
     private TagRepository tagRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private TagMapper tagMapper;
@@ -79,10 +76,8 @@ class TagResourceIT {
     public static Tag createEntity(EntityManager em) {
         Tag tag = new Tag().tagName(DEFAULT_TAG_NAME).color(DEFAULT_COLOR);
         // Add required entity
-        User user = UserResourceIT.createEntity();
-        em.persist(user);
-        em.flush();
-        tag.setOwner(user);
+        User user = getOrCreateUser(em, "user");
+		tag.setOwner(user);
         return tag;
     }
 
@@ -95,10 +90,8 @@ class TagResourceIT {
     public static Tag createUpdatedEntity(EntityManager em) {
         Tag updatedTag = new Tag().tagName(UPDATED_TAG_NAME).color(UPDATED_COLOR);
         // Add required entity
-        User user = UserResourceIT.createEntity();
-        em.persist(user);
-        em.flush();
-        updatedTag.setOwner(user);
+        User user = getOrCreateUser(em, "user");
+		updatedTag.setOwner(user);
         return updatedTag;
     }
 
@@ -450,5 +443,27 @@ class TagResourceIT {
 
     protected void assertPersistedTagToMatchUpdatableProperties(Tag expectedTag) {
         assertTagAllUpdatablePropertiesEquals(expectedTag, getPersistedTag(expectedTag));
+    }
+    
+    private static User getOrCreateUser(EntityManager em, String login) {
+        return em
+            .createQuery("select u from User u where u.login = :login", User.class)
+            .setParameter("login", login)
+            .getResultStream()
+            .findFirst()
+            .orElseGet(() -> {
+                User user = new User();
+                user.setLogin(login);
+                user.setPassword("password");
+                user.setActivated(true);
+                user.setEmail(login + "@example.com");
+                user.setFirstName("Test");
+                user.setLastName("User");
+                user.setImageUrl("");
+                user.setLangKey("en");
+                em.persist(user);
+                em.flush();
+                return user;
+            });
     }
 }

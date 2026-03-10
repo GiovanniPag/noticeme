@@ -163,8 +163,7 @@
     }
   },
   "warning": {
-    "titlelength": "{{remainingCharachters} remaining charachters.}",
-    "contentlength": "{{remainingCharachters} remaining charachters."
-  },
-  "footer": "This is your footer"
+    "titlelength": "{{remainingCharacters} remaining charachters.}",
+    "contentlength": "{{remainingCharacters} remaining charachters."
+  }
 }

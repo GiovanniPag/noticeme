@@ -12,7 +12,7 @@ import SharedModule from 'app/shared/shared.module';
   host: {
     '[class.moving]': 'moving()',
     '[class.blink]': 'blinking()',
-    '[style.background]': 'model().color ?? "#e0e0e0"',
+    '[style.background-color]': 'model().color || "#e0e0e0"',
     '[style.color]': 'textColor()',
     '(keydown)': 'onKeydown($event)',
     '(click)': 'select($event)',

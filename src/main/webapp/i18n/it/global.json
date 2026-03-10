@@ -161,8 +161,7 @@
     }
   },
   "warning": {
-    "titlelength": "{{remainingCharachters}} caratteri rimanenti.",
-    "contentlength": "{{remainingCharachters}} caratteri rimanenti."
-  },
-  "footer": "Piè di pagina"
+    "titlelength": "{{remainingCharacters}} caratteri rimanenti.",
+    "contentlength": "{{remainingCharacters}} caratteri rimanenti."
+  }
 }

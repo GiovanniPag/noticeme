@@ -43,7 +43,7 @@ public class Note extends AbstractAuditingEntity<Long> implements Serializable {
     @Column(name = "status", nullable = false)
     private NoteStatus status;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "note")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "note", cascade = CascadeType.ALL, orphanRemoval = true)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonIgnoreProperties(value = { "note" }, allowSetters = true)
     private Set<Attachment> attachments = new HashSet<>();
@@ -155,7 +155,12 @@ public class Note extends AbstractAuditingEntity<Long> implements Serializable {
         attachment.setNote(null);
         return this;
     }
-
+    
+    public Note detachAttachment(Attachment attachment) {
+        this.attachments.remove(attachment);
+        return this;
+    }
+    
     public User getOwner() {
         return this.owner;
     }

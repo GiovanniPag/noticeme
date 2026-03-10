@@ -1,11 +1,14 @@
 import { INote } from 'app/entities/note/note.model';
 
-export interface IAttachment {
+export interface IAttachmentSummary {
   id: number;
   fileName?: string | null;
-  data?: string | null;
   dataContentType?: string | null;
   fileSize?: number | null;
+}
+
+export interface IAttachment extends IAttachmentSummary {
+  data?: string | null;
   note?: Pick<INote, 'id'> | null;
 }
 

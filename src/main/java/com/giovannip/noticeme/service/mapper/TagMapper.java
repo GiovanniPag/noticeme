@@ -16,7 +16,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface TagMapper extends EntityMapper<TagDTO, Tag> {
     @Mapping(target = "owner", source = "owner", qualifiedByName = "userId")
-    @Mapping(target = "notes", source = "notes", qualifiedByName = "noteIdSet")
+    @Mapping(target = "notes", source = "notes", qualifiedByName = "noteSummarySet")
     TagDTO toDto(Tag s);
 
     @Mapping(target = "notes", ignore = true)
@@ -28,13 +28,15 @@ public interface TagMapper extends EntityMapper<TagDTO, Tag> {
     @Mapping(target = "id", source = "id")
     UserDTO toDtoUserId(User user);
 
-    @Named("noteId")
+    @Named("noteSummary")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")
-    NoteDTO toDtoNoteId(Note note);
+    @Mapping(target = "title", source = "title")
+    @Mapping(target = "status", source = "status")
+    NoteDTO toDtoNoteSummary(Note note);
 
-    @Named("noteIdSet")
-    default Set<NoteDTO> toDtoNoteIdSet(Set<Note> note) {
-        return note.stream().map(this::toDtoNoteId).collect(Collectors.toSet());
+    @Named("noteSummarySet")
+    default Set<NoteDTO> toDtoNoteSummarySet(Set<Note> note) {
+        return note.stream().map(this::toDtoNoteSummary).collect(Collectors.toSet());
     }
 }
