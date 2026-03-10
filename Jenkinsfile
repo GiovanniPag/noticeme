@@ -24,7 +24,7 @@ pipeline {
     // Sonar
     SONAR_ENV = "sonar"
     // Docker registry (local)
-    DOCKER_REGISTRY = "localhost:15000"
+    DOCKER_REGISTRY = "registry:5000"
     IMAGE_NAME = "noticeme"
   }
 
@@ -182,7 +182,8 @@ pipeline {
             sh './mvnw -ntp -Pprod clean package -DskipTests'
             sh """
               ./mvnw -Pprod jib:build \
-                -Djib.to.image=${DOCKER_REGISTRY}/${IMAGE_NAME}:${env.GIT_COMMIT}
+                -Djib.to.image=${DOCKER_REGISTRY}/${IMAGE_NAME}:${env.GIT_COMMIT} \
+                -Djib.allowInsecureRegistries=true
             """
           }
         }
