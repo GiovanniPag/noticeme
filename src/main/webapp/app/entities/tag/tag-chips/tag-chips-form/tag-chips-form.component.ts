@@ -38,6 +38,7 @@ export class TagChipsFormComponent {
    * ========================================================== */
   @ViewChild('typeahead') public popup!: NgbTypeahead;
   @ViewChild('tagInput', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('formEl', { static: true }) formRef!: ElementRef<HTMLFormElement>;
   readonly searching = signal(false);
   readonly fb = inject(NonNullableFormBuilder);
   readonly form = this.fb.group({
@@ -79,9 +80,21 @@ export class TagChipsFormComponent {
     this.inputRef.nativeElement.focus();
   }
 
-  blur(): void {
-    this._focused.set(false);
-    this.inputRef.nativeElement.blur();
+  onInputBlur(event: FocusEvent): void {
+    setTimeout(() => {
+      const active = document.activeElement as HTMLElement | null;
+      const formEl = this.formRef.nativeElement;
+
+      const insideForm = !!(active && formEl.contains(active));
+      const insidePopup = !!active?.closest('.click-outside-exclude');
+
+      if (insideForm || insidePopup) {
+        this._focused.set(true);
+        return;
+      }
+      this._focused.set(false);
+      this.blurEvent.emit(event);
+    }, 0);
   }
 
   set inputText(text: string) {
@@ -130,8 +143,6 @@ export class TagChipsFormComponent {
       tagName: '',
       color: this.randomHexColor(),
     });
-    this.tagNameControl.markAsPristine();
-    this.tagNameControl.markAsUntouched();
   }
 
   /* ==========================================================
@@ -189,7 +200,12 @@ export class TagChipsFormComponent {
  * ========================================================== */
 function minTrimmedLength(min: number): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-    const value = (control.value as string).trim();
-    return value.length < min ? { minlength: { msg: 'entity.validation.minlength', translateValues: { min: 1 } } } : null;
+    const raw = (control.value as string | null | undefined) ?? '';
+    const trimmed = raw.trim();
+    // campo opzionale: se è vuoto non è un errore
+    if (raw.length === 0) {
+      return null;
+    }
+    return trimmed.length < min ? { minlength: { msg: 'entity.validation.minlength', translateValues: { min } } } : null;
   };
 }

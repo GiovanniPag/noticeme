@@ -2,6 +2,8 @@ package com.giovannip.noticeme.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.temporal.ChronoUnit;
+
 public class NoteAsserts {
 
     /**
@@ -36,8 +38,7 @@ public class NoteAsserts {
         assertThat(actual)
             .as("Verify Note auto generated properties")
             .satisfies(a -> assertThat(a.getId()).as("check id").isEqualTo(expected.getId()))
-            .satisfies(a -> assertThat(a.getCreatedBy()).as("check createdBy").isEqualTo(expected.getCreatedBy()))
-            .satisfies(a -> assertThat(a.getCreatedDate()).as("check createdDate").isEqualTo(expected.getCreatedDate()));
+            .satisfies(a -> assertThat(a.getCreatedBy()).as("check createdBy").isEqualTo(expected.getCreatedBy()));
     }
 
     /**

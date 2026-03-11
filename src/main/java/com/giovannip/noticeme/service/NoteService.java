@@ -1,16 +1,25 @@
 package com.giovannip.noticeme.service;
 
 import com.giovannip.noticeme.domain.Note;
+import com.giovannip.noticeme.domain.Tag;
 import com.giovannip.noticeme.domain.User;
 import com.giovannip.noticeme.domain.enumeration.NoteStatus;
 import com.giovannip.noticeme.repository.NoteRepository;
+import com.giovannip.noticeme.repository.TagRepository;
 import com.giovannip.noticeme.security.AuthoritiesConstants;
 import com.giovannip.noticeme.security.SecurityUtils;
 import com.giovannip.noticeme.service.dto.NoteDTO;
+import com.giovannip.noticeme.service.dto.TagDTO;
 import com.giovannip.noticeme.service.mapper.NoteMapper;
+import com.giovannip.noticeme.web.rest.errors.BadRequestAlertException;
+
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -29,13 +38,15 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
     private final UserService userService;
-
+    private final TagRepository tagRepository;
+    
     private final NoteMapper noteMapper;
 
-    public NoteService(NoteRepository noteRepository, NoteMapper noteMapper, UserService userService) {
+    public NoteService(NoteRepository noteRepository, NoteMapper noteMapper, UserService userService, TagRepository tagRepository) {
         this.noteRepository = noteRepository;
         this.userService = userService;
         this.noteMapper = noteMapper;
+        this.tagRepository = tagRepository;
     }
 
     /**
@@ -46,7 +57,10 @@ public class NoteService {
      */
     public NoteDTO save(NoteDTO noteDTO) {
         LOG.debug("Request to save Note : {}", noteDTO);
+        validateOwnedTags(noteDTO);
+
         Note note = noteMapper.toEntity(noteDTO);
+        
         if (note.getId() == null) {
             User currentUser = this.userService.getCurrentUser().orElseThrow();
             note.setOwner(currentUser);
@@ -63,12 +77,22 @@ public class NoteService {
      */
     public NoteDTO update(NoteDTO noteDTO) {
         LOG.debug("Request to update Note : {}", noteDTO);
+        validateOwnedTags(noteDTO);
+
         Note existingNote = noteRepository
-            .findById(noteDTO.getId())
-            .orElseThrow(() -> new IllegalArgumentException("Note not found with id " + noteDTO.getId()));
-        // copy editable fields, but DO NOT touch attachments
-        noteMapper.partialUpdate(existingNote, noteDTO);
-        existingNote = noteRepository.save(existingNote);
+                .findById(noteDTO.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Note not found with id " + noteDTO.getId()));
+        existingNote.setTitle(noteDTO.getTitle());
+        existingNote.setContent(noteDTO.getContent());
+        existingNote.setAlarmDate(noteDTO.getAlarmDate());
+        existingNote.setStatus(noteDTO.getStatus());
+
+        Set<Tag> resolvedTags = resolveOwnedTags(noteDTO);
+        if (resolvedTags != null) {
+            existingNote.setTags(resolvedTags);
+        }
+
+        existingNote = noteRepository.saveAndFlush(existingNote);
         return noteMapper.toDto(existingNote);
     }
 
@@ -80,6 +104,7 @@ public class NoteService {
      */
     public Optional<NoteDTO> partialUpdate(NoteDTO noteDTO) {
         LOG.debug("Request to partially update Note : {}", noteDTO);
+        validateOwnedTags(noteDTO);
 
         return noteRepository
             .findById(noteDTO.getId())
@@ -222,5 +247,64 @@ public class NoteService {
             case "deleted" -> List.of(NoteStatus.DELETED);
             default -> List.of(NoteStatus.NORMAL, NoteStatus.PINNED);
         };
+    }
+    
+    private void validateOwnedTags(NoteDTO noteDTO) {
+        if (noteDTO.getTags() == null || noteDTO.getTags().isEmpty()) {
+            return;
+        }
+
+        String currentLogin = SecurityUtils.getCurrentUserLogin()
+            .orElseThrow(() -> new IllegalStateException("Current user not found"));
+
+        Set<Long> tagIds = noteDTO.getTags().stream()
+            .map(TagDTO::getId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
+        if (tagIds.size() != noteDTO.getTags().size()) {
+            throw new BadRequestAlertException(
+                "Invalid tag list",
+                "note",
+                "taginvalid"
+            );
+        }
+
+        long ownedTagCount = tagRepository.countByIdInAndOwnerLogin(tagIds, currentLogin);
+
+        if (ownedTagCount != tagIds.size()) {
+            throw new BadRequestAlertException(
+                "A note can only use tags owned by the current user",
+                "note",
+                "foreigntag"
+            );
+        }
+    }
+    
+    private Set<Tag> resolveOwnedTags(NoteDTO noteDTO) {
+        if (noteDTO.getTags() == null) {
+            return null;
+        }
+
+        if (noteDTO.getTags().isEmpty()) {
+            return new java.util.HashSet<>();
+        }
+
+        Set<Long> tagIds = noteDTO.getTags().stream()
+            .map(TagDTO::getId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
+        if (tagIds.size() != noteDTO.getTags().size()) {
+            throw new BadRequestAlertException("Invalid tag list", "note", "taginvalid");
+        }
+
+        Set<Tag> tags = new java.util.HashSet<>(tagRepository.findAllById(tagIds));
+
+        if (tags.size() != tagIds.size()) {
+            throw new BadRequestAlertException("Some tags do not exist", "note", "tagnotfound");
+        }
+
+        return tags;
     }
 }

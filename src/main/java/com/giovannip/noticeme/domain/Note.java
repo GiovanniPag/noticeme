@@ -179,6 +179,12 @@ public class Note extends AbstractAuditingEntity<Long> implements Serializable {
     }
 
     public void setTags(Set<Tag> tags) {
+        if (this.tags != null) {
+            this.tags.forEach(tag -> tag.getNotes().remove(this));
+        }
+        if (tags != null) {
+            tags.forEach(tag -> tag.getNotes().add(this));
+        }
         this.tags = tags;
     }
 
@@ -188,12 +194,14 @@ public class Note extends AbstractAuditingEntity<Long> implements Serializable {
     }
 
     public Note addTag(Tag tag) {
-        this.tags.add(tag);
+    	this.tags.add(tag);
+        tag.getNotes().add(this);
         return this;
     }
 
     public Note removeTag(Tag tag) {
         this.tags.remove(tag);
+        tag.getNotes().remove(this);
         return this;
     }
 
