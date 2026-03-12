@@ -126,11 +126,36 @@ pipeline {
       steps {
         withChecks(name: 'Dev - Heavy Tests (PIT & Gatling)') {
             sh './mvnw org.pitest:pitest-maven:mutationCoverage'
+			sh './mvnw -ntp -Pdev,webapp -DskipTests package'
+			sh '''
+			      nohup java -jar target/*.jar > app.log 2>&1 &
+			      echo $! > app.pid
+			   '''
+		      
+	        sh '''
+			      for i in $(seq 1 60); do
+			        if curl -fsS http://localhost:8080/management/health | grep -q '"status":"UP"'; then
+			          echo "Application is UP"
+			          exit 0
+			        fi
+			        sleep 5
+			      done
+			      echo "Application failed to start"
+			      tail -100 app.log || true
+			      exit 1
+			    '''  
+		      
+		      
             sh './mvnw gatling:test'
         }
       }
       post {
         always {
+		  sh '''
+	         if [ -f app.pid ]; then
+	           kill $(cat app.pid) || true
+	         fi
+	       '''
 		  archiveArtifacts artifacts: 'target/pit-reports/**', fingerprint: true
           archiveArtifacts artifacts: 'target/gatling/**', fingerprint: true
         }
@@ -164,7 +189,7 @@ pipeline {
       when { branch 'dev' }
       steps {
           withChecks(name: 'Sonar Quality Gate') {
-            timeout(time: 10, unit: 'MINUTES') {
+            timeout(time: 20, unit: 'MINUTES') {
               waitForQualityGate abortPipeline: true
             }
           }

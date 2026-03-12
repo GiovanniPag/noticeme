@@ -99,12 +99,6 @@ export class TagInputComponent implements ControlValueAccessor {
 
   blur(): void {
     this.onTouched();
-    // clear input after a short delay to allow event propagation
-    setTimeout(() => {
-      if (this.inputForm) {
-        this.inputForm.inputText = '';
-      }
-    }, 50);
   }
 
   removeTag(tag: ITag): void {

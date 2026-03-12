@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
 /**
  * Spring Data JPA repository for the Tag entity.
  */
-@SuppressWarnings("unused")
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Long> {
     @Query("select tag from Tag tag where tag.owner.login = ?#{authentication.name}")
@@ -45,6 +44,8 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     Optional<Tag> findOneByIdAndOwnerLogin(@Param("id") Long id, @Param("login") String login);
 
     Optional<Tag> findOneByTagNameAndOwnerLogin(@Param("tagName") String tagName, @Param("login") String login);
-
+    
+    long countByIdInAndOwnerLogin(Collection<Long> ids, String login);
+    
     boolean existsByTagNameAndOwnerLogin(@Param("tagName") String tagName, @Param("login") String login);
 }

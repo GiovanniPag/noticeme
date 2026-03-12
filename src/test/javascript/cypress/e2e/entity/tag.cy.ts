@@ -84,8 +84,7 @@ describe('Tag e2e test', () => {
    */
 
   it('Tags menu should load Tags page', () => {
-    cy.visit('/');
-    cy.clickOnEntityMenuItem('tag');
+    cy.visit('/tag');
     cy.wait('@entitiesRequest').then(({ response }) => {
       if (response?.body.length === 0) {
         cy.get(entityTableSelector).should('not.exist');

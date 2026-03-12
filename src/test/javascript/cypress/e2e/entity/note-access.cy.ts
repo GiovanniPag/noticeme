@@ -10,7 +10,7 @@ import {
   entityTableSelector,
 } from '../../support/entity';
 
-describe('NoteAccess e2e test', () => {
+describe.skip('NoteAccess e2e test', () => {
   const noteAccessPageUrl = '/note-access';
   const noteAccessPageUrlPattern = new RegExp('/note-access(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'user';

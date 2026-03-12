@@ -1,12 +1,12 @@
 @let modelRef = model();
 <div class="tag-wrapper">
   <!-- TAG NAME -->
-  <div [attr.title]="modelRef.tagName" class="tag__text inline" spellcheck="false" (blur)="onBlurred()">{{ modelRef.tagName }}</div>
+  <div data-cy="tagChip" [attr.title]="modelRef.tagName" class="tag__text inline" spellcheck="false" (blur)="onBlurred()">{{ modelRef.tagName }}</div>
 
   <!-- 'X' BUTTON -->
   @if (!disabled()) {
   <div>
-    <button type="button" class="remove-icon" aria-label="Remove tag" (click)="remove($event)">
+    <button type="button" data-cy="remove-tag" class="remove-icon" aria-label="Remove tag" (click)="remove($event)">
       <fa-icon icon="times"></fa-icon>
     </button>
   </div>

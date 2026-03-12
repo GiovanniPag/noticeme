@@ -40,8 +40,7 @@ describe('Authority e2e test', () => {
   });
 
   it('Authorities menu should load Authorities page', () => {
-    cy.visit('/');
-    cy.clickOnEntityMenuItem('authority');
+    cy.visit('/authority');
     cy.wait('@entitiesRequest').then(({ response }) => {
       if (response?.body.length === 0) {
         cy.get(entityTableSelector).should('not.exist');

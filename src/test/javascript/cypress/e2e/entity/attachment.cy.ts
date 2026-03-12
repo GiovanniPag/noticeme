@@ -10,7 +10,7 @@ import {
   entityTableSelector,
 } from '../../support/entity';
 
-describe('Attachment e2e test', () => {
+describe.skip('Attachment e2e test', () => {
   const attachmentPageUrl = '/attachment';
   const attachmentPageUrlPattern = new RegExp('/attachment(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'user';

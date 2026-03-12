@@ -11,17 +11,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giovannip.noticeme.IntegrationTest;
 import com.giovannip.noticeme.domain.Note;
+import com.giovannip.noticeme.domain.Tag;
 import com.giovannip.noticeme.domain.User;
 import com.giovannip.noticeme.domain.enumeration.NoteStatus;
 import com.giovannip.noticeme.repository.NoteRepository;
+import com.giovannip.noticeme.repository.TagRepository;
 import com.giovannip.noticeme.service.NoteService;
 import com.giovannip.noticeme.service.dto.NoteDTO;
+import com.giovannip.noticeme.service.dto.TagDTO;
 import com.giovannip.noticeme.service.mapper.NoteMapper;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,6 +74,8 @@ class NoteResourceIT {
 
     @Autowired
     private NoteRepository noteRepository;
+    @Autowired
+    private TagRepository tagRepository;
 
     @Mock
     private NoteRepository noteRepositoryMock;
@@ -470,6 +476,95 @@ class NoteResourceIT {
         // Validate the database contains one less item
         assertDecrementedRepositoryCount(databaseSizeBeforeDelete);
     }
+    
+    @Test
+    @Transactional
+    void shouldAssociateMultipleTagsToNote() throws Exception {
+        User user = getOrCreateUser(em, "user");
+
+        insertedNote =
+            noteRepository.saveAndFlush(
+                new Note()
+                    .title("Test note")
+                    .content("content")
+                    .status(NoteStatus.NORMAL)
+                    .owner(user)
+            );
+
+        Tag tag1 = tagRepository.saveAndFlush(
+            new Tag().tagName("tag1").color("blue").owner(user)
+        );
+
+        Tag tag2 = tagRepository.saveAndFlush(
+            new Tag().tagName("tag2").color("red").owner(user)
+        );
+
+        NoteDTO dto = noteMapper.toDto(insertedNote);
+
+        TagDTO t1 = new TagDTO();
+        t1.setId(tag1.getId());
+
+        TagDTO t2 = new TagDTO();
+        t2.setId(tag2.getId());
+
+        dto.setTags(Set.of(t1, t2));
+
+        restNoteMockMvc.perform(
+            put(ENTITY_API_URL_ID, insertedNote.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsBytes(dto))
+        ).andExpect(status().isOk());
+
+        em.clear();
+
+        Note persisted = noteRepository.findById(insertedNote.getId()).orElseThrow();
+
+        assertThat(persisted.getTags()).hasSize(2);
+    }
+    
+    @Test
+    @Transactional
+    void putNoteShouldRejectTagOwnedByAnotherUser() throws Exception {
+        User owner = getOrCreateUser(em, "user");
+        User other = getOrCreateUser(em, "other");
+
+        insertedNote = noteRepository.saveAndFlush(
+            new Note()
+                .title(DEFAULT_TITLE)
+                .content(DEFAULT_CONTENT)
+                .status(DEFAULT_STATUS)
+                .owner(owner)
+        );
+
+        Tag foreignTag = new Tag()
+            .tagName("foreign")
+            .color("red")
+            .owner(other);
+        em.persist(foreignTag);
+        em.flush();
+
+        NoteDTO noteDTO = noteMapper.toDto(insertedNote);
+
+        TagDTO foreignTagDTO = new TagDTO();
+        foreignTagDTO.setId(foreignTag.getId());
+        foreignTagDTO.setTagName(foreignTag.getTagName());
+        foreignTagDTO.setColor(foreignTag.getColor());
+
+        noteDTO.setTags(Set.of(foreignTagDTO));
+
+        restNoteMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, insertedNote.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(noteDTO))
+            )
+            .andExpect(status().isBadRequest());
+
+        em.clear();
+        Note persisted = noteRepository.findById(insertedNote.getId()).orElseThrow();
+        assertThat(persisted.getTags()).isEmpty();
+    }
+    
 
     protected long getRepositoryCount() {
         return noteRepository.count();
@@ -508,7 +603,7 @@ class NoteResourceIT {
             .orElseGet(() -> {
                 User user = new User();
                 user.setLogin(login);
-                user.setPassword("password");
+                user.setPassword("123456789012345678901234567890123456789012345678901234567890");
                 user.setActivated(true);
                 user.setEmail(login + "@example.com");
                 user.setFirstName("Test");
