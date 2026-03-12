@@ -40,7 +40,7 @@ public class NoteAccessGatlingTest extends Simulation {
 
     Map<String, String> headersHttpAuthentication = Map.of("Content-Type", "application/json", "Accept", "application/json");
 
-    Map<String, String> headersHttpAuthenticated = Map.of("Accept", "application/json", "Authorization", "${access_token}");
+    Map<String, String> headersHttpAuthenticated = Map.of("Accept", "application/json", "Authorization", "#{access_token}");
 
     ChainBuilder scn = exec(http("First unauthenticated request").get("/api/account").headers(headersHttp).check(status().is(401)))
         .exitHereIfFailed()
@@ -73,8 +73,8 @@ public class NoteAccessGatlingTest extends Simulation {
                 .exitHereIfFailed()
                 .pause(10)
                 .repeat(5)
-                .on(exec(http("Get created noteAccess").get("${new_noteAccess_url}").headers(headersHttpAuthenticated)).pause(10))
-                .exec(http("Delete created noteAccess").delete("${new_noteAccess_url}").headers(headersHttpAuthenticated))
+                .on(exec(http("Get created noteAccess").get("#{new_noteAccess_url}").headers(headersHttpAuthenticated)).pause(10))
+                .exec(http("Delete created noteAccess").delete("#{new_noteAccess_url}").headers(headersHttpAuthenticated))
                 .pause(10)
         );
 

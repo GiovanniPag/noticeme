@@ -2,6 +2,7 @@
 @if (note) {
   <form
     jhiClickOutside
+    data-cy="noteUpdateDialog"
     #noteupdateform
     autocomplete="off"
     class="scrollable-modal"
@@ -255,7 +256,7 @@
       </div>
 
       <div class="btn-group" role="group" aria-label="save group">
-        <button type="submit" id="save-entity" data-cy="entitySaveButton" class="btn btn-primary" [disabled]="!canSubmit()">
+        <button type="submit" id="save-entity" data-cy="NoteSaveEdit" class="btn btn-primary" [disabled]="!canSubmit()">
           <span jhiTranslate="entity.action.close">Close</span>
         </button>
       </div>

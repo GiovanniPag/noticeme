@@ -1,254 +1,116 @@
-import {
-  entityConfirmDeleteButtonSelector,
-  entityCreateButtonSelector,
-  entityCreateCancelButtonSelector,
-  entityCreateSaveButtonSelector,
-  entityDeleteButtonSelector,
-  entityDetailsBackButtonSelector,
-  entityDetailsButtonSelector,
-  entityEditButtonSelector,
-  entityTableSelector,
-} from '../../support/entity';
-
-describe('Note e2e test', () => {
+describe('Note custom e2e', () => {
   const notePageUrl = '/note';
-  const notePageUrlPattern = new RegExp('/note(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'user';
   const password = Cypress.env('E2E_PASSWORD') ?? 'user';
-  // const noteSample = {"status":"NORMAL"};
 
-  let note;
-  // let user;
+  let createdNoteId: number | undefined;
 
   beforeEach(() => {
     cy.login(username, password);
+    cy.intercept('GET', '/api/notes*').as('getNotes');
+    cy.intercept('POST', '/api/notes').as('postNote');
+    cy.intercept('PATCH', '/api/notes/*').as('patchNote');
+    cy.intercept('PUT', '/api/notes/*').as('putNote');
+    cy.intercept('DELETE', '/api/notes/*').as('deleteNote');
   });
-
-  /* Disabled due to incompatibility
-  beforeEach(() => {
-    // create an instance at the required relationship entity:
-    cy.authenticatedRequest({
-      method: 'POST',
-      url: '/api/users',
-      body: {"login":"}NX@XY6XbP\\a7-SZcc","firstName":"Guenda","lastName":"Rollo","email":"Aquilino87@libero.it","imageUrl":"fervently likely repeatedly","langKey":"scarily mi"},
-    }).then(({ body }) => {
-      user = body;
-    });
-  });
-   */
-
-  beforeEach(() => {
-    cy.intercept('GET', '/api/notes+(?*|)').as('entitiesRequest');
-    cy.intercept('POST', '/api/notes').as('postEntityRequest');
-    cy.intercept('DELETE', '/api/notes/*').as('deleteEntityRequest');
-  });
-
-  /* Disabled due to incompatibility
-  beforeEach(() => {
-    // Simulate relationships api for better performance and reproducibility.
-    cy.intercept('GET', '/api/attachments', {
-      statusCode: 200,
-      body: [],
-    });
-
-    cy.intercept('GET', '/api/users', {
-      statusCode: 200,
-      body: [user],
-    });
-
-    cy.intercept('GET', '/api/tags', {
-      statusCode: 200,
-      body: [],
-    });
-
-  });
-   */
 
   afterEach(() => {
-    if (note) {
+    if (createdNoteId) {
       cy.authenticatedRequest({
         method: 'DELETE',
-        url: `/api/notes/${note.id}`,
+        url: `/api/notes/${createdNoteId}`,
       }).then(() => {
-        note = undefined;
+        createdNoteId = undefined;
       });
     }
   });
 
-  /* Disabled due to incompatibility
-  afterEach(() => {
-    if (user) {
-      cy.authenticatedRequest({
-        method: 'DELETE',
-        url: `/api/users/${user.id}`,
-      }).then(() => {
-        user = undefined;
-      });
-    }
-  });
-   */
+  it('should create a new note and show it in the list', () => {
+    const title = `E2E note ${Date.now()}`;
+    const content = 'Nota creata automaticamente da Cypress';
 
-  it('Notes menu should load Notes page', () => {
-    cy.visit('/');
-    cy.clickOnEntityMenuItem('note');
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response?.body.length === 0) {
-        cy.get(entityTableSelector).should('not.exist');
-      } else {
-        cy.get(entityTableSelector).should('exist');
-      }
+    cy.visit(notePageUrl);
+    cy.wait('@getNotes');
+
+    cy.get('[data-cy="title"]').should('be.visible').clear().type(title);
+    cy.get('[data-cy="content"]').should('be.visible').clear().type(content);
+
+    cy.get('[data-cy="NoteSaveButton"]').click();
+
+    cy.wait('@postNote').then(({ response }) => {
+      expect(response?.statusCode).to.eq(201);
+      createdNoteId = response?.body?.id;
     });
-    cy.getEntityHeading('Note').should('exist');
-    cy.url().should('match', notePageUrlPattern);
+
+    cy.contains(title).should('be.visible');
   });
 
-  describe('Note page', () => {
-    describe('create button click', () => {
-      beforeEach(() => {
-        cy.visit(notePageUrl);
-        cy.wait('@entitiesRequest');
-      });
+  it('should create a new note with a tag and show both in the list', () => {
+    const title = `E2E tagged note ${Date.now()}`;
+    const content = 'Nota con tag aggiunto via Cypress';
+    const tagName = `studio-${Date.now()}`;
 
-      it('should load create Note page', () => {
-        cy.get(entityCreateButtonSelector).click();
-        cy.url().should('match', new RegExp('/note/new$'));
-        cy.getEntityCreateUpdateHeading('Note');
-        cy.get(entityCreateSaveButtonSelector).should('exist');
-        cy.get(entityCreateCancelButtonSelector).click();
-        cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response?.statusCode).to.equal(200);
-        });
-        cy.url().should('match', notePageUrlPattern);
-      });
+    cy.visit(notePageUrl);
+    cy.wait('@getNotes');
+
+    cy.get('[data-cy="title"]').should('be.visible').clear().type(title);
+    cy.get('[data-cy="content"]').should('be.visible').clear().type(content);
+
+    cy.get('[data-cy="tagInput"]').should('be.visible').type(`${tagName}{enter}`);
+
+    cy.get('[data-cy="NoteSaveButton"]').should('be.visible').click();
+
+    cy.wait('@postNote').then(({ response }) => {
+      expect(response?.statusCode).to.eq(201);
+      createdNoteId = response?.body?.id;
     });
 
-    describe('with existing value', () => {
-      /* Disabled due to incompatibility
-      beforeEach(() => {
-        cy.authenticatedRequest({
-          method: 'POST',
-          url: '/api/notes',
-          body: {
-            ...noteSample,
-            owner: user,
-          },
-        }).then(({ body }) => {
-          note = body;
-
-          cy.intercept(
-            {
-              method: 'GET',
-              url: '/api/notes+(?*|)',
-              times: 1,
-            },
-            {
-              statusCode: 200,
-              headers: {
-                link: '<http://localhost/api/notes?page=0&size=20>; rel="last",<http://localhost/api/notes?page=0&size=20>; rel="first"',
-              },
-              body: [note],
-            }
-          ).as('entitiesRequestInternal');
-        });
-
-        cy.visit(notePageUrl);
-
-        cy.wait('@entitiesRequestInternal');
-      });
-       */
-
-      beforeEach(function () {
-        cy.visit(notePageUrl);
-
-        cy.wait('@entitiesRequest').then(({ response }) => {
-          if (response?.body.length === 0) {
-            this.skip();
-          }
-        });
-      });
-
-      it('detail button click should load details Note page', () => {
-        cy.get(entityDetailsButtonSelector).first().click();
-        cy.getEntityDetailsHeading('note');
-        cy.get(entityDetailsBackButtonSelector).click();
-        cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response?.statusCode).to.equal(200);
-        });
-        cy.url().should('match', notePageUrlPattern);
-      });
-
-      it('edit button click should load edit Note page and go back', () => {
-        cy.get(entityEditButtonSelector).first().click();
-        cy.getEntityCreateUpdateHeading('Note');
-        cy.get(entityCreateSaveButtonSelector).should('exist');
-        cy.get(entityCreateCancelButtonSelector).click();
-        cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response?.statusCode).to.equal(200);
-        });
-        cy.url().should('match', notePageUrlPattern);
-      });
-
-      it('edit button click should load edit Note page and save', () => {
-        cy.get(entityEditButtonSelector).first().click();
-        cy.getEntityCreateUpdateHeading('Note');
-        cy.get(entityCreateSaveButtonSelector).click();
-        cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response?.statusCode).to.equal(200);
-        });
-        cy.url().should('match', notePageUrlPattern);
-      });
-
-      // Reason: cannot create a required entity with relationship with required relationships.
-      it.skip('last delete button click should delete instance of Note', () => {
-        cy.get(entityDeleteButtonSelector).last().click();
-        cy.getEntityDeleteDialogHeading('note').should('exist');
-        cy.get(entityConfirmDeleteButtonSelector).click();
-        cy.wait('@deleteEntityRequest').then(({ response }) => {
-          expect(response?.statusCode).to.equal(204);
-        });
-        cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response?.statusCode).to.equal(200);
-        });
-        cy.url().should('match', notePageUrlPattern);
-
-        note = undefined;
-      });
-    });
+    cy.contains('h5.card-title', title, { timeout: 10000 }).should('be.visible');
+    cy.contains('.card-text', content).should('be.visible');
+    cy.contains('[data-cy="tagChip"]', tagName, { timeout: 10000 }).should('be.visible');
   });
 
-  describe('new Note page', () => {
-    beforeEach(() => {
-      cy.visit(`${notePageUrl}`);
-      cy.get(entityCreateButtonSelector).click();
-      cy.getEntityCreateUpdateHeading('Note');
+  it('should create a note, open update dialog, add a tag and show both in UI', () => {
+    const title = `E2E dialog tag note ${Date.now()}`;
+    const content = 'Nota da aggiornare dal dialog';
+    const initialTag = `iniziale-${Date.now()}`;
+    const addedTag = `aggiunto-${Date.now()}`;
+
+    cy.visit(notePageUrl);
+    cy.wait('@getNotes');
+
+    cy.get('[data-cy="title"]').should('be.visible').clear().type(title);
+    cy.get('[data-cy="content"]').should('be.visible').clear().type(content);
+    cy.get('[data-cy="tagInput"]').first().should('be.visible').type(`${initialTag}{enter}`);
+    cy.get('[data-cy="NoteSaveButton"]').should('be.visible').click();
+
+    cy.wait('@postNote').then(({ response }) => {
+      expect(response?.statusCode).to.eq(201);
+      createdNoteId = response?.body?.id;
     });
 
-    // Reason: cannot create a required entity with relationship with required relationships.
-    it.skip('should create an instance of Note', () => {
-      cy.get(`[data-cy="title"]`).type('wry');
-      cy.get(`[data-cy="title"]`).should('have.value', 'wry');
+    cy.contains('[data-cy="noteTitle"]', title, { timeout: 10000 }).should('be.visible');
 
-      cy.get(`[data-cy="content"]`).type('../fake-data/blob/hipster.txt');
-      cy.get(`[data-cy="content"]`).invoke('val').should('match', new RegExp('../fake-data/blob/hipster.txt'));
-
-      cy.get(`[data-cy="alarmDate"]`).type('2026-02-15T20:23');
-      cy.get(`[data-cy="alarmDate"]`).blur();
-      cy.get(`[data-cy="alarmDate"]`).should('have.value', '2026-02-15T20:23');
-
-      cy.get(`[data-cy="status"]`).select('PINNED');
-
-      cy.get(`[data-cy="owner"]`).select(1);
-
-      cy.get(entityCreateSaveButtonSelector).click();
-
-      cy.wait('@postEntityRequest').then(({ response }) => {
-        expect(response?.statusCode).to.equal(201);
-        note = response.body;
+    // apre il dialog di update cliccando la card della nota
+    cy.contains('[data-cy="noteCard"] [data-cy="noteTitle"]', title).closest('[data-cy="noteCard"]').click();
+    // lavora dentro il modal/dialog
+    cy.get('[data-cy="noteUpdateDialog"]', { timeout: 10000 })
+      .should('be.visible')
+      .within(() => {
+        cy.contains('[data-cy="tagChip"]', initialTag).should('be.visible');
+        cy.get('[data-cy="tagInput"]').should('be.visible').type(`${addedTag}{enter}`);
+        cy.get('[data-cy="NoteSaveEdit"]').click({ force: true });
       });
-      cy.wait('@entitiesRequest').then(({ response }) => {
-        expect(response?.statusCode).to.equal(200);
-      });
-      cy.url().should('match', notePageUrlPattern);
+    cy.wait('@patchNote').then(({ request, response }) => {
+      expect(request.url).to.include(`/api/notes/${createdNoteId}`);
+      expect(response?.statusCode).to.eq(200);
     });
+
+    cy.contains('[data-cy="noteCard"] [data-cy="noteTitle"]', title)
+      .closest('[data-cy="noteCard"]')
+      .within(() => {
+        cy.contains('[data-cy="tagChip"]', initialTag, { timeout: 10000 }).should('be.visible');
+        cy.contains('[data-cy="tagChip"]', addedTag, { timeout: 10000 }).should('be.visible');
+      });
   });
 });

@@ -37,7 +37,7 @@
             (resized)="onResized()"
           >
             @for (note of pinnedNotes(); track trackId(note)) {
-              <div (mousedown)="onMouseDown($event)" (click)="onClick($event, note)" class="muuri-grid-item" jhiGridItem>
+              <div (mousedown)="onMouseDown($event)" (click)="onClick($event, note)" class="muuri-grid-item" jhiGridItem data-cy="noteCard" >
                 <div class="muuri-grid-item-content" (resized)="onResized()">
                   @if ((note.attachments?.length ?? 0) > 0) {
                     <div class="card-img-top">
@@ -51,7 +51,7 @@
                     </div>
                   }
                   <div class="card-body">
-                    <h5 class="card-title">{{ note.title }}</h5>
+                    <h5 class="card-title" data-cy="noteTitle">{{ note.title }}</h5>
                     <p class="card-text summary-text" jhiEllipsis [ellipsisContent]="note.content ?? ''"></p>
                     <jhi-tag-input
                       #tagInput
@@ -92,7 +92,7 @@
             (resized)="onResized()"
           >
             @for (note of otherNotes(); track trackId(note)) {
-              <div (mousedown)="onMouseDown($event)" (click)="onClick($event, note)" class="muuri-grid-item" jhiGridItem>
+              <div (mousedown)="onMouseDown($event)" (click)="onClick($event, note)" class="muuri-grid-item" jhiGridItem data-cy="noteCard" >
                 <div class="muuri-grid-item-content" (resized)="onResized()">
                   @if ((note.attachments?.length ?? 0) > 0) {
                     <div class="card-img-top">
@@ -106,7 +106,7 @@
                     </div>
                   }
                   <div class="card-body">
-                    <h5 class="card-title">{{ note.title }}</h5>
+                    <h5 class="card-title" data-cy="noteTitle">{{ note.title }}</h5>
                     <p class="card-text summary-text" jhiEllipsis [ellipsisContent]="note.content ?? ''"></p>
                     <jhi-tag-input
                       #tagInput
