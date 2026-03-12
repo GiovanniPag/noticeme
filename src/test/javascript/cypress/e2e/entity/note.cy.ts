@@ -32,9 +32,13 @@ describe('Note custom e2e', () => {
     cy.visit(notePageUrl);
     cy.wait('@getNotes');
 
-    cy.get('[data-cy="title"]').should('be.visible').clear().type(title);
-    cy.get('[data-cy="content"]').should('be.visible').clear().type(content);
+    cy.get('[data-cy="title"]').should('be.visible');
+    cy.get('[data-cy="title"]').clear();
+    cy.get('[data-cy="title"]').type(title);
 
+    cy.get('[data-cy="content"]').should('be.visible');
+    cy.get('[data-cy="content"]').clear();
+    cy.get('[data-cy="content"]').type(content);
     cy.get('[data-cy="NoteSaveButton"]').click();
 
     cy.wait('@postNote').then(({ response }) => {
@@ -53,8 +57,19 @@ describe('Note custom e2e', () => {
     cy.visit(notePageUrl);
     cy.wait('@getNotes');
 
-    cy.get('[data-cy="title"]').should('be.visible').clear().type(title);
-    cy.get('[data-cy="content"]').should('be.visible').clear().type(content);
+    cy.get('[data-cy="title"]').should('be.visible');
+    cy.get('[data-cy="title"]').clear();
+    cy.get('[data-cy="title"]').type(title);
+
+    cy.get('[data-cy="content"]').should('be.visible');
+    cy.get('[data-cy="content"]').clear();
+    cy.get('[data-cy="content"]').type(content);
+
+    cy.get('[data-cy="tagInput"]').should('be.visible');
+    cy.get('[data-cy="tagInput"]').type(`${tagName}{enter}`);
+
+    cy.get('[data-cy="NoteSaveButton"]').should('be.visible');
+    cy.get('[data-cy="NoteSaveButton"]').click();
 
     cy.get('[data-cy="tagInput"]').should('be.visible').type(`${tagName}{enter}`);
 
@@ -79,10 +94,19 @@ describe('Note custom e2e', () => {
     cy.visit(notePageUrl);
     cy.wait('@getNotes');
 
-    cy.get('[data-cy="title"]').should('be.visible').clear().type(title);
-    cy.get('[data-cy="content"]').should('be.visible').clear().type(content);
-    cy.get('[data-cy="tagInput"]').first().should('be.visible').type(`${initialTag}{enter}`);
-    cy.get('[data-cy="NoteSaveButton"]').should('be.visible').click();
+    cy.get('[data-cy="title"]').should('be.visible');
+    cy.get('[data-cy="title"]').clear();
+    cy.get('[data-cy="title"]').type(title);
+
+    cy.get('[data-cy="content"]').should('be.visible');
+    cy.get('[data-cy="content"]').clear();
+    cy.get('[data-cy="content"]').type(content);
+
+    cy.get('[data-cy="tagInput"]').first().should('be.visible');
+    cy.get('[data-cy="tagInput"]').first().type(`${initialTag}{enter}`);
+
+    cy.get('[data-cy="NoteSaveButton"]').should('be.visible');
+    cy.get('[data-cy="NoteSaveButton"]').click();
 
     cy.wait('@postNote').then(({ response }) => {
       expect(response?.statusCode).to.eq(201);
