@@ -14,16 +14,16 @@ The project was developed using JHipster with the aim of evaluating the applicab
 ## Screenshots
 
 ###### Dashboard
-![Dashboard](docs/screenshots/dashboard.png)
+![Dashboard](/docs/screenshots/dashboard.png)
 
 ###### Create note
-![Create Note](docs/screenshots/create-note.png)
+![Create Note](/docs/screenshots/create-note.png)
 
 ###### Update note
-![Update Note](docs/screenshots/update-note.png)
+![Update Note](/docs/screenshots/update-note.png)
 
 ###### Lista tags generata
-![Tags](docs/screenshots/tags.png)
+![Tags](/docs/screenshots/tags.png)
 
 ## Tech Stack
 
