@@ -2,6 +2,38 @@
 
 This application was generated using JHipster 8.11.0, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v8.11.0](https://www.jhipster.tech/documentation-archive/v8.11.0).
 
+## Overview
+
+noticeMe is a web application for managing notes, inspired by tools like Google Keep. It allows users to create, edit, and delete notes, organize them using tags, and manage attachments.
+
+The project was developed using JHipster with the aim of evaluating the applicability of:
+- Test-Driven Development (TDD)
+- Behavior-Driven Development (BDD)
+- Continuous Integration (CI)
+
+## Screenshots
+
+###### Dashboard
+![Dashboard](/docs/screenshots/dashboard.PNG)
+
+###### Create note
+![Create Note](/docs/screenshots/create-note.PNG)
+
+###### Update note
+![Update Note](/docs/screenshots/update-note.PNG)
+
+###### Lista tags generata
+![Tags](/docs/screenshots/tags.PNG)
+
+## Tech Stack
+
+- Backend: Spring Boot (Java)
+- Frontend: Angular
+- Database: mySQL
+- Build: Maven
+- Testing: JUnit, Jest, Cypress
+- CI/CD: local jenkins, managed with docker compose in `/ci/docker-compose-ci.yml`
+
 ## Project Structure
 
 Node is required for generation and recommended for development. `package.json` is always generated for a better development experience with prettier, commit hooks, scripts and so on.
